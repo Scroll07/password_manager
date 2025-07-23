@@ -1,0 +1,15 @@
+__pycache__/
+*.json
+*.bin
+pas.egg-info/
+*.pyc
+*.pyo
+*.egg
+.env 
+
+
+
+
+
+
+
