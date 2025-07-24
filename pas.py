@@ -13,7 +13,7 @@ from tkinter import simpledialog
 
 def gui_password_prompt():
     root = tk.Tk()
-    root.withdraw()  # Скрыть основное окно
+    root.withdraw()  
     password = simpledialog.askstring("Мастер-пароль", "Введите мастер пароль:", show='*')
     root.destroy()
     return password
@@ -21,7 +21,7 @@ def gui_password_prompt():
 BASE_DIR = Path(__file__).resolve().parent
 STORE = BASE_DIR / 'store.bin'
 LAST_MATCHES = BASE_DIR / 'last_matches.json'
-#MASTER_HASH = BASE_DIR / 'master_hash.json'
+SESSION_FILE = BASE_DIR / 'session.json'
 SALT_FILE = BASE_DIR / 'salt_file.bin'
 
 session_key = None
@@ -43,18 +43,37 @@ app = typer.Typer(help="""
     """,
     no_args_is_help=True)
 
+def save_session():
+    global session_key, session_start_time
+    data = {
+        'start_time': session_start_time,
+        'key': base64.urlsafe_b64encode(session_key).decode('utf-8')
+    }
+    with open(SESSION_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
+
+
 def check_session(force_prompt: bool = False):
     global session_key, session_start_time
-    if session_key is not None and not force_prompt:
-        if time.time() - session_start_time < SESSION_TIMEOUT:
-            session_start_time = time.time()
-            return session_key
-        else:
-            typer.echo("Сессия истекла по таймауту.")
-            session_key = None
-            session_start_time = None
+    if not force_prompt and SESSION_FILE.exists():
+        try:
+            with open(SESSION_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                session_start_time = data['start_time']
+                session_key = base64.urlsafe_b64decode(data['key'])
+            if time.time() - session_start_time < SESSION_TIMEOUT:
+                session_start_time = time.time()
+                save_session()
+                return session_key
+        except (json.JSONDecodeError, KeyError, ValueError, base64.binascii.Error):
+            pass
+
 
     master_password = gui_password_prompt()
+    if not master_password:
+        typer.echo('Ввод пароля отменен.')
+        raise typer.Exit()
+    
     try:
         key = get_master_key(master_password)
         if STORE.exists():
@@ -62,6 +81,7 @@ def check_session(force_prompt: bool = False):
             _ = decrypt_data(encrypted, key)
         session_key = key
         session_start_time = time.time()
+        save_session()
         return key
     except ValueError as e:
         typer.echo(f"Ошибка: {str(e)}")
@@ -203,7 +223,7 @@ def get(
         typer.echo('Записей нет')
         return
 
-    if service.lower() == '.':
+    if service.lower() == '.' or service.lower() == 'all':
         matches = sorted(data.keys())
     else:
         matches = sorted([key for key in data if key.lower().startswith(service.lower())])
@@ -441,9 +461,15 @@ def find(
     typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt='grid'))
     dump_last_matches(sorted_matches)
 
-
-
-
+@app.command()
+def reset_session():
+    '''Сбросить текущую сессию.'''
+    global session_start_time, session_key
+    session_key = None
+    session_start_time = None
+    if SESSION_FILE.exists():
+        SESSION_FILE.unlink(missing_ok=True)
+    typer.echo('Сессия сброшена.')
 
 @app.callback()
 def main():

@@ -6,6 +6,7 @@ pas.egg-info/
 *.pyo
 *.egg
 .env 
+build/
 
 
 

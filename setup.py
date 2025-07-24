@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pas',
-    version='0.1.0',
+    version='0.1.2',
     description='Менеджер паролей на базе Typer.',
     author='Hybrid',
     author_email='vovanikolaev140707@gmail.com',
@@ -19,3 +19,11 @@ setup(
         ],
     },
 )
+
+
+
+
+
+
+
+
