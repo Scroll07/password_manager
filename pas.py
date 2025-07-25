@@ -29,19 +29,41 @@ session_start_time = None
 SESSION_TIMEOUT = 300
 
 app = typer.Typer(help="""
-    Менеджер паролей - безопасное хранение логинов и паролей.
-    
-    Основной рабочий процесс:
-    1. Добавьте записи: pas.py add <сервис> -u <логин> --gen
-    2. Просмотрите список: pas.py list
-    3. Найдите нужную: pas.py get <сервис>
-    4. Скопируйте пароль: pas.py copy <номер>
-    
-    Все данные хранятся в зашифрованном файле store.json
-    
-    Для справки по команде: pas.py <команда> --help
-    """,
-    no_args_is_help=True)
+Менеджер паролей: безопасное хранение логинов и паролей.
+
+Основной рабочий процесс:
+
+  1. Добавьте запись:
+     pas add <сервис> -u <логин> --gen
+
+  2. Просмотрите список:
+     pas list
+
+  3. Найдите нужную запись:
+     pas get <метка_или_начало>
+
+  4. Скопируйте пароль:
+     pas copy <номер_из_таблицы>
+
+Дополнительные команды:
+
+  - Изменить запись:
+    pas edit <метка> [опции]
+
+  - Поиск по полям:
+    pas find <запрос>
+
+  - Удалить запись:
+    pas del <метка>          (или 'clear-all' для полной очистки)
+
+  - Сбросить сессию:
+    pas reset-session
+
+Все данные надёжно шифруются в файле store.bin.
+Для справки по любой команде используйте:
+  pas <команда> --help
+""",
+no_args_is_help=True)
 
 def save_session():
     global session_key, session_start_time
@@ -51,7 +73,6 @@ def save_session():
     }
     with open(SESSION_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f)
-
 
 def check_session(force_prompt: bool = False):
     global session_key, session_start_time
@@ -151,9 +172,13 @@ def add(
 ):
     '''
     Сохранение Логина/Пароля.
+
     Примеры:
+
       pas.py add github -u myuser -p mypass123
+
       pas.py add vk -u user@email.com --gen --length 20
+
       pas.py add work-email -u john@company.com --gen --note "Рабочая почта"
     '''
     if password is not None:
@@ -184,6 +209,7 @@ def add(
 def list():
     '''
     Показать список всех сохраненных меток сервисов.
+
     Выводит отсортированный список всех доступных записей.
     '''
     data = load_data()
@@ -198,20 +224,27 @@ def list():
 
 @app.command()
 def get(
-    service: str = typer.Argument(..., help='Метка сервиса (например: github) или "all" для всех записей'),
+    service: str = typer.Argument(..., help='Метка сервиса (например: github) или "all"/"." для всех записей'),
     show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)')
 ):
     '''
     Показать информацию о записях по метке или все записи.
     
-    Поддерживает поиск по началу метки - "github" найдет github, github-1, github-2.
+    Поддерживает поиск по началу метки - "github" найдет github, github-1, github-2 и т.д.
+
     По умолчанию пароли скрыты символами ******, используйте --show для отображения.
-    
+
+    Для всех записей используйте "all" или ".".
+
     Примеры:
+
       pas.py get github           # Все записи, начинающиеся с "github", пароли скрыты
+
       pas.py get github --show    # То же, но с открытыми паролями
+
       pas.py get all              # Все записи, пароли скрыты
-      pas.py get all --show       # Все записи с открытыми паролями
+
+      pas.py get . --show         # Все записи с открытыми паролями
     '''
     if not STORE.exists():
         typer.echo('Записей нет')
@@ -258,12 +291,14 @@ def copy(
     '''
     Скопировать пароль в буфер обмена по номеру из последнего результата get.
     
-    Сначала выполните команду get для отображения таблицы с номерами,
-    затем используйте copy с нужным номером.
+    Сначала выполните команду get для отображения таблицы с номерами, затем используйте copy с нужным номером.
     
     Примеры:
+
       pas.py get github    # Показать таблицу с номерами
+
       pas.py copy 1        # Скопировать пароль из строки №1
+
       pas.py copy 3        # Скопировать пароль из строки №3
     '''
     if not LAST_MATCHES.exists():
@@ -309,10 +344,13 @@ def delete(
      Удалить запись по метке или все записи.
     
     Требует подтверждения перед удалением для безопасности.
+
     Для полной очистки всех данных используйте "clear-all".
     
     Примеры:
+
       pas.py delete github-1      # Удалить конкретную запись
+
       pas.py delete "clear-all"   # Удалить все записи (в кавычках!)
     '''
     if not STORE.exists():
@@ -354,13 +392,19 @@ def edit(
     Изменить существующую запись.
     
     Указывайте только те поля, которые хотите изменить. Остальные останутся без изменений.
+
     Показывает предварительный просмотр изменений и запрашивает подтверждение.
     
     Примеры:
+
       pas.py edit github-1 -u newuser              # Изменить только username
+
       pas.py edit github-1 -p newpass123           # Изменить только пароль
+
       pas.py edit github-1 --gen --length 24       # Сгенерировать новый пароль длиной 24
+
       pas.py edit github-1 --note "Новая заметка"  # Изменить только заметку
+
       pas.py edit github-1 -u user --gen           # Изменить username и сгенерировать пароль
     '''
 
@@ -427,7 +471,9 @@ def find(
     Ищет подстроку во всех полях записи. Выводит результаты в таблице.
     
     Примеры:
+
       pas.py find "vova"               # Поиск "vova" во всех полях, пароли скрыты
+      
       pas.py find "123" --show         # Поиск "123" с открытыми паролями
     '''
     if not STORE.exists():
@@ -478,7 +524,7 @@ def main():
 
 if __name__ == '__main__':
     app()
-#D:\kod\python\password_manager\password_new
-
+#cd D:\kod\python\password_manager\password_new
+#python install setyp.py
 
 
