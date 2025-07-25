@@ -10,6 +10,7 @@ import base64
 import time
 import tkinter as tk
 from tkinter import simpledialog
+import csv
 
 BASE_DIR = Path(__file__).resolve().parent
 STORE = BASE_DIR / 'store.bin'
@@ -51,6 +52,12 @@ app = typer.Typer(help="""
 
   - Сбросить сессию:
     pas reset-session
+
+ - Экспорт данных:
+    pas export <файл> [--format json|csv] [--include-passwords]
+
+  - Импорт данных:
+    pas import <файл> [--format json|csv] [--overwrite]
 
 Все данные надёжно шифруются в файле store.bin.
 Для справки по любой команде используйте:
@@ -525,6 +532,103 @@ def reset_session():
     if SESSION_FILE.exists():
         SESSION_FILE.unlink(missing_ok=True)
     typer.echo('Сессия сброшена.')
+
+@app.command()
+def export(
+    filename: str = typer.Argument(..., help="Имя файла для экспорта (например, export.json)"),
+    format: str = typer.Option("json", "--format", help="Формат: json или csv (по умолчанию: json)"),
+    include_passwords: bool = typer.Option(False, "--include-passwords", help="Включить пароли в экспорт (опасно!)")
+):
+    '''
+    Экспорт данных из store.bin в файл.
+
+    Примеры:
+
+      pas export my_export.json --format json --include-passwords
+
+      pas export my_export.csv --format csv
+    '''
+    if not STORE.exists():
+        typer.echo('Нет данных для экспорта.')
+        return
+
+    data = load_data()
+    if not typer.confirm("Экспорт может раскрыть чувствительные данные. Продолжить?"):
+        typer.echo("Экспорт отменен. ВЫХОД")
+        return
+
+    export_data = {}
+    for label, entry in data.items():
+        export_entry = {
+            "username": entry.get("username", ""),
+            "note": entry.get("note", "")
+        }
+        if include_passwords:
+            export_entry["password"] = entry.get("password", "")
+        export_data[label] = export_entry
+
+    if format.lower() == "json":
+        with open(filename, 'w', encoding="utf-8") as f:
+            json.dump(export_data, f, indent=2, ensure_ascii=False)
+        typer.echo(f"данные экспортированы в {filename} (JSON)")
+    elif format.lower() == 'csv':
+        with open(filename, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Метка", "Логин", "Пароль", "Заметка"])
+            for label, entry in export_data.items():
+                writer.writerow([label, entry.get("username", ""), entry.get("password", ""), entry.get("note", "")])
+        typer.echo(f"Данные экспортированы в {filename} (CSV).")
+    else:
+        typer.echo("Неправильный формат, используйте JSON или CSV.")
+
+@app.command(name='import_data')
+def import_data(
+    filename: str = typer.Argument(..., help="Имя файла для импорта (например, export.json)"),
+    format: str = typer.Option("json", "--format", help="Формат: json или csv (по умолчанию: json)"),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Перезаписать существующие метки")
+):
+    '''
+     Импорт данных в store.bin из файла.
+
+    Примеры:
+
+      pas import my_export.json --format json --overwrite
+
+      pas import my_export.csv --format csv
+    '''
+    if not Path(filename).exists():
+        typer.echo(f'Файл {filename} не найден.')
+        return
+    if format.lower() == 'json':
+        with open(filename, 'r', encoding='utf-8') as f:
+            import_data = json.load(f) 
+    elif format.lower() == "csv":
+        import_data = {}
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            headers = next(reader)  # Пропустить заголовок
+            for row in reader:
+                if len(row) >= 4:
+                    label, username, password, note = row[:4]
+                    import_data[label] = {"username": username, "password": password, "note": note}
+    else:
+        typer.echo("Неподдерживаемый формат. Используйте json или csv.")
+        return
+
+    current_data = load_data()
+
+    if not typer.confirm("Импорт может изменить существующие записи. Продолжить?"):
+        typer.echo('Импорт отменен. ВЫХОД')
+        return
+    
+    for label, entry in import_data.items():
+        if label in current_data and not overwrite:
+            typer.echo(f"Метка {label} уже существует. Пропускаем (Используйте --overwrite для замены).")
+            continue
+        current_data[label] = entry
+
+    save_data(current_data)
+    typer.echo(f'Данные успешно импортированы из {filename}')
 
 @app.callback()
 def main():
