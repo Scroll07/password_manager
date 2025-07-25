@@ -11,13 +11,6 @@ import time
 import tkinter as tk
 from tkinter import simpledialog
 
-def gui_password_prompt():
-    root = tk.Tk()
-    root.withdraw()  
-    password = simpledialog.askstring("Мастер-пароль", "Введите мастер пароль:", show='*')
-    root.destroy()
-    return password
-
 BASE_DIR = Path(__file__).resolve().parent
 STORE = BASE_DIR / 'store.bin'
 LAST_MATCHES = BASE_DIR / 'last_matches.json'
@@ -64,6 +57,13 @@ app = typer.Typer(help="""
   pas <команда> --help
 """,
 no_args_is_help=True)
+
+def gui_password_prompt():
+    root = tk.Tk()
+    root.withdraw()  
+    password = simpledialog.askstring("Мастер-пароль", "Введите мастер пароль:", show='*')
+    root.destroy()
+    return password
 
 def save_session():
     global session_key, session_start_time
@@ -463,7 +463,8 @@ def edit(
 @app.command()
 def find(
     query: str = typer.Argument(..., help='Поисковый запрос (строка для поиска в полях)'),
-    show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)')
+    show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)'),
+    exact: bool = typer.Option(False, '--exact', help='Искать точное совпадение (не подстроку)')
 ):
     '''
     Поиск записей по подстроке в полях (username, password, note).
@@ -473,7 +474,7 @@ def find(
     Примеры:
 
       pas.py find "vova"               # Поиск "vova" во всех полях, пароли скрыты
-      
+
       pas.py find "123" --show         # Поиск "123" с открытыми паролями
     '''
     if not STORE.exists():
@@ -481,14 +482,22 @@ def find(
         return
 
     data = load_data()
-    
-    matches = []
-    for key, inner_dict in data.items():
-        for value in inner_dict.values():
-            if query.lower() in str(value).lower(): 
-                matches.append(key)
-                break
+    if not data:
+        typer.echo('Записей нет.')
+        return
 
+    def matches_values(value: str) -> bool:
+        val_lower = str(value).lower()
+        query_lower = query.lower()
+        return query_lower == val_lower if exact else query_lower in val_lower
+
+    try:
+        matches = [key for key, inner_dict in data.items()
+                if any(matches_values(value) for value in inner_dict.values())]
+    except Exception as e:
+        typer.echo(f'Ошибка при поиске: {str(e)}. Проверьте структуру данных.')
+        return
+    
     if not matches:
         typer.echo(f'Ничего не найдено по запросу "{query}".')
         return
@@ -526,5 +535,6 @@ if __name__ == '__main__':
     app()
 #cd D:\kod\python\password_manager\password_new
 #python install setyp.py
+#.\scripts\activate.ps1
 
 
