@@ -20,7 +20,7 @@ SALT_FILE = BASE_DIR / 'salt_file.bin'
 
 session_key = None
 session_start_time = None
-SESSION_TIMEOUT = 300
+SESSION_TIMEOUT = 5
 
 app = typer.Typer(help="""
 Менеджер паролей: безопасное хранение логинов и паролей.
@@ -96,7 +96,7 @@ def check_session(force_prompt: bool = False):
         except (json.JSONDecodeError, KeyError, ValueError, base64.binascii.Error):
             pass
 
-
+    typer.echo('Введите действующий мастер-пароль для продолжения.')
     master_password = gui_password_prompt()
     if not master_password:
         typer.echo('Ввод пароля отменен.')
@@ -630,6 +630,54 @@ def import_data(
     save_data(current_data)
     typer.echo(f'Данные успешно импортированы из {filename}')
 
+@app.command()
+def change_master(
+    current_master: str = typer.Argument(..., help='Введите действующий мастер-пароль для смены.')
+):
+    '''
+    Команда для смены мастер-пароля.
+
+    Требует ввода текущего и нового пароля.
+    '''
+    if not STORE.exists():
+        typer.echo('Нет записей. Новый мастер-пароль будет установлен при первом добавлении записи')
+        return
+    
+    typer.echo('Введите новый мастер-пароль в отркывшееся окно.')
+    new_master_password = gui_password_prompt()
+    if not new_master_password:
+        typer.echo('Ввод пароля отменен. ВЫХОД')
+        raise typer.Exit()
+    
+    if new_master_password == current_master:
+        typer.echo('Дейвствующий пароль не может совпадать с новым.')
+        return
+
+    try:
+        current_key = get_master_key(current_master)
+        encrypted = STORE.read_bytes()
+        if not encrypted: 
+            raise ValueError("Хранилище пустое, но файл существует. Проверьте данные.")
+        _ = decrypt_data(encrypted, current_key)
+    except ValueError:
+        typer.echo('Неверный мастер-пароль.')
+        raise typer.Exit()
+    
+    if not typer.confirm('Изменить мастер-пароль? Это действие необратимо!'):
+        typer.echo('Смена мастер-пароля отменена.')
+        return
+
+    decrypted_data = decrypt_data(encrypted, current_key)
+    new_key = get_master_key(new_master_password)
+    encrypted_data = encrypt_data(decrypted_data, new_key)
+    STORE.write_bytes(encrypted_data)
+    typer.echo('Мастер-пароль успешно изменен.')
+
+    global session_start_time, session_key
+    session_key = new_key
+    session_start_time = time.time()
+    save_session()
+
 @app.callback()
 def main():
     """Инициализация сессии при запуске."""
@@ -638,7 +686,7 @@ def main():
 if __name__ == '__main__':
     app()
 #cd D:\kod\python\password_manager\password_new
-#python install setyp.py
+#python setyp.py install
 #.\scripts\activate.ps1
 
 
