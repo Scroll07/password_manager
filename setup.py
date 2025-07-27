@@ -12,6 +12,7 @@ setup(
         'pyperclip',
         'tabulate',
         'cryptography',
+        'rich'
     ],
     entry_points={
         'console_scripts': [
@@ -19,11 +20,3 @@ setup(
         ],
     },
 )
-
-
-
-
-
-
-
-

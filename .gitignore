@@ -7,6 +7,8 @@ pas.egg-info/
 *.egg
 .env 
 build/
+dist/
+pas.exe.spec
 
 
 

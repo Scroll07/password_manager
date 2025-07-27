@@ -20,7 +20,7 @@ SALT_FILE = BASE_DIR / 'salt_file.bin'
 
 session_key = None
 session_start_time = None
-SESSION_TIMEOUT = 5
+SESSION_TIMEOUT = 300
 
 app = typer.Typer(help="""
 Менеджер паролей: безопасное хранение логинов и паролей.
