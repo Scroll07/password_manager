@@ -611,11 +611,12 @@ def export(
     else:
         typer.echo("Неправильный формат, используйте JSON или CSV.")
 
-@app.command(name='import_data')
+@app.command()
 def import_data(
     filename: str = typer.Argument(..., help="Имя файла для импорта (например, export.json)"),
     format: str = typer.Option("json", "--format", help="Формат: json или csv (по умолчанию: json)"),
-    overwrite: bool = typer.Option(False, "--overwrite", help="Перезаписать существующие метки")
+    overwrite: bool = typer.Option(False, "--overwrite", help="Перезаписать существующие метки"),
+    will_delete: bool = typer.Option(False, '--delete', help="Удалять ли файл json сразу после импорта")
 ):
     '''
      Импорт данных в store.bin из файла.
@@ -625,6 +626,10 @@ def import_data(
       pas import my_export.json --format json --overwrite
 
       pas import my_export.csv --format csv
+
+      pas import my_export.json --delete             # Импорт из JSON с удалением файла после
+
+      pas import my_export.csv --format csv --delete # Импорт из CSV с удалением файла после
     '''
     if not Path(filename).exists():
         typer.echo(f'Файл {filename} не найден.')
@@ -659,6 +664,10 @@ def import_data(
 
     save_data(current_data)
     typer.echo(f'Данные успешно импортированы из {filename}')
+    if will_delete:
+        delete_file(filename)
+    else:
+        typer.echo(f'Файл {filename} не был удален.')
 
 @app.command()
 def change_master(
@@ -707,6 +716,23 @@ def change_master(
     session_key = new_key
     session_start_time = time.time()
     save_session()
+
+@app.command()
+def get_path():
+    '''Показать расположение файла.'''
+    typer.echo(f'Скрипт находится по пути {BASE_DIR}')
+
+def delete_file(filename):
+    file_to_delete = BASE_DIR / filename
+    if not file_to_delete.exists():
+        typer.echo(f'Файла {filename} не обнаружено.')
+        return
+    
+    try:
+        os.remove(file_to_delete)
+        typer.echo(f'Файл {filename} успешно удален.')
+    except Exception as e:
+        typer.echo(f'Ошибка при удалении файла {filename}: {e}')
 
 @app.callback()
 def main():
