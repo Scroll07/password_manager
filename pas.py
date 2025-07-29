@@ -232,7 +232,8 @@ def list():
 @app.command()
 def get(
     service: str = typer.Argument(..., help='Метка сервиса (например: github) или "all"/"." для всех записей'),
-    show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)')
+    show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)'),
+    sort: str = typer.Option("service", '--sort', help="Введите категорию для сортировки. Существующие категории: 'service' - default, 'username', 'password', 'note'." )
 ):
     '''
     Показать информацию о записях по метке или все записи.
@@ -273,7 +274,24 @@ def get(
     headers = ['№','Метка', "Логин", 'Пароль', 'Заметка']
     rows = []
 
-    for i, match in enumerate(matches, start=1):
+    def sort_key(k):
+        value = data[k].get(sort)
+        if value is None:
+            return ''
+        return str(value).lower()
+    try:
+        if sort == 'service':
+            sorted_matches = sorted(matches)
+        else:
+            sorted_matches = sorted(matches, key = sort_key, reverse=True)
+        for k in sorted_matches:
+            val = data[k].get(sort)
+            typer.echo(f"{k}: {val}")
+    except Exception:
+        typer.echo('Метка для сортировки не найдена, применена сортировка по service.')
+        sorted_matches = sorted(matches)
+
+    for i, match in enumerate(sorted_matches, start=1):
         try:
             value = data[match]
             username = value["username"]
@@ -471,7 +489,8 @@ def edit(
 def find(
     query: str = typer.Argument(..., help='Поисковый запрос (строка для поиска в полях)'),
     show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)'),
-    exact: bool = typer.Option(False, '--exact', help='Искать точное совпадение (не подстроку)')
+    exact: bool = typer.Option(False, '--exact', help='Искать точное совпадение (не подстроку)'),
+    sort: str = typer.Option('service', '--sort', help="Введите категорию для сортировки. Существующие категории: 'service' - default, 'username', 'password', 'note'." )
 ):
     '''
     Поиск записей по подстроке в полях (username, password, note).
@@ -497,7 +516,7 @@ def find(
         val_lower = str(value).lower()
         query_lower = query.lower()
         return query_lower == val_lower if exact else query_lower in val_lower
-
+    
     try:
         matches = [key for key, inner_dict in data.items()
                 if any(matches_values(value) for value in inner_dict.values())]
@@ -509,9 +528,26 @@ def find(
         typer.echo(f'Ничего не найдено по запросу "{query}".')
         return
 
+    def sort_key(k):
+        value = data[k].get(sort)
+        if value is None:
+            return ''
+        return str(value).lower()
+
     headers = ['№', 'Метка', "Логин", 'Пароль', 'Заметка']
     rows = []
-    sorted_matches = sorted(matches)
+    try:
+        if sort == 'service':
+            sorted_matches = sorted(matches)
+        else:
+            sorted_matches = sorted(matches, key = sort_key, reverse=True)
+        for k in sorted_matches:
+            val = data[k].get(sort)
+            typer.echo(f"{k}: {val}")
+    except Exception:
+        typer.echo('Метка для сортировки не найдена, применена сортировка по service.')
+        sorted_matches = sorted(matches)
+
     for i, match in enumerate(sorted_matches, start=1):
         inner_dict = data[match]
         username = inner_dict.get("username", "")
