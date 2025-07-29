@@ -284,9 +284,6 @@ def get(
             sorted_matches = sorted(matches)
         else:
             sorted_matches = sorted(matches, key = sort_key, reverse=True)
-        for k in sorted_matches:
-            val = data[k].get(sort)
-            typer.echo(f"{k}: {val}")
     except Exception:
         typer.echo('Метка для сортировки не найдена, применена сортировка по service.')
         sorted_matches = sorted(matches)
@@ -541,9 +538,6 @@ def find(
             sorted_matches = sorted(matches)
         else:
             sorted_matches = sorted(matches, key = sort_key, reverse=True)
-        for k in sorted_matches:
-            val = data[k].get(sort)
-            typer.echo(f"{k}: {val}")
     except Exception:
         typer.echo('Метка для сортировки не найдена, применена сортировка по service.')
         sorted_matches = sorted(matches)
