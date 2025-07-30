@@ -634,7 +634,8 @@ def import_data(
 
       pas import my_export.csv --format csv --delete # Импорт из CSV с удалением файла после
     '''
-    if not Path(filename).exists():
+    filename_path = BASE_DIR / filename
+    if not filename_path.exists():
         typer.echo(f'Файл {filename} не найден.')
         return
     if format.lower() == 'json':
