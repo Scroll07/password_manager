@@ -12,7 +12,10 @@ import tkinter as tk
 from tkinter import simpledialog
 import csv
 
-BASE_DIR = Path(__file__).resolve().parent
+
+# BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path.home() / 'pas_data'
+BASE_DIR.mkdir(exist_ok=True)
 STORE = BASE_DIR / 'store.bin'
 LAST_MATCHES = BASE_DIR / 'last_matches.json'
 SESSION_FILE = BASE_DIR / 'session.json'
@@ -720,7 +723,11 @@ def change_master(
 @app.command()
 def get_path():
     '''Показать расположение файла.'''
-    typer.echo(f'Скрипт находится по пути {BASE_DIR}')
+    typer.echo(f'''
+    Данные находяться по пути {BASE_DIR}
+    
+    Файл pas.py находиться по пути {Path(__file__)}
+    ''')
 
 def delete_file(filename):
     file_to_delete = BASE_DIR / filename
@@ -742,7 +749,7 @@ def main():
 if __name__ == '__main__':
     app()
 #cd D:\kod\python\password_manager\password_new
-#python setyp.py install
+#pip install . --user
 #.\scripts\activate.ps1
 
 
