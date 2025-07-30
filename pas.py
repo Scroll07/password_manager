@@ -639,11 +639,11 @@ def import_data(
         typer.echo(f'Файл {filename} не найден.')
         return
     if format.lower() == 'json':
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename_path, 'r', encoding='utf-8') as f:
             import_data = json.load(f) 
     elif format.lower() == "csv":
         import_data = {}
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename_path, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             headers = next(reader)  # Пропустить заголовок
             for row in reader:
@@ -669,7 +669,7 @@ def import_data(
     save_data(current_data)
     typer.echo(f'Данные успешно импортированы из {filename}')
     if will_delete:
-        delete_file(filename)
+        delete_file(filename_path)
     else:
         typer.echo(f'Файл {filename} не был удален.')
 
