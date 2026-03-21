@@ -79,7 +79,7 @@ def save_session():
     global session_key, session_start_time
     data = {
         'start_time': session_start_time,
-        'key': base64.urlsafe_b64encode(session_key).decode('utf-8')
+        'key': base64.urlsafe_b64encode(session_key).decode('utf-8') # type: ignore
     }
     with open(SESSION_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f)
@@ -96,7 +96,7 @@ def check_session(force_prompt: bool = False):
                 session_start_time = time.time()
                 save_session()
                 return session_key
-        except (json.JSONDecodeError, KeyError, ValueError, base64.binascii.Error):
+        except (json.JSONDecodeError, KeyError, ValueError, base64.binascii.Error): # type: ignore
             pass
 
     typer.echo('Введите действующий мастер-пароль для продолжения.')
@@ -581,6 +581,7 @@ def export(
 
       pas export my_export.csv --format csv
     '''
+    filename_path = BASE_DIR / filename
     if not STORE.exists():
         typer.echo('Нет данных для экспорта.')
         return
@@ -601,16 +602,16 @@ def export(
         export_data[label] = export_entry
 
     if format.lower() == "json":
-        with open(filename, 'w', encoding="utf-8") as f:
+        with open(filename_path, 'w', encoding="utf-8") as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
-        typer.echo(f"данные экспортированы в {filename} (JSON)")
+        typer.echo(f"данные экспортированы в {filename_path} (JSON)")
     elif format.lower() == 'csv':
-        with open(filename, 'w', newline='', encoding='utf-8') as f:
+        with open(filename_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(["Метка", "Логин", "Пароль", "Заметка"])
             for label, entry in export_data.items():
                 writer.writerow([label, entry.get("username", ""), entry.get("password", ""), entry.get("note", "")])
-        typer.echo(f"Данные экспортированы в {filename} (CSV).")
+        typer.echo(f"Данные экспортированы в {filename_path} (CSV).")
     else:
         typer.echo("Неправильный формат, используйте JSON или CSV.")
 
