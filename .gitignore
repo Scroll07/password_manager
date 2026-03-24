@@ -9,9 +9,9 @@ pas.egg-info/
 build/
 dist/
 pas.exe.spec
-
-
-
+.venv/
+.vscode/
+setup.py
 
 
 
