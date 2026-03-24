@@ -1,11 +1,9 @@
-import time
-
 import typer
 
-from src.adapters.promt_gui import gui_password_prompt
-from src.config import STORE
-from src.core.crypto import decrypt_data, encrypt_data
-from src.core.services import get_master_key, save_session
+from pas_app.adapters.promt_gui import gui_password_prompt
+from pas_app.config import STORE
+from pas_app.core.crypto import decrypt_data, encrypt_data
+from pas_app.core.services import get_master_key, save_session
 
 
 def change_master(

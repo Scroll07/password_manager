@@ -1,8 +1,7 @@
 from pathlib import Path
-
 import typer
 
-from src.config import BASE_DIR
+from pas_app.config import BASE_DIR
 
 others_typer = typer.Typer()
 

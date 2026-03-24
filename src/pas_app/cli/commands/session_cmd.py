@@ -1,6 +1,6 @@
 import typer
 
-from src.config import SESSION_FILE
+from pas_app.config import SESSION_FILE
 
 
 def reset_session():

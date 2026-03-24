@@ -5,6 +5,7 @@ description = "CLI password manager"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "build>=1.4.0",
     "cffi==2.0.0",
     "click==8.3.1",
     "colorama==0.4.6",
@@ -20,3 +21,7 @@ dependencies = [
     "typer==0.20.0",
     "typing-extensions==4.15.0",
 ]
+
+[project.scripts]
+pas = "pas_app.main:app"
+

@@ -7,12 +7,12 @@ pas.egg-info/
 *.egg
 .env 
 build/
-dist/
+dist/*.tar.gz
 pas.exe.spec
 .venv/
 .vscode/
 setup.py
-
+password_manager.egg-info/
 
 
 

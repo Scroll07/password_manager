@@ -3,13 +3,14 @@ from datetime import datetime
 import hashlib
 import json
 import os
+from pathlib import Path
 import time
 import typer
 
 
-from src.adapters.promt_gui import gui_password_prompt
-from src.core.crypto import decrypt_data, encrypt_data
-from src.config import BASE_DIR, LAST_MATCHES, SALT_FILE, SESSION_FILE, STORE
+from pas_app.adapters.promt_gui import gui_password_prompt
+from pas_app.core.crypto import decrypt_data, encrypt_data
+from pas_app.config import BASE_DIR, LAST_MATCHES, SALT_FILE, SESSION_FILE, STORE
 
 SESSION_TIMEOUT = 300
 
@@ -102,7 +103,7 @@ def save_data(data: dict):
 
 
 
-def delete_file(filename: str):
+def delete_file(filename: Path):
     file_to_delete = BASE_DIR / filename
     if not file_to_delete.exists():
         typer.echo(f'Файла {filename} не обнаружено.')

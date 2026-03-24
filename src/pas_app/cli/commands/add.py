@@ -1,7 +1,7 @@
 import typer
 import secrets
 
-from src.core.services import load_data, save_data
+from pas_app.core.services import load_data, save_data
 
 
 def add_command(

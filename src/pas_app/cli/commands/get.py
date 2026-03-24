@@ -1,8 +1,8 @@
 import tabulate
 import typer
 
-from src.config import STORE
-from src.core.services import dump_last_matches, load_data
+from pas_app.config import STORE
+from pas_app.core.services import dump_last_matches, load_data
 
 
 def get_command(

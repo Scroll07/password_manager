@@ -1,7 +1,7 @@
 import tabulate
 import typer
 
-from src.core.services import load_data
+from pas_app.core.services import load_data
 
 
 def list_command():

@@ -1,18 +1,18 @@
 import typer
 
-from src.core.services import check_session
+from pas_app.core.services import check_session
 
-from src.cli.commands.add import add_command
-from src.cli.commands.list_cmd import list_command
-from src.cli.commands.get import get_command
-from src.cli.commands.delete import delete_command
-from src.cli.commands.find import find_command
-from src.cli.commands.edit import edit_command
-from src.cli.commands.master_cmd import change_master
-from src.cli.commands.session_cmd import reset_session
-from src.cli.commands.import_cmd import import_data
-from src.cli.commands.export_cmd import export_command
-from src.cli.commands.others_cmd import get_path
+from pas_app.cli.commands.add import add_command
+from pas_app.cli.commands.list_cmd import list_command
+from pas_app.cli.commands.get import get_command
+from pas_app.cli.commands.delete import delete_command
+from pas_app.cli.commands.find import find_command
+from pas_app.cli.commands.edit import edit_command
+from pas_app.cli.commands.master_cmd import change_master
+from pas_app.cli.commands.session_cmd import reset_session
+from pas_app.cli.commands.import_cmd import import_data
+from pas_app.cli.commands.export_cmd import export_command
+from pas_app.cli.commands.others_cmd import get_path
 
 
 

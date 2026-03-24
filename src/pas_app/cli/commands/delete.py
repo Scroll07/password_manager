@@ -1,7 +1,7 @@
 import typer
 
-from src.config import STORE
-from src.core.services import load_data, save_data
+from pas_app.config import STORE
+from pas_app.core.services import load_data, save_data
 
 
 def delete_command(

@@ -1,4 +1,6 @@
-from src.cli.app import app
+from pas_app.cli.app import app
+
+
 def main():
     app()
 

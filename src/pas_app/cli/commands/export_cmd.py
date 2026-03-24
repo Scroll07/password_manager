@@ -2,8 +2,8 @@ import csv
 import json
 import typer
 
-from src.config import BASE_DIR, STORE
-from src.core.services import load_data
+from pas_app.config import BASE_DIR, STORE
+from pas_app.core.services import load_data
 
 
 def export_command(
