@@ -13,7 +13,7 @@ from pas_app.cli.commands.session_cmd import reset_session
 from pas_app.cli.commands.import_cmd import import_data
 from pas_app.cli.commands.export_cmd import export_command
 from pas_app.cli.commands.others_cmd import get_path
-
+from pas_app.cli.commands.copy_cmd import copy
 
 
 
@@ -60,8 +60,10 @@ app = typer.Typer(help="""
 """,
 no_args_is_help=True)
 
+app.command("add")(add_command)
 app.command("list")(list_command)
 app.command("get")(get_command)
+app.command("copy")(copy)
 app.command("del")(delete_command)
 app.command("find")(find_command)
 app.command("edit")(edit_command)

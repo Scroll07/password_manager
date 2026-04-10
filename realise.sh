@@ -10,5 +10,7 @@ rm -f ~/.local/bin/pas
 rm -rf ~/.local/share/pipx/venvs/password-manager
 rm -rf ~/.local/share/pipx/venvs/pas
 
+uv run python -m build --wheel
+
 # 4. Теперь ставь wheel
 pipx install dist/password_manager-*.whl
