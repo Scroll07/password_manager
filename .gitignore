@@ -13,6 +13,7 @@ pas.exe.spec
 .vscode/
 setup.py
 password_manager.egg-info/
-
+learn.py
+dist/
 
 

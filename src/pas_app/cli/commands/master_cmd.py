@@ -1,6 +1,6 @@
 import typer
 
-from pas_app.adapters.promt_gui import gui_password_prompt
+from pas_app.adapters.promts import gui_password_prompt, cli_password_promt
 from pas_app.config import STORE
 from pas_app.core.crypto import decrypt_data, encrypt_data
 from pas_app.core.services import get_master_key, save_session
@@ -19,7 +19,8 @@ def change_master(
         return
     
     typer.echo('Введите новый мастер-пароль в отркывшееся окно.')
-    new_master_password = gui_password_prompt()
+    # new_master_password = gui_password_prompt()
+    new_master_password = cli_password_promt()
     if not new_master_password:
         typer.echo('Ввод пароля отменен. ВЫХОД')
         raise typer.Exit()

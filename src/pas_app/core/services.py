@@ -8,7 +8,7 @@ import time
 import typer
 
 
-from pas_app.adapters.promt_gui import gui_password_prompt
+from pas_app.adapters.promts import gui_password_prompt, cli_password_promt
 from pas_app.core.crypto import decrypt_data, encrypt_data
 from pas_app.config import BASE_DIR, LAST_MATCHES, SALT_FILE, SESSION_FILE, STORE
 
@@ -54,7 +54,8 @@ def check_session(force_prompt: bool = False):
             pass
 
     typer.echo('Введите действующий мастер-пароль для продолжения.')
-    master_password = gui_password_prompt()
+    # master_password = gui_password_prompt()
+    master_password = cli_password_promt()
     if not master_password:
         typer.echo('Ввод пароля отменен.')
         raise typer.Exit()

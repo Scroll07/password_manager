@@ -14,7 +14,7 @@ from pas_app.cli.commands.import_cmd import import_data
 from pas_app.cli.commands.export_cmd import export_command
 from pas_app.cli.commands.others_cmd import get_path
 from pas_app.cli.commands.copy_cmd import copy
-
+from pas_app.cli.commands.create_secret_key import create_password_command
 
 
 app = typer.Typer(help="""
@@ -73,7 +73,8 @@ app.command("reset-session")(reset_session)
 app.command("change-master")(change_master)
 app.command("get-path")(get_path)
 
-
+#KEYS
+app.command("create-key")(create_password_command)
 
 
 
