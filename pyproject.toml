@@ -10,9 +10,11 @@ dependencies = [
     "click==8.3.1",
     "colorama==0.4.6",
     "cryptography==46.0.3",
+    "httpx>=0.28.1",
     "markdown-it-py==4.0.0",
     "mdurl==0.1.2",
     "pycparser==2.23",
+    "pydantic>=2.13.2",
     "pygments==2.19.2",
     "pyperclip==1.11.0",
     "rich==14.2.0",
@@ -24,4 +26,9 @@ dependencies = [
 
 [project.scripts]
 pas = "pas_app.main:app"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.11",
+]
 
