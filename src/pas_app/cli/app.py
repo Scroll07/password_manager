@@ -1,6 +1,6 @@
 import typer
 
-from pas_app.core.services import check_session
+from services.password import check_session
 
 from pas_app.cli.commands.pas_commands.add import add_command
 from pas_app.cli.commands.pas_commands.list_cmd import list_command

@@ -2,7 +2,7 @@ import tabulate
 import typer
 
 from pas_app.config import STORE
-from pas_app.core.services import dump_last_matches, load_data
+from services.password import dump_last_matches, load_data
 
 
 def find_command(

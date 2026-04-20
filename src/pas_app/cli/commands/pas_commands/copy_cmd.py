@@ -4,7 +4,7 @@ import pyperclip
 import typer
 
 from pas_app.config import LAST_MATCHES, STORE
-from pas_app.core.services import load_data
+from services.password import load_data
 
 
 def copy(
