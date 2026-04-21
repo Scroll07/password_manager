@@ -9,7 +9,7 @@ from pas_app.config import BASE_DIR, LAST_MATCHES, VAULTS
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
 from pas_app.services.password import check_session
 from pas_app.schemas.state import State
-
+from pas_app.exceptions import EchoException
 
 
 
@@ -39,12 +39,12 @@ def load_encrypted_vault(username: str) -> EncryptedUserVault:
         encrypted = EncryptedUserVault.model_validate_json(data)
         return encrypted
     except Exception as e:
-        raise ValueError(e)
+        raise EchoException(e)
     
     
 def load_data(state: State) -> UserVault:
     if state.current_user is None:
-        raise ValueError("No logged")
+        raise EchoException("No logged")
     encrypted = load_encrypted_vault(state.current_user)
     key = check_session(state)
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
@@ -63,7 +63,7 @@ def load_data(state: State) -> UserVault:
 def save_data(state: State ,vault_data: UserVault):
     vault_file = VAULTS / f"{vault_data.username}.json"
     if not vault_file.exists():
-        raise ValueError(f"File {vault_data.username}.json does not exist") 
+        raise EchoException(f"File {vault_data.username}.json does not exist") 
     key = check_session(state)
     encrypted_passwords = encrypt_vault_passwords(Passwords(passwords=vault_data.user_passwords), key)
     encrypted_vault = EncryptedUserVault(
@@ -80,12 +80,11 @@ def save_data(state: State ,vault_data: UserVault):
 def delete_file(filename: Path):
     file_to_delete = BASE_DIR / filename
     if not file_to_delete.exists():
-        typer.echo(f'Файла {filename} не обнаружено.')
-        return
+        raise EchoException(f'Файла {filename} не обнаружено.')
     
     try:
         os.remove(file_to_delete)
-        typer.echo(f'Файл {filename} успешно удален.')
+        raise EchoException(f'Файл {filename} успешно удален.')
     except Exception as e:
-        typer.echo(f'Ошибка при удалении файла {filename}: {e}')
+        raise EchoException(f'Ошибка при удалении файла {filename}: {e}')
         

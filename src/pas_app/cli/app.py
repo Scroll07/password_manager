@@ -19,6 +19,9 @@ from pas_app.cli.commands.create_secret_key import create_password_command
 
 
 from pas_app.schemas.state import State
+from pas_app.exceptions import EchoException
+
+
 
 app = typer.Typer(help="""
 Менеджер паролей: безопасное хранение логинов и паролей.
@@ -87,10 +90,17 @@ def main(ctx: typer.Context):
     """Инициализация сессии при запуске."""
     state = ctx.obj
     if not state:
-      state = State(
+        state = State(
         current_user=None,
         master_password=None,
         last_action=datetime.now()
       )
     ctx.obj = state
-    check_session(state)
+    try:
+        check_session(state)
+
+    except Exception as e:
+        typer.echo(e)
+        raise typer.Exit()
+        
+        

@@ -9,6 +9,8 @@ from pas_app.config import VAULTS
 from pas_app.schemas.passwords import Password, UserVault, EncryptedUserVault
 from pas_app.schemas.state import State
 from pas_app.services.file_utils import load_data, load_encrypted_vault
+from pas_app.exceptions import EchoException
+
 
 SESSION_TIMEOUT = 300
 
@@ -19,44 +21,40 @@ SESSION_TIMEOUT = 300
 
 
 def check_session(state: State):
-    username = state.current_user
+    if state.current_user is None:
+        raise EchoException("No logged user")
     
-    if username is None:
-        raise ValueError("No logged")
+    expired = (
+        state.master_password is None
+        or state.last_action is None
+        or (datetime.now() - state.last_action).total_seconds() > SESSION_TIMEOUT
+    )    
 
-    encrypted_vault = load_encrypted_vault(username)
-    
-    vault_file = VAULTS / f"{username}.json"
-    if not vault_file.exists():
-        raise ValueError(f"File {username}.json does not exist")
-    delta = datetime.now() - state.last_action
-    if delta.total_seconds() > 300 or master_password is None:
-        # master_password = gui_password_prompt()
+    if expired:
         master_password = cli_password_promt()
         if not master_password:
-            typer.echo('Ввод пароля отменен.')
-            raise typer.Exit()
-    try:
-        salt = encrypted_vault.salt
-        key = derive_key(master_password, salt)
-        _ = decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
+            raise EchoException("Cancelled")
+    else:
+        master_password = state.master_password
         
-        return key
-    except InvalidToken as e:
-        typer.echo("Неправильный мастер-пароль")
-        raise typer.Exit()
+    encrypted_vault = load_encrypted_vault(state.current_user)
+    
+    key = derive_key(master_password, encrypted_vault.salt) # type: ignore
+    decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
+    
+    state.master_password = master_password
+    state.last_action = datetime.now()
+    
+    return key
     
 
 
-
-
-#----NEW----#    
     
 
 def create_user_vault(username: str):
     new_vault = VAULTS / f"{username}.json"
     if new_vault.exists():
-        raise ValueError(f"File {username}.json already exists")
+        raise EchoException(f"File {username}.json already exists")
     
     salt = create_random_salt()
     vault_data = EncryptedUserVault(
@@ -64,7 +62,6 @@ def create_user_vault(username: str):
         salt=salt,
         encrypted_passwords=""
     )
-    
     
     data = vault_data.model_dump_json()
     with open(new_vault, "w") as f:
