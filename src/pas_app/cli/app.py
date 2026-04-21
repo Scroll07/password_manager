@@ -1,6 +1,7 @@
 import typer
+from datetime import datetime
 
-from pas_app.core.services import check_session
+from pas_app.services.password import check_session
 
 from pas_app.cli.commands.add import add_command
 from pas_app.cli.commands.list_cmd import list_command
@@ -16,6 +17,8 @@ from pas_app.cli.commands.others_cmd import get_path
 from pas_app.cli.commands.copy_cmd import copy
 from pas_app.cli.commands.create_secret_key import create_password_command
 
+
+from pas_app.schemas.state import State
 
 app = typer.Typer(help="""
 Менеджер паролей: безопасное хранение логинов и паролей.
@@ -80,6 +83,14 @@ app.command("create-key")(create_password_command)
 
 
 @app.callback()
-def main():
+def main(ctx: typer.Context):
     """Инициализация сессии при запуске."""
-    check_session()
+    state = ctx.obj
+    if not state:
+      state = State(
+        current_user=None,
+        master_password=None,
+        last_action=datetime.now()
+      )
+    ctx.obj = state
+    check_session(state)

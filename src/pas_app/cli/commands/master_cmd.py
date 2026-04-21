@@ -3,7 +3,7 @@ import typer
 from pas_app.adapters.promts import gui_password_prompt, cli_password_promt
 from pas_app.config import STORE
 from pas_app.core.crypto import decrypt_data, encrypt_data
-from pas_app.core.services import get_master_key, save_session
+from pas_app.services.password import get_master_key, save_session
 
 
 def change_master(

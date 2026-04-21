@@ -1,7 +1,7 @@
 import tabulate
 import typer
 
-from pas_app.core.services import load_data
+from pas_app.services.password import load_data
 
 
 def list_command():
