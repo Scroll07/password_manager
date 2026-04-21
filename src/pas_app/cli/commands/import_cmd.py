@@ -3,7 +3,7 @@ import json
 import typer
 
 from pas_app.config import BASE_DIR
-from pas_app.core.services import delete_file, load_data, save_data
+from pas_app.services.password import delete_file, load_data, save_data
 
 
 

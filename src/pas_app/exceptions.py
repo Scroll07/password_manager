@@ -1,0 +1,2 @@
+class EchoException(Exception):
+  pass
