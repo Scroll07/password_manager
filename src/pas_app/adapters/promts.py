@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import simpledialog
 import getpass
-
+import typer
 
 
 
@@ -16,3 +16,6 @@ def cli_password_promt():
     password = getpass.getpass("Введите пароль: ")
     return password
 
+def cli_input(text: str, is_secret: bool = False) -> str:
+    data = typer.prompt(text=text, hide_input=is_secret)
+    return data

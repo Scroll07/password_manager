@@ -1,7 +1,7 @@
 import typer
 
-from pas_app.config import STORE
-from pas_app.services.password import load_data, save_data
+
+from pas_app.services.password import load_data
 
 
 def delete_command(

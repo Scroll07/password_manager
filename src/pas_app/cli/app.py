@@ -3,19 +3,19 @@ from datetime import datetime
 
 from pas_app.services.password import check_session
 
-from pas_app.cli.commands.add import add_command
-from pas_app.cli.commands.list_cmd import list_command
-from pas_app.cli.commands.get import get_command
-from pas_app.cli.commands.delete import delete_command
-from pas_app.cli.commands.find import find_command
-from pas_app.cli.commands.edit import edit_command
-from pas_app.cli.commands.master_cmd import change_master
-from pas_app.cli.commands.session_cmd import reset_session
-from pas_app.cli.commands.import_cmd import import_data
-from pas_app.cli.commands.export_cmd import export_command
-from pas_app.cli.commands.others_cmd import get_path
-from pas_app.cli.commands.copy_cmd import copy
-from pas_app.cli.commands.create_secret_key import create_password_command
+from pas_app.cli.commands.pas_commands.add import add_command
+from pas_app.cli.commands.pas_commands.list_cmd import list_command
+from pas_app.cli.commands.pas_commands.get import get_command
+from pas_app.cli.commands.pas_commands.delete import delete_command
+from pas_app.cli.commands.pas_commands.find import find_command
+from pas_app.cli.commands.pas_commands.edit import edit_command
+from pas_app.cli.commands.pas_commands.master_cmd import change_master
+from pas_app.cli.commands.pas_commands.session_cmd import reset_session
+from pas_app.cli.commands.pas_commands.import_cmd import import_data
+from pas_app.cli.commands.pas_commands.export_cmd import export_command
+from pas_app.cli.commands.pas_commands.others_cmd import get_path
+from pas_app.cli.commands.pas_commands.copy_cmd import copy
+from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
 
 
 from pas_app.schemas.state import State
@@ -82,6 +82,7 @@ app.command("get-path")(get_path)
 #KEYS
 app.command("create-key")(create_password_command)
 
+#API
 
 
 
