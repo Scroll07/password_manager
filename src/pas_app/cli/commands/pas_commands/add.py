@@ -1,10 +1,13 @@
 import typer
 import secrets
 
-from pas_app.services.password import load_data, save_data
-
+from pas_app.services.file_utils import load_data, save_data
+from pas_app.schemas.state import State
+from pas_app.schemas.passwords import Password
 
 def add_command(
+    ctx: typer.Context,
+    
     service: str = typer.Argument(..., help="Название сервиса (например: github, vk, yandex)"),
     username: str = typer.Option(..., '-u', '--username', help="Имя пользователя или email"),
     password: str | None = typer.Option(None, '-p', '--password', help="Пароль (если не указан, используйте --gen)"),
@@ -23,18 +26,20 @@ def add_command(
 
       pas.py add work-email -u john@company.com --gen --note "Рабочая почта"
     '''
+    state: State = ctx.obj
+    
     if password is not None:
         if gen:
             typer.echo('Нельзя вводить одновременно -p И --gen \n ВЫХОД')
             return
-    elif password is None and gen:
+    elif password is None:
         password = secrets.token_urlsafe(length)
     elif password is None and gen == False:
         typer.echo('Нужно указать либо -p либо --gen')
         return
         
 
-    data = load_data()
+    data = load_data(state)
 
     labels = set(data)
     base = service.lower()
@@ -43,6 +48,14 @@ def add_command(
     while candidate in labels:
         candidate = base + '-' + str(i)
         i+=1
-    entry = {"username": username, "password": password, "note": note}
-    data[candidate] = entry
-    save_data(data)
+    
+    password_to_append = Password(
+        service=candidate,
+        username=username,
+        password=password,
+        note=note
+    ) 
+    data.user_passwords.append(password_to_append)
+    
+    save_data(state, data)
+    
