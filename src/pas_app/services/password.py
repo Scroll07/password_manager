@@ -8,7 +8,7 @@ from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, enc
 from pas_app.config import VAULTS
 from pas_app.schemas.passwords import Password, UserVault, EncryptedUserVault
 from pas_app.schemas.state import State
-from pas_app.services.file_utils import load_data, load_encrypted_vault
+from pas_app.services.file_utils import load_encrypted_vault
 from pas_app.exceptions import EchoException
 
 

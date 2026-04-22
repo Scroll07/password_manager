@@ -7,7 +7,7 @@ import typer
 from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
 from pas_app.config import BASE_DIR, LAST_MATCHES, VAULTS
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
-from pas_app.services.password import check_session
+#from pas_app.services.password import check_session
 from pas_app.schemas.state import State
 from pas_app.exceptions import EchoException
 
@@ -43,6 +43,8 @@ def load_encrypted_vault(username: str) -> EncryptedUserVault:
     
     
 def load_data(state: State) -> UserVault:
+    from pas_app.services.password import check_session
+    
     if state.current_user is None:
         raise EchoException("No logged")
     encrypted = load_encrypted_vault(state.current_user)
@@ -61,6 +63,8 @@ def load_data(state: State) -> UserVault:
 
 
 def save_data(state: State ,vault_data: UserVault):
+    from pas_app.services.password import check_session
+    
     vault_file = VAULTS / f"{vault_data.username}.json"
     if not vault_file.exists():
         raise EchoException(f"File {vault_data.username}.json does not exist") 
