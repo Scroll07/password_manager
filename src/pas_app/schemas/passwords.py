@@ -20,5 +20,7 @@ class Passwords(BaseModel):
     passwords: list[Password]
 
 
-
+class RegisterInput(BaseModel):
+    username: str
+    password: str
 

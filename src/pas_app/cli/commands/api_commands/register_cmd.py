@@ -2,30 +2,36 @@ import typer
 import time
 
 
-from pas_app.adapters.promts import cli_input
-from pas_app.adapters.console import clear_console
+from pas_app.adapters.promts import cli_register_input
+from pas_app.schemas.state import State
+from pas_app.services.password import create_user_vault
+from pas_app.core.api import Api
+from pas_app.schemas.api import Login_RegisterRequest
 
-async def register_command():
-    while True:
-        clear_console()
-        typer.echo("[Регистрация]")
-        login = cli_input("Введите логин: ")
-        if not (4 <= len(login) <= 16):
-            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
-            time.sleep(2)
-            continue
-        
-        password = cli_input("Введите пароль: ", True)
-        confirm_password = cli_input("Повторите пароль: ", True)
-        
-        if password.strip() != confirm_password.strip():
-            typer.echo("Пароли должны совпадать")
-            time.sleep(2)
-            continue
-        
-        if not (4 <= len(password) <= 32):
-            typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
-            time.sleep(2)
-            continue
-         
+async def register_command(
+    ctx: typer.Context
+):
+    state: State = ctx.obj
+    if state.api is None:
+        api = Api()
+        state.api = api
+    else:
+        api = state.api
+    
+    user_input_data = cli_register_input()
+    user_api_data = Login_RegisterRequest(
+        username=user_input_data.username,
+        password=user_input_data.password
+    )
+    
+    is_registered = await api.register(user_api_data)
+    if is_registered:
+        typer.echo(f"Registered new accaunt - {user_api_data.username}")
+    
+        #Запустить логин чтобы он сразу залогинился
+    
+        raise typer.Exit(code=1)
+    else:
+        typer.echo("Register failed")
+        raise typer.Exit(code=0)
         
