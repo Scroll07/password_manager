@@ -3,11 +3,15 @@ import json
 import pyperclip
 import typer
 
-from pas_app.config import LAST_MATCHES, STORE
-from pas_app.services.password import load_data
+from pas_app.services.file_utils import load_data, save_data
+from pas_app.schemas.state import State
+from pas_app.schemas.passwords import Password
+from pas_app.config import LAST_MATCHES
 
 
 def copy(
+  ctx: typer.Context,
+  
   idx: int = typer.Argument(..., help='Номер записи из таблицы (от 1 до N)')
 ):
     '''
@@ -41,19 +45,15 @@ def copy(
         typer.echo(f'Неверный индекс: {idx}. Доступно от 1 до {len(last_matches)}.')
         return
 
-    if not STORE.exists():
-        typer.echo('store.bin не существует.')
-        return
-
-    data = load_data()
+    state: State = ctx.obj
+    data = load_data(state)
 
     match = last_matches[idx - 1]
-    if match in data:
-        password = data[match].get("password", "")
-        if password:
-            pyperclip.copy(password)
+    passwords = data.user_passwords
+    for password in passwords:
+        if password.service == match:
+            pyperclip.copy(password.password)
             typer.echo(f"Пароль для {match} успешно скопирован в буфер обмена.")
+            break
         else:
             typer.echo(f'Пароль для {match} не найден')    
-    else:
-        typer.echo(f'Запись для {match} не найдена в store.json')

@@ -1,10 +1,14 @@
 import typer
 
 
-from pas_app.services.password import load_data
+from pas_app.services.file_utils import load_data, save_data
+from pas_app.schemas.state import State
+from pas_app.schemas.passwords import Password
 
 
 def delete_command(
+    ctx: typer.Context,
+    
     label: str = typer.Argument(..., help='Метка для удаления или "clear-all" для полной очистки')
 ):
     '''
@@ -20,28 +24,28 @@ def delete_command(
 
       pas.py delete "clear-all"   # Удалить все записи (в кавычках!)
     '''
-    if not STORE.exists():
-        typer.echo('Записей нет, файл не существует.')
-        return
+    state: State = ctx.obj
     
-    data = load_data()
+    data = load_data(state)
     
     if label.lower() == 'clear-all':
         if not typer.confirm('Удалить ВСЕ записи? Это действие необратимо!'):
             typer.echo('Очистка отменена.')
             return
-        data.clear()
-        save_data(data)
+        data.user_passwords = []
+        save_data(state, data)
         typer.echo('Все данные были успешно удалены')
         return
     
-    if label in data:
-        if not typer.confirm('Удалить запись? Это действие необратимо!'):
-            typer.echo('Очистка отменена.')
+    for pas in data.user_passwords:
+        if label == pas.service:
+            if not typer.confirm('Удалить запись? Это действие необратимо!'):
+                typer.echo('Очистка отменена.')
+                return
+            data.user_passwords.remove(pas)
+            typer.echo(f'Данные с меткой {label} были успешно удалены.')
+            save_data(state, data)
+            break
+        else:
+            typer.echo(f'Метка "{label}" не найдена.')
             return
-        del data[label]
-        typer.echo(f'Данные с меткой {label} были успешно удалены.')
-        save_data(data)
-    else:
-        typer.echo(f'Метка "{label}" не найдена.')
-        return

@@ -2,11 +2,14 @@ import secrets
 
 import typer
 
-from pas_app.config import STORE
-from pas_app.services.password import load_data, save_data
+from pas_app.services.file_utils import load_data, save_data
+from pas_app.schemas.state import State
+from pas_app.schemas.passwords import Password
 
 
 def edit_command(
+    ctx: typer.Context,
+
     service: str = typer.Argument(..., help='Метка для изменения (например, "github(1)")'),
     username: str | None = typer.Option(None, '-u', '--username', help='Новое имя пользователя'),
     password: str | None = typer.Option(None, '-p', '--password', help='Новый пароль'),
@@ -33,19 +36,22 @@ def edit_command(
 
       pas.py edit github-1 -u user --gen           # Изменить username и сгенерировать пароль
     '''
+    state: State = ctx.obj
 
 
-    if not STORE.exists():
-        typer.echo('Записей нет, файл не существует.')
-        return
 
-    data = load_data()
-   
-    if service not in data:
-        typer.echo(f'Данные с меткой {service} не найдены.')
-        return
+    data = load_data(state)
+    pas_to_change = None
+    for pas in data.user_passwords:
+        if pas.service == service:
+            pas_to_change = pas
+            break
     
-    existing: dict = data[service]
+    if pas_to_change is None:
+        typer.echo("No such service in passwords")
+        raise typer.Exit()
+        
+    
     
     if password is not None:
         if gen:
@@ -54,17 +60,17 @@ def edit_command(
     elif password is None and gen:
         password = secrets.token_urlsafe(length)
     elif password is None:
-        password = existing.get("password", "")
+        password = pas_to_change.password
 
     
 
     changes = []
     if username is not None:
-        changes.append(f'username: {existing.get("username", "")} → {username}  ')
-    if password != existing.get("password", ""):
+        changes.append(f'username: {pas_to_change.username} → {username}  ')
+    if password != pas_to_change.password:
         changes.append(f'password: {"*" * len(existing.get("password", ''))} → {"*" * len(password)}') # type: ignore
     if note is not None:
-        changes.append(f'note: {existing.get("note", "")} → {note}')
+        changes.append(f'note: {pas_to_change.note} → {note}')
 
     if not changes:
         typer.echo('Нет изменений для применения.')
@@ -78,12 +84,10 @@ def edit_command(
         typer.echo('Изменения отменены.')
         return
 
-    updated_data = {
-        'username': username if username is not None else existing.get("username", ""),
-        'password': password,
-        'note': note if note is not None else existing.get("note", "")
-    }
-
-    data[service] = updated_data
-    save_data(data)
+    
+    pas_to_change.username = username if username is not None else pas_to_change.username
+    pas_to_change.password = password
+    pas_to_change.note = note
+    
+    save_data(state, data)
     typer.echo(f"Запись с меткой {service} была успешно изменена.")
