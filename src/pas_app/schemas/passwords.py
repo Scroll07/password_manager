@@ -24,3 +24,11 @@ class RegisterInput(BaseModel):
     username: str
     password: str
 
+
+
+
+
+
+
+
+
