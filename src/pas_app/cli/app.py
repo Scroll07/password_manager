@@ -92,6 +92,7 @@ def main(ctx: typer.Context):
     state = ctx.obj
     if not state:
         state = State(
+        api=None,
         current_user=None,
         master_password=None,
         last_action=datetime.now()
