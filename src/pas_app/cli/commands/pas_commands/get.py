@@ -1,11 +1,14 @@
 import tabulate
 import typer
 
-from pas_app.config import STORE
-from pas_app.services.password import dump_last_matches, load_data
+from pas_app.services.file_utils import dump_last_matches, load_data, save_data
+from pas_app.schemas.state import State
+from pas_app.schemas.passwords import Password
 
 
 def get_command(
+    ctx: typer.Context,
+    
     service: str = typer.Argument(..., help='Метка сервиса (например: github) или "all"/"." для всех записей'),
     show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)'),
     sort: str = typer.Option("service", '--sort', help="Введите категорию для сортировки. Существующие категории: 'service' - default, 'username', 'password', 'note'." )
@@ -29,11 +32,8 @@ def get_command(
 
       pas.py get . --show         # Все записи с открытыми паролями
     '''
-    if not STORE.exists():
-        typer.echo('Записей нет')
-        return
-
-    data = load_data()
+    state: State = ctx.obj
+    data = load_data(state=state)
 
     if not data:
         typer.echo('Записей нет')
@@ -46,6 +46,7 @@ def get_command(
     if not matches:
         typer.echo('Записей нет')
         return    
+    
     headers = ['№','Метка', "Логин", 'Пароль', 'Заметка']
     rows = []
 
@@ -54,6 +55,7 @@ def get_command(
         if value is None:
             return ''
         return str(value).lower()
+    
     try:
         if sort == 'service':
             sorted_matches = sorted(matches)
@@ -79,4 +81,4 @@ def get_command(
     if rows:
         typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt='grid'))
 
-    dump_last_matches(matches)
+    # dump_last_matches(matches) NEED FIX FOR THIS FUNCTION

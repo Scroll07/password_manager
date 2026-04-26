@@ -10,7 +10,8 @@ for dir in (BASE_DIR, EXPORT_DIR):
 LAST_MATCHES = BASE_DIR / 'last_matches.json'
 SESSION_FILE = BASE_DIR / 'session.json'
 
-BASE_URL = "http://localhost"
+BASE_URL = "http://localhost:8000"
+# BASE_URL = "http://localhost:80"
 
 VAULTS = BASE_DIR / "Vaults"
 VAULTS.mkdir(exist_ok=True)
