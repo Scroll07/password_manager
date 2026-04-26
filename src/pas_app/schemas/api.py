@@ -16,4 +16,7 @@ class LoginResponse(MessageResponse):
     access_token: str
     token_type: str
     
-
+class ApiResponse(BaseModel):
+    status_code: int
+    content: MessageResponse | Login_RegisterRequest
+    
