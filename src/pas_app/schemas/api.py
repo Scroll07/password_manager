@@ -18,5 +18,5 @@ class LoginResponse(MessageResponse):
     
 class ApiResponse(BaseModel):
     status_code: int
-    content: MessageResponse | Login_RegisterRequest
+    content: MessageResponse | LoginResponse
     

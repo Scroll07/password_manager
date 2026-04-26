@@ -26,21 +26,25 @@ async def register_command(
         password=user_input_data.password
     )
     
-    is_registered = await api.register(user_api_data)
-    if is_registered:
-        typer.echo(f"Registered new accaunt - {user_api_data.username}")
+    response = await api.register(user_api_data)
+    if response.status_code == 201:
+        typer.echo(response.content.message)
 
-        config.create_empty_config(user_input_data.username)
-
+        config_message = config.create_empty_config(user_input_data.username)
+        typer.echo(config_message)
             
-        typer.echo(f"Successful login, Hi {user_api_data.username}!")
-        time.sleep(1)
     
-    #     #Запустить логин чтобы он сразу залогинился
+    #   #Запустить логин чтобы он сразу залогинился
+        
+        
+        #login logic
+        
+        # typer.echo(f"Successful login, Hi {user_api_data.username}!")
+        # time.sleep(1)
+        raise typer.Exit(code=1)
 
     
-        raise typer.Exit(code=1)
     else:
-        typer.echo("Register failed")
+        typer.echo(f'Register failed\nstatus_code: {response.status_code}, message: {response.content.message}')
         raise typer.Exit(code=0)
         

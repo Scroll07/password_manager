@@ -43,10 +43,9 @@ class UserConfig:
             f.write(json)
         return None
     
-    def create_empty_config(self, current_user: str) -> None:
+    def create_empty_config(self, current_user: str) -> str:
         if self.config_file.exists():
-            #config file alredy exists
-            return
+            return "config file already exists"
         
         empty_config = ConfigData(
             default_user=current_user,
@@ -54,6 +53,7 @@ class UserConfig:
             BOT_TOKEN="No token"
         )
         self.save_config(empty_config)
+        return "config file was created"
     
     def _refresh(self) -> ConfigData:
         return self.load_config()
