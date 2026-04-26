@@ -3,7 +3,10 @@ from pydantic import BaseModel
 
 
 BASE_DIR = Path.home() / 'pas_data'
-BASE_DIR.mkdir(exist_ok=True)
+EXPORT_DIR = BASE_DIR / 'exports'
+for dir in (BASE_DIR, EXPORT_DIR):
+    dir.mkdir(parents=True, exist_ok=True)
+
 LAST_MATCHES = BASE_DIR / 'last_matches.json'
 SESSION_FILE = BASE_DIR / 'session.json'
 
