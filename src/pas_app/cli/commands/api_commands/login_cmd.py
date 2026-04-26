@@ -27,16 +27,16 @@ async def login_command(
         password=password
     )
     
-    is_login = await api.login(user_api_data)
-    if is_login:
+    response = await api.login(user_api_data)
+    if response.status_code == 200:
         state.current_user = user_api_data.username
             
-        typer.echo(f"Successful login, Hi {user_api_data.username}!")
+        typer.echo(response.content.message)
         time.sleep(1)
         
 
-        raise typer.Exit(code=1)
-    else:
-        typer.echo("Register failed")
         raise typer.Exit(code=0)
+    else:
+        typer.echo(f'Register failed\nstatus_code: {response.status_code}, message: {response.content.message}')
+        raise typer.Exit(code=1)
         
