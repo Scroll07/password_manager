@@ -12,7 +12,7 @@ class Api:
         if bearer_token is not None:
             self.headers["Authorization"] = f"Bearer {bearer_token}"
         
-    async def register(self, user_data:Login_RegisterRequest) -> bool:
+    async def register(self, user_data:Login_RegisterRequest) -> dict:
         url = "/register"
         json = user_data.model_dump()
         async with AsyncClient(base_url=self.base_url) as client:
@@ -21,11 +21,10 @@ class Api:
                 json=json,
             )
             
-        if response.status_code == 201:
-            return True
-        return False
+        return response.json()
+            
     
-    async def login(self, user_data: Login_RegisterRequest) -> bool:
+    async def login(self, user_data: Login_RegisterRequest) -> dict:
         url = "/login"
         json = user_data.model_dump()
         async with AsyncClient(base_url=self.base_url) as client:
@@ -38,5 +37,4 @@ class Api:
             data = response.json()
             token = data.get("access_token")
             self._update_headers(bearer_token=token)
-            return True
-        return False
+        return response.json()

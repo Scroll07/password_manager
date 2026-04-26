@@ -12,7 +12,7 @@ BASE_URL = "http://localhost"
 VAULTS = BASE_DIR / "Vaults"
 VAULTS.mkdir(exist_ok=True)
 
-
+CONFIG_FILE = BASE_DIR / "config.json"
 
 
 class ConfigData(BaseModel):
@@ -22,7 +22,7 @@ class ConfigData(BaseModel):
 
 class UserConfig:
     def __init__(self):
-        self.config_file = BASE_DIR / "config.json"
+        self.config_file = CONFIG_FILE
         self.config_data = self._refresh()
 
     def check_exists(self) -> None:
@@ -44,6 +44,10 @@ class UserConfig:
         return None
     
     def create_empty_config(self, current_user: str) -> None:
+        if self.config_file.exists():
+            #config file alredy exists
+            return
+        
         empty_config = ConfigData(
             default_user=current_user,
             BASE_URL=BASE_URL,

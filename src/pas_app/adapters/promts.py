@@ -5,7 +5,7 @@ import getpass
 import typer
 
 from pas_app.adapters.console import clear_console
-from pas_app.schemas.passwords import RegisterInput
+from pas_app.schemas.passwords import LoginRegisterInput
 
 
 def gui_password_prompt():
@@ -23,7 +23,7 @@ def cli_input(text: str, is_secret: bool = False) -> str:
     data = typer.prompt(text=text, hide_input=is_secret)
     return data
 
-def cli_register_input() -> RegisterInput:
+def cli_register_input() -> LoginRegisterInput:
     while True:
         clear_console()
         typer.echo("[Регистрация]")
@@ -46,8 +46,27 @@ def cli_register_input() -> RegisterInput:
             time.sleep(2)
             continue
         
-        return RegisterInput(username=login, passwords=password)
+        return LoginRegisterInput(username=login, password=password)
     
+def cli_login_input() -> LoginRegisterInput:
+    while True:
+        clear_console()
+        typer.echo("[Вход]")
+        login = cli_input("Введите логин: ")
+        if not (4 <= len(login) <= 16):
+            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
+            time.sleep(2)
+            continue
+        
+        password = cli_input("Введите пароль: ", True)
+                
+        if not (4 <= len(password) <= 32):
+            typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
+            time.sleep(2)
+            continue
+        
+        return LoginRegisterInput(username=login, password=password)
+
 
 def exit_message_and_clear_console(message: str):
     typer.echo(message)
