@@ -41,10 +41,10 @@ async def register_command(
         
         # typer.echo(f"Successful login, Hi {user_api_data.username}!")
         # time.sleep(1)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=0)
 
     
     else:
         typer.echo(f'Register failed\nstatus_code: {response.status_code}, message: {response.content.message}')
-        raise typer.Exit(code=0)
+        raise typer.Exit(code=1)
         

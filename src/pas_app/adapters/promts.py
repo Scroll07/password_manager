@@ -71,4 +71,4 @@ def cli_login_input() -> LoginRegisterInput:
 def exit_message_and_clear_console(message: str):
     typer.echo(message)
     time.sleep(2)
-    typer.Exit(code=1)
+    typer.Exit(code=0)
