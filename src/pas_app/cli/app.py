@@ -55,7 +55,7 @@ app = typer.Typer(help="""
     pas reset-session
 
  - Экспорт данных:
-    pas export <файл> [--format json|csv] [--include-passwords]
+    pas export <файл> [--format json|csv] [--no-passwords]
 
   - Импорт данных:
     pas import <файл> [--format json|csv] [--overwrite]

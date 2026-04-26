@@ -12,7 +12,7 @@ def export_command(
     ctx: typer.Context,
     
     filename: str = typer.Argument(..., help="Имя файла для экспорта (например, export.json)"),
-    no_passwords: bool = typer.Option(False, "--no-passwords", help="Включить пароли в экспорт (опасно!)")
+    no_passwords: bool = typer.Option(False, "--no-passwords", help="Включить если не хочешь сохранять пароли")
     # format: str = typer.Option("json", "--format", help="Формат: json или csv (по умолчанию: json)"),
 ):
     '''
