@@ -20,7 +20,7 @@ from pas_app.cli.commands.pas_commands.create_secret_key import create_password_
 
 from pas_app.schemas.state import State
 from pas_app.exceptions import EchoException
-from pas_app.config import UserConfig
+from pas_app.config import config
 
 
 app = typer.Typer(help="""
@@ -93,7 +93,7 @@ def main(ctx: typer.Context):
     if not state:
         state = State(
         api=None,
-        config=UserConfig(),
+        config=config,
         current_user=None,
         master_password=None,
         last_action=datetime.now()

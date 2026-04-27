@@ -1,5 +1,3 @@
-import secrets
-
 import pytest
 
 
@@ -9,15 +7,11 @@ from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
 
 
-def create_random_username() -> str:
-    return secrets.token_urlsafe(16)
-
-
 @pytest.mark.asyncio
-async def test_register():
+async def test_register(random_username):
     api = Api()
     
-    username = create_random_username()
+    username = random_username
     user_data = Login_RegisterRequest(
         username=username,
         password="test-password"
@@ -28,10 +22,10 @@ async def test_register():
 
 
 @pytest.mark.asyncio
-async def test_double_register():
+async def test_double_register(random_username):
     api = Api()
     
-    username = create_random_username()
+    username = random_username
     user1 = Login_RegisterRequest(
         username=username,
         password="test-password"
@@ -45,6 +39,7 @@ async def test_double_register():
     assert response.status_code == 409
     print(response.content)
     
+
 
 
 

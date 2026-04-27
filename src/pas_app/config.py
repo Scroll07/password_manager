@@ -22,12 +22,12 @@ CONFIG_FILE = BASE_DIR / "config.json"
 class ConfigData(BaseModel):
     default_user: str
     BASE_URL: str = BASE_URL
-    BOT_TOKEN: str
+    BOT_TOKEN: str = "no token"
 
 class UserConfig:
-    def __init__(self):
-        self.config_file = CONFIG_FILE
-        self.config_data = self._refresh()
+    def __init__(self, config_file: Path):
+        self.config_file = config_file
+        # self.config_data = self._refresh()
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
@@ -41,7 +41,6 @@ class UserConfig:
         return user_config
     
     def save_config(self, data: ConfigData) -> None:
-        self.check_exists()
         json = data.model_dump_json()
         with open(self.config_file, "w") as f:
             f.write(json)
@@ -61,3 +60,5 @@ class UserConfig:
     
     def _refresh(self) -> ConfigData:
         return self.load_config()
+    
+config = UserConfig(CONFIG_FILE)
