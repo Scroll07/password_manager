@@ -24,7 +24,7 @@ from pas_app.exceptions import EchoException
 #         json.dump(data, f)
 
 
-def dump_last_matches(matches: list[str]):
+def dump_last_matches(matches: list[str]): #NEED TO REBUILD THIS FUNCTION TO NEW VERSION OF WORKING WITH DATA
     try:
         with open(LAST_MATCHES, 'w', encoding='utf-8') as f:
             json.dump(matches, f, indent=2, ensure_ascii=False)
@@ -62,7 +62,7 @@ def load_data(state: State) -> UserVault:
 
 
 
-def save_data(state: State ,vault_data: UserVault):
+def save_data(state: State ,vault_data: UserVault) -> None:
     from pas_app.services.password import check_session
     
     vault_file = VAULTS / f"{vault_data.username}.json"

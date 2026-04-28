@@ -48,6 +48,8 @@ def derive_key(master_password: str, salt_b64: str, iteration: int = 100000) -> 
     
     
 def decrypt_vault_passwords(encrypted_passwords: str, key: bytes) -> Passwords:
+    if encrypted_passwords == "":
+        return Passwords(passwords=[])
     cipher = Fernet(key)
     decrypted_passwords = cipher.decrypt(encrypted_passwords.encode("ascii"))
     return Passwords.model_validate_json(decrypted_passwords)

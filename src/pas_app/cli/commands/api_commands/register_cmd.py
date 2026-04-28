@@ -24,7 +24,7 @@ async def register_command(
     user_api_data = Login_RegisterRequest(
         username=user_input_data.username,
         password=user_input_data.password
-    )
+    )    
     
     response = await api.register(user_api_data)
     if response.status_code == 201:
@@ -32,7 +32,8 @@ async def register_command(
 
         config_message = config.create_empty_config(user_input_data.username)
         typer.echo(config_message)
-            
+        
+        create_user_vault(username=user_input_data.username)
     
     #   #Запустить логин чтобы он сразу залогинился
         

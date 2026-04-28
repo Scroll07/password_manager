@@ -4,8 +4,8 @@ from pas_app.config import UserConfig, BASE_DIR, ConfigData
 
 
 
-def test_create_config(config: UserConfig):
-    config.create_empty_config("test_user")
+def test_create_config(config: UserConfig, random_username):
+    config.create_empty_config(random_username)
     
     assert config.config_file.exists()
     assert config._refresh() is not None
