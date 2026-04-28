@@ -11,7 +11,6 @@ def get_command(
     
     service: str = typer.Argument(..., help='Метка сервиса (например: github) или "all"/"." для всех записей'),
     show: bool = typer.Option(False, '--show', help='Показать пароли открытым текстом (по умолчанию скрыты)'),
-    sort: str = typer.Option("service", '--sort', help="Введите категорию для сортировки. Существующие категории: 'service' - default, 'username', 'password', 'note'." )
 ):
     '''
     Показать информацию о записях по метке или все записи.
@@ -29,55 +28,40 @@ def get_command(
       pas.py get github --show    # То же, но с открытыми паролями
 
       pas.py get all              # Все записи, пароли скрыты
-
-      pas.py get . --show         # Все записи с открытыми паролями
     '''
     state: State = ctx.obj
     data = load_data(state=state)
+    passwords = data.user_passwords
 
-    if not data:
+    if not data or not data.user_passwords:
         typer.echo('Записей нет')
         return
 
+
     if service.lower() == '.' or service.lower() == 'all':
-        matches = sorted(data.keys())
+        passwords = sorted(passwords, key=lambda p: p.service)
     else:
-        matches = sorted([key for key in data if key.lower().startswith(service.lower())])
-    if not matches:
+        passwords = sorted([p for p in passwords if p.service.lower().startswith(service.lower())], key=lambda p: p.service)
+    
+    if not passwords:
         typer.echo('Записей нет')
         return    
     
     headers = ['№','Метка', "Логин", 'Пароль', 'Заметка']
     rows = []
 
-    def sort_key(k):
-        value = data[k].get(sort)
-        if value is None:
-            return ''
-        return str(value).lower()
-    
-    try:
-        if sort == 'service':
-            sorted_matches = sorted(matches)
-        else:
-            sorted_matches = sorted(matches, key = sort_key, reverse=True)
-    except Exception:
-        typer.echo('Метка для сортировки не найдена, применена сортировка по service.')
-        sorted_matches = sorted(matches)
-
-    for i, match in enumerate(sorted_matches, start=1):
+    for i, pas in enumerate(passwords, start=1):
         try:
-            value = data[match]
-            username = value["username"]
-            password = value["password"] if show else '******'
-            note = value.get("note", "")
+            match = pas.service
+            username = pas.username
+            password = pas.password if show else '******'
+            note = pas.note
             rows.append([i, match, username, password, note])
-        
-        except KeyError as e:
-            typer.echo(f"В записи {match} нет ключа {e.args[0]}. Пропускаем.")
-        except TypeError as e:
-            typer.echo(f"Неверная структура в {match}: {e}. Пропускаем.")
+        except Exception as e:
+            typer.echo(f"Ошибка: {e}")
+            typer.Exit(code=1)
 
+        
     if rows:
         typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt='grid'))
 
