@@ -4,7 +4,6 @@
 from pas_app.schemas.passwords import UserVault, Password
 from pas_app.services.password import create_user_vault
 from pas_app.services.file_utils import save_data, load_data
-from pas_app.core.crypto import create_random_salt
 
 
 def test_create_user_vault(monkeypatch, tmp_path, test_username):

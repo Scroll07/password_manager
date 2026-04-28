@@ -5,9 +5,12 @@ import pytest
 import secrets
 
 from pas_app.config import UserConfig
+from pas_app.schemas.passwords import UserVault
 from pas_app.schemas.state import State
 from pas_app.core.api import Api
 from pas_app.config import BASE_DIR, VAULTS
+from pas_app.services.file_utils import load_data
+from pas_app.services.password import create_user_vault
 
 @pytest.fixture
 def api() -> Api:
@@ -34,6 +37,26 @@ def state(api: Api, config: UserConfig, test_username) -> State:
         master_password=None,
         last_action=datetime.now()
     )
+
+
+
+@pytest.fixture
+def test_vault(tmp_path, monkeypatch, test_username, state) -> UserVault:
+    def mock_cli_input_password() -> str:
+        return "test_password"
+    
+    monkeypatch.setattr("pas_app.services.password.cli_password_promt", mock_cli_input_password)
+    monkeypatch.setattr("pas_app.services.password.VAULTS", tmp_path)
+    monkeypatch.setattr("pas_app.services.file_utils.VAULTS", tmp_path)
+    
+    create_user_vault(test_username)
+    
+    new_vault = load_data(state=state)
+
+    return new_vault
+
+
+
 
 
 
