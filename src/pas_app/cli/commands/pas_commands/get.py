@@ -3,8 +3,7 @@ import typer
 
 from pas_app.services.file_utils import dump_last_matches, load_data, save_data
 from pas_app.schemas.state import State
-from pas_app.schemas.passwords import Password
-
+from pas_app.services.password import print_passwords
 
 def get_command(
     ctx: typer.Context,
@@ -43,26 +42,6 @@ def get_command(
     else:
         passwords = sorted([p for p in passwords if p.service.lower().startswith(service.lower())], key=lambda p: p.service)
     
-    if not passwords:
-        typer.echo('Записей нет')
-        return    
-    
-    headers = ['№','Метка', "Логин", 'Пароль', 'Заметка']
-    rows = []
-
-    for i, pas in enumerate(passwords, start=1):
-        try:
-            match = pas.service
-            username = pas.username
-            password = pas.password if show else '******'
-            note = pas.note
-            rows.append([i, match, username, password, note])
-        except Exception as e:
-            typer.echo(f"Ошибка: {e}")
-            typer.Exit(code=1)
-
-        
-    if rows:
-        typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt='grid'))
+    print_passwords(passwords=passwords, show=show)
 
     # dump_last_matches(matches) NEED FIX FOR THIS FUNCTION

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from httpx import AsyncClient
 
 from pas_app.config import BASE_URL
@@ -46,3 +48,19 @@ class Api:
         content = LoginResponse.model_validate(response.json()) 
             
         return ApiResponse(status_code=response.status_code, content=content)
+    
+    
+    async def upload(self, file_path: Path) -> ApiResponse:
+        url = "/backups/upload"
+        async with AsyncClient(base_url=self.base_url) as client:
+            with open(file_path, "rb") as f:
+                response = await client.post(
+                    url=url,
+                    headers=self.headers,
+                    files={"file": f}
+                )
+        content = MessageResponse.model_validate(response.json())
+        
+        return ApiResponse(status_code=response.status_code, content=content)
+        
+        

@@ -1,4 +1,5 @@
 from datetime import datetime
+import tabulate
 import typer
 
 from cryptography.fernet import InvalidToken
@@ -6,7 +7,7 @@ from cryptography.fernet import InvalidToken
 from pas_app.adapters.promts import gui_password_prompt, cli_password_promt
 from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, encrypt_vault_passwords, derive_key
 from pas_app.config import VAULTS
-from pas_app.schemas.passwords import Password, UserVault, EncryptedUserVault
+from pas_app.schemas.passwords import Password, Passwords, UserVault, EncryptedUserVault
 from pas_app.schemas.state import State
 from pas_app.services.file_utils import load_encrypted_vault
 from pas_app.exceptions import EchoException
@@ -68,5 +69,28 @@ def create_user_vault(username: str):
         f.write(data)
         
         
+        
+def print_passwords(passwords: list[Password], show: bool = False) -> None:
+    if not passwords:
+        typer.echo('Записей нет')
+        return    
+    
+    headers = ['№','Метка', "Логин", 'Пароль', 'Заметка']
+    rows = []
+
+    for i, pas in enumerate(passwords, start=1):
+        try:
+            match = pas.service
+            username = pas.username
+            password = pas.password if show else '******'
+            note = pas.note
+            rows.append([i, match, username, password, note])
+        except Exception as e:
+            typer.echo(f"Ошибка: {e}")
+            typer.Exit(code=1)
+
+        
+    if rows:
+        typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt='grid'))
 
 
