@@ -19,11 +19,11 @@ from pas_app.cli.commands.pas_commands.create_secret_key import create_password_
 
 
 from pas_app.schemas.state import State
-from pas_app.exceptions import EchoException
 from pas_app.config import config
 
 
-app = typer.Typer(help="""
+app = typer.Typer(
+    help="""
 Менеджер паролей: безопасное хранение логинов и паролей.
 
 Основной рабочий процесс:
@@ -64,7 +64,8 @@ app = typer.Typer(help="""
 Для справки по любой команде используйте:
   pas <команда> --help
 """,
-no_args_is_help=True)
+    no_args_is_help=True,
+)
 
 app.command("add")(add_command)
 app.command("list")(list_command)
@@ -79,11 +80,10 @@ app.command("reset-session")(reset_session)
 app.command("change-master")(change_master)
 app.command("get-path")(get_path)
 
-#KEYS
+# KEYS
 app.command("create-key")(create_password_command)
 
-#API
-
+# API
 
 
 @app.callback()
@@ -92,12 +92,12 @@ def main(ctx: typer.Context):
     state = ctx.obj
     if not state:
         state = State(
-        api=None,
-        config=config,
-        current_user=None,
-        master_password=None,
-        last_action=datetime.now()
-      )
+            api=None,
+            config=config,
+            current_user=None,
+            master_password=None,
+            last_action=datetime.now(),
+        )
     ctx.obj = state
     try:
         check_session(state)
@@ -105,5 +105,3 @@ def main(ctx: typer.Context):
     except Exception as e:
         typer.echo(e)
         raise typer.Exit()
-        
-        

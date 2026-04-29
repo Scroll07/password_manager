@@ -1,8 +1,6 @@
 import pytest
 
 
-
-
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
 
@@ -10,43 +8,25 @@ from pas_app.schemas.api import Login_RegisterRequest
 @pytest.mark.asyncio
 async def test_register(random_username):
     api = Api()
-    
+
     username = random_username
-    user_data = Login_RegisterRequest(
-        username=username,
-        password="test-password"
-    )
+    user_data = Login_RegisterRequest(username=username, password="test-password")
     response = await api.register(user_data=user_data)
-    
+
     assert response.status_code == 201
 
 
 @pytest.mark.asyncio
 async def test_double_register(random_username):
     api = Api()
-    
+
     username = random_username
-    user1 = Login_RegisterRequest(
-        username=username,
-        password="test-password"
-    )
+    user1 = Login_RegisterRequest(username=username, password="test-password")
     response = await api.register(user_data=user1)
-    
+
     assert response.status_code == 201
-    
+
     response = await api.register(user_data=user1)
-    
+
     assert response.status_code == 409
     print(response.content)
-    
-
-
-
-
-
-
-
-
-
-
-

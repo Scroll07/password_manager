@@ -3,7 +3,7 @@ import typer
 import time
 
 from pas_app.adapters.promts import exit_message_and_clear_console, clear_console
-from pas_app.config import ConfigData, UserConfig
+from pas_app.config import UserConfig
 
 
 def change_base_url(config: UserConfig):
@@ -70,22 +70,21 @@ def change_bot_token(config: UserConfig):
             typer.echo("Wrong Input")
             time.sleep(1)
             continue
-        
+
 
 def configure_config(
     ctx: typer.Context,
-    
     base_url: bool = typer.Option(False, "--url", help="Change Base url"),
-    bot_token: bool = typer.Option(False, '--token', help="Change Telegram bot token"),
-    default_user: bool = typer.Option(False, '--user', help="Change Current user"),
+    bot_token: bool = typer.Option(False, "--token", help="Change Telegram bot token"),
+    default_user: bool = typer.Option(False, "--user", help="Change Current user"),
 ):
     state: State = ctx.obj
     config = state.config
-    
+
     if base_url:
         change_base_url(config)
     elif bot_token:
         change_bot_token(config)
     elif default_user:
-        #func get users -> возвращает существующих пользователей на этом пк
+        # func get users -> возвращает существующих пользователей на этом пк
         pass
