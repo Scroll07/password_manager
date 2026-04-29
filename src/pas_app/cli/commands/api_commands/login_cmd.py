@@ -12,6 +12,7 @@ async def login_command(
     ctx: typer.Context
 ):
     state: State = ctx.obj
+    config = state.config
     if state.api is None:
         api = Api()
         state.api = api
@@ -30,6 +31,10 @@ async def login_command(
     response = await api.login(user_api_data)
     if response.status_code == 200:
         state.current_user = user_api_data.username
+        
+        cfg_data = config.load_config()
+        cfg_data.default_user = user_api_data.username
+        config.save_config(cfg_data)
             
         typer.echo(response.content.message)
         time.sleep(1)
@@ -37,6 +42,6 @@ async def login_command(
 
         raise typer.Exit(code=0)
     else:
-        typer.echo(f'Register failed\nstatus_code: {response.status_code}, message: {response.content.message}')
+        typer.echo(f'Login failed\nstatus_code: {response.status_code}, message: {response.content.message}')
         raise typer.Exit(code=1)
         

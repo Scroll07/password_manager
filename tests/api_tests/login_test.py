@@ -25,8 +25,9 @@ async def test_succsess_register_login(random_username):
     response = await api.login(user_data=user_data)
     
     assert response.status_code == 200
-    assert response.content.access_token is not None # type: ignore
-    assert response.content.token_type is not None # type: ignore
+    assert response.content.access_token  # type: ignore
+    assert response.content.token_type  # type: ignore
+    
     
     print(response.content)
     

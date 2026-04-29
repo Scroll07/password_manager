@@ -48,4 +48,4 @@ def export_command(
         json.dump(export_data, f, indent=2, ensure_ascii=False)
     
     typer.echo(f"данные экспортированы в {filename_path} (JSON)")
-    typer.Exit(code=0)
+    raise typer.Exit(code=0)

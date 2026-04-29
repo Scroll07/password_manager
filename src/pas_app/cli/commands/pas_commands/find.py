@@ -31,7 +31,7 @@ def find_command(
     
     if not data:
         typer.echo('Записей нет.')
-        typer.Exit(code=1)
+        raise typer.Exit(code=1)
         
 
     def matches_values(value: str) -> bool:
@@ -47,11 +47,11 @@ def find_command(
                 
     except Exception as e:
         typer.echo(f'Ошибка при поиске: {str(e)}. Проверьте структуру данных.')
-        typer.Exit(code=1)
+        raise typer.Exit(code=1)
     
     if not passwords:
         typer.echo(f'Ничего не найдено по запросу "{query}".')
-        typer.Exit(code=1)
+        raise typer.Exit(code=1)
 
 
 

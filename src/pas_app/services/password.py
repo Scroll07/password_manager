@@ -87,7 +87,7 @@ def print_passwords(passwords: list[Password], show: bool = False) -> None:
             rows.append([i, match, username, password, note])
         except Exception as e:
             typer.echo(f"Ошибка: {e}")
-            typer.Exit(code=1)
+            raise typer.Exit(code=1)
 
         
     if rows:
