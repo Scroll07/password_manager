@@ -1,3 +1,4 @@
+import time
 import json
 import os
 from pathlib import Path
@@ -5,7 +6,7 @@ import typer
 
 
 from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
-from pas_app.config import BASE_DIR, LAST_MATCHES, VAULTS
+from pas_app.config import BASE_DIR, LAST_MATCHES, SESSION_FILE, VAULTS
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
 
 # from pas_app.services.password import check_session
@@ -13,14 +14,14 @@ from pas_app.schemas.state import State
 from pas_app.exceptions import EchoException
 
 
-# def save_session(session_key: bytes):
-#     session_start_time = time.time()
-#     data = {
-#         'start_time': session_start_time,
-#         'key': base64.urlsafe_b64encode(session_key).decode('utf-8') # type: ignore
-#     }
-#     with open(SESSION_FILE, 'w', encoding='utf-8') as f:
-#         json.dump(data, f)
+def save_session(session_key: bytes):
+    session_start_time = time.time()
+    data = {
+        'start_time': session_start_time,
+        'key': base64.urlsafe_b64encode(session_key).decode('utf-8') # type: ignore
+    }
+    with open(SESSION_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
 
 
 def dump_last_matches(

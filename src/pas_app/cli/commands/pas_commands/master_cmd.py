@@ -1,12 +1,16 @@
 import typer
 
 from pas_app.adapters.promts import cli_password_promt
-from pas_app.config import STORE
-from pas_app.core.crypto import decrypt_data, encrypt_data
-from pas_app.services.password import get_master_key, save_session
+from pas_app.config import VAULTS
+from pas_app.core.crypto import derive_key, encrypt_vault_passwords
+from pas_app.services.file_utils import load_data, save_data, save_session
+from pas_app.schemas.state import State
+from pas_app.schemas.passwords import Passwords, EncryptedUserVault
 
 
 def change_master(
+    ctx: typer.Context,
+    
     current_master: str = typer.Argument(
         ..., help="Введите действующий мастер-пароль для смены."
     ),
@@ -16,41 +20,39 @@ def change_master(
 
     Требует ввода текущего и нового пароля.
     """
-    if not STORE.exists():
-        typer.echo(
-            "Нет записей. Новый мастер-пароль будет установлен при первом добавлении записи"
-        )
-        return
-
+    state: State = ctx.obj
+    
+    data = load_data(state=state)
+    
     typer.echo("Введите новый мастер-пароль в отркывшееся окно.")
-    # new_master_password = gui_password_prompt()
     new_master_password = cli_password_promt()
     if not new_master_password:
         typer.echo("Ввод пароля отменен. ВЫХОД")
-        raise typer.Exit()
+        raise typer.Exit(code=1)
 
     if new_master_password == current_master:
         typer.echo("Дейвствующий пароль не может совпадать с новым.")
         return
 
-    try:
-        current_key = get_master_key(current_master)
-        encrypted = STORE.read_bytes()
-        if not encrypted:
-            raise ValueError("Хранилище пустое, но файл существует. Проверьте данные.")
-        _ = decrypt_data(encrypted, current_key)
-    except ValueError:
-        typer.echo("Неверный мастер-пароль.")
-        raise typer.Exit()
-
     if not typer.confirm("Изменить мастер-пароль? Это действие необратимо!"):
         typer.echo("Смена мастер-пароля отменена.")
         return
 
-    decrypted_data = decrypt_data(encrypted, current_key)
-    new_key = get_master_key(new_master_password)
-    encrypted_data = encrypt_data(decrypted_data, new_key)
-    STORE.write_bytes(encrypted_data)
+    new_key = derive_key(new_master_password, data.salt)
+    encrypted_passwords = encrypt_vault_passwords(Passwords(passwords=data.user_passwords), new_key)
+    
+    encrypted_vault = EncryptedUserVault(
+        username=data.username,
+        salt=data.salt,
+        encrypted_passwords=encrypted_passwords
+    )
+    
+    vault_file = VAULTS / f"{data.username}.json"
+    if not vault_file.exists():
+        raise FileExistsError(f"File {data.username}.json does not exist")
+    with open(vault_file, "w") as f:
+        f.write(encrypted_vault.model_dump_json())
+    
     typer.echo("Мастер-пароль успешно изменен.")
 
     save_session(new_key)

@@ -26,6 +26,7 @@ from pas_app.schemas.passwords import Passwords
 # ----NEW----#
 
 
+
 def create_random_salt() -> str:
     salt = base64.urlsafe_b64encode(os.urandom(16)).decode("ascii")
     return salt
