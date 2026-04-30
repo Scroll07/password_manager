@@ -65,7 +65,7 @@ def edit_command(
         changes.append(f"username: {pas_to_change.username} → {username}  ")
     if password != pas_to_change.password:
         changes.append(
-            f"password: {'*' * len(existing.get('password', ''))} → {'*' * len(password)}"
+            f"password: {'*' * len(pas_to_change.password)} → {'*' * len(password)}"
         )  # type: ignore
     if note is not None:
         changes.append(f"note: {pas_to_change.note} → {note}")
