@@ -58,7 +58,7 @@ app = typer.Typer(
     pas export <файл> [--format json|csv] [--no-passwords]
 
   - Импорт данных:
-    pas import <файл> [--format json|csv] [--overwrite]
+    pas import [--overwrite] [--delete]
 
 Все данные надёжно шифруются в файле store.bin.
 Для справки по любой команде используйте:
@@ -84,7 +84,7 @@ app.command("get-path")(get_path)
 app.command("create-key")(create_password_command)
 
 # API
-
+#Добавь сюда команды умник
 
 @app.callback()
 def main(ctx: typer.Context):

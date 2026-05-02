@@ -1,3 +1,4 @@
+from pathlib import Path
 import time
 import tkinter as tk
 from tkinter import simpledialog
@@ -6,6 +7,7 @@ import typer
 
 from pas_app.adapters.console import clear_console
 from pas_app.schemas.passwords import LoginRegisterInput
+from pas_app.config import IMPORT_DIR
 
 
 def gui_password_prompt():
@@ -72,6 +74,37 @@ def cli_login_input() -> LoginRegisterInput:
             continue
 
         return LoginRegisterInput(username=login, password=password)
+
+
+def cli_improt_file_prompt() -> Path:
+    files = []
+    for file in IMPORT_DIR.glob("*.json"):
+        files.append(file)
+        
+    while True:
+        clear_console()
+        typer.echo("Files to import:\n")
+        for i, file in enumerate(files, start=1):
+            typer.echo(f'[{i}] - {file.name}')
+        choise = typer.prompt("\nChoose number of file to import: ")
+
+        if not choise.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choise) <= len(files):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return files[int(choise)-1].absolute()
+        
+            
+
+
+
+
 
 
 def exit_message_and_clear_console(message: str):
