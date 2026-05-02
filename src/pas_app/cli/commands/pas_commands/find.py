@@ -34,27 +34,22 @@ def find_command(
 
     if not data:
         typer.echo("Записей нет.")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=0)
 
-    def matches_values(value: str) -> bool:
-        val_lower = str(value).lower()
-        query_lower = query.lower()
-        return query_lower == val_lower if exact else query_lower in val_lower
+    result = []            
+    for pas in passwords:
+        data = pas.model_dump()
+        if exact:
+            if query in (data.values()):
+                result.append(pas)
+        else:
+            if any(query in value for value in data.values()):
+                result.append(pas) 
+    
 
-    try:
-        passwords = [
-            key
-            for key, inner_dict in data.items()
-            if any(matches_values(value) for value in inner_dict.values())
-        ]
-
-    except Exception as e:
-        typer.echo(f"Ошибка при поиске: {str(e)}. Проверьте структуру данных.")
-        raise typer.Exit(code=1)
-
-    if not passwords:
+    if not result:
         typer.echo(f'Ничего не найдено по запросу "{query}".')
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=0)
 
     typer.echo(f'Найденные записи по запросу "{query}":')
-    print_passwords()
+    print_passwords(passwords=result, show=show)
