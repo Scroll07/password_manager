@@ -85,8 +85,8 @@ def import_data(
         
 
     save_data(state=state, vault_data=current_vault)
-    typer.echo(f"Данные успешно импортированы из {filename}")
+    typer.echo(f"Данные успешно импортированы из {filename_path.name}")
     if will_delete:
         delete_file(filename_path)
     else:
-        typer.echo(f"Файл {filename} не был удален.")
+        typer.echo(f"Файл {filename_path.name} не был удален.")
