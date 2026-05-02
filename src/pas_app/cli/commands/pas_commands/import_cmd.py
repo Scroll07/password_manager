@@ -6,10 +6,11 @@ from pas_app.schemas.state import State
 from pas_app.schemas.passwords import EncryptedUserVault
 from pas_app.services.file_utils import delete_file, load_data, save_data
 from pas_app.core.crypto import decrypt_vault_passwords, derive_key
+from pas_app.config import config
+
+
 
 def import_data(
-    ctx: typer.Context,
-    
     # filename: str = typer.Argument(
     #     ..., help="Имя файла для импорта (например, export.json)"
     # ),
@@ -29,8 +30,6 @@ def import_data(
 
       pas import --delete             # Импорт из JSON с удалением файла после
     """
-    state: State = ctx.obj
-    
     #Choose import file by cicle
     filename_path = cli_improt_file_prompt()
     
@@ -41,7 +40,7 @@ def import_data(
     with open(filename_path, "r", encoding="utf-8") as f:
         import_data = f.read()
 
-    current_vault = load_data(state=state)
+    current_vault = load_data(config=config)
     import_data = EncryptedUserVault.model_validate(import_data)
 
 
@@ -84,7 +83,7 @@ def import_data(
              
         
 
-    save_data(state=state, vault_data=current_vault)
+    save_data(config=config, vault_data=current_vault)
     typer.echo(f"Данные успешно импортированы из {filename_path.name}")
     if will_delete:
         delete_file(filename_path)

@@ -3,10 +3,10 @@ import typer
 from pas_app.services.file_utils import load_data
 from pas_app.schemas.state import State
 from pas_app.services.password import print_passwords
+from pas_app.config import config
 
 
 def find_command(
-    ctx: typer.Context,
     query: str = typer.Argument(
         ..., help="Поисковый запрос (строка для поиска в полях)"
     ),
@@ -28,8 +28,7 @@ def find_command(
 
       pas.py find "123" --show         # Поиск "123" с открытыми паролями
     """
-    state: State = ctx.obj
-    data = load_data(state=state)
+    data = load_data(config=config)
     passwords = data.user_passwords
 
     if not data:

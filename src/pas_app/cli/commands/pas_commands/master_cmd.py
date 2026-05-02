@@ -6,11 +6,10 @@ from pas_app.core.crypto import derive_key, encrypt_vault_passwords
 from pas_app.services.file_utils import load_data, save_session
 from pas_app.schemas.state import State
 from pas_app.schemas.passwords import Passwords, EncryptedUserVault
+from pas_app.config import config
 
 
 def change_master(
-    ctx: typer.Context,
-    
     current_master: str = typer.Argument(
         ..., help="Введите действующий мастер-пароль для смены."
     ),
@@ -20,9 +19,7 @@ def change_master(
 
     Требует ввода текущего и нового пароля.
     """
-    state: State = ctx.obj
-    
-    data = load_data(state=state)
+    data = load_data(config=config)
     
     typer.echo("Введите новый мастер-пароль в отркывшееся окно.")
     new_master_password = cli_password_promt()

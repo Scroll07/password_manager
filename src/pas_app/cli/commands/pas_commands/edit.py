@@ -4,10 +4,10 @@ import typer
 
 from pas_app.services.file_utils import load_data, save_data
 from pas_app.schemas.state import State
+from pas_app.config import config
 
 
 def edit_command(
-    ctx: typer.Context,
     service: str = typer.Argument(
         ..., help='Метка для изменения (например, "github(1)")'
     ),
@@ -38,9 +38,7 @@ def edit_command(
 
       pas.py edit github-1 -u user --gen           # Изменить username и сгенерировать пароль
     """
-    state: State = ctx.obj
-
-    data = load_data(state)
+    data = load_data(config=config)
     pas_to_change = None
     for pas in data.user_passwords:
         if pas.service == service:
@@ -88,5 +86,5 @@ def edit_command(
     pas_to_change.password = password
     pas_to_change.note = note
 
-    save_data(state, data)
+    save_data(config=config, vault_data=data)
     typer.echo(f"Запись с меткой {service} была успешно изменена.")

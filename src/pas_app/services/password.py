@@ -5,7 +5,7 @@ import typer
 
 from pas_app.adapters.promts import cli_password_promt
 from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
-from pas_app.config import VAULTS
+from pas_app.config import VAULTS, ConfigData, UserConfig
 from pas_app.schemas.passwords import Password, EncryptedUserVault
 from pas_app.schemas.state import State
 from pas_app.services.file_utils import load_encrypted_vault
@@ -15,14 +15,15 @@ from pas_app.exceptions import EchoException
 SESSION_TIMEOUT = 300
 
 
-def check_session(state: State):
-    if state.current_user is None:
-        state.current_user = "unauthorized"
-
+def check_session(config: UserConfig):
+    config_data = config._refresh()
+    if not config_data:
+        config.create_empty_config(current_user="unauthorized")
+        
     expired = (
-        state.master_password is None
-        or state.last_action is None
-        or (datetime.now() - state.last_action).total_seconds() > SESSION_TIMEOUT
+        config_data.master_password is None
+        or config_data.last_action is None
+        or (datetime.now() - config_data.last_action).total_seconds() > SESSION_TIMEOUT
     )
 
     if expired:
@@ -30,16 +31,17 @@ def check_session(state: State):
         if not master_password:
             raise EchoException("Cancelled")
     else:
-        master_password = state.master_password
+        master_password = config_data.master_password
 
-    encrypted_vault = load_encrypted_vault(state.current_user)
+    encrypted_vault = load_encrypted_vault(config_data.default_user)
 
     key = derive_key(master_password, encrypted_vault.salt)  # type: ignore
     decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
 
-    state.master_password = master_password
-    state.last_action = datetime.now()
-
+    config_data.master_password = master_password
+    config_data.last_action = datetime.now()
+    config.save_config(data=config_data)
+    
     return key
 
 

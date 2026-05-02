@@ -5,10 +5,10 @@ import typer
 from pas_app.services.file_utils import load_data
 from pas_app.schemas.state import State
 from pas_app.config import LAST_MATCHES
+from pas_app.config import config
 
 
 def copy(
-    ctx: typer.Context,
     idx: int = typer.Argument(..., help="Номер записи из таблицы (от 1 до N)"),
 ):
     """
@@ -42,8 +42,7 @@ def copy(
         typer.echo(f"Неверный индекс: {idx}. Доступно от 1 до {len(last_matches)}.")
         return
 
-    state: State = ctx.obj
-    data = load_data(state)
+    data = load_data(config=config)
 
     match = last_matches[idx - 1]
     passwords = data.user_passwords

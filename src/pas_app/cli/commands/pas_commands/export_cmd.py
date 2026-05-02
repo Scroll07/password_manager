@@ -4,10 +4,10 @@ import typer
 from pas_app.config import EXPORT_DIR
 from pas_app.services.file_utils import load_data
 from pas_app.schemas.state import State
+from pas_app.config import config
 
 
 def export_command(
-    ctx: typer.Context,
     filename: str = typer.Argument(
         ..., help="Имя файла для экспорта (например, export.json)"
     ),
@@ -25,9 +25,7 @@ def export_command(
 
       pas export my_export.csv --format csv
     """
-
-    state: State = ctx.obj
-    data = load_data(state=state)
+    data = load_data(config=config)
 
     if not typer.confirm("Экспорт может раскрыть чувствительные данные. Продолжить?"):
         typer.echo("Экспорт отменен. ВЫХОД")

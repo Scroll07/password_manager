@@ -8,16 +8,11 @@ from pas_app.adapters.promts import cli_login_input
 from pas_app.schemas.state import State
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
+from pas_app.config import config
 
-
-async def login(ctx: typer.Context):
-    state: State = ctx.obj
-    config = state.config
-    if state.api is None:
-        api = Api()
-        state.api = api
-    else:
-        api = state.api
+async def login():
+    config_data = config._refresh()
+    api = Api(bearer_token=config_data.bearer_token)
 
     user_input_data = cli_login_input()
     username = user_input_data.username
@@ -27,11 +22,9 @@ async def login(ctx: typer.Context):
 
     response = await api.login(user_api_data)
     if response.status_code == 200:
-        state.current_user = user_api_data.username
-
-        cfg_data = config.load_config()
-        cfg_data.default_user = user_api_data.username
-        config.save_config(cfg_data)
+        config_data.default_user = user_api_data.username
+        config_data.bearer_token = response.content.access_token # type: ignore
+        config.save_config(config_data)
 
         typer.echo(response.content.message)
         time.sleep(1)
@@ -43,5 +36,5 @@ async def login(ctx: typer.Context):
         )
         raise typer.Exit(code=1)
 
-def login_command(ctx: typer.Context):
-    asyncio.run(login(ctx=ctx))
+def login_command():
+    asyncio.run(login())

@@ -6,7 +6,7 @@ import typer
 
 
 from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
-from pas_app.config import BASE_DIR, LAST_MATCHES, SESSION_FILE, VAULTS
+from pas_app.config import BASE_DIR, LAST_MATCHES, SESSION_FILE, VAULTS, ConfigData, UserConfig
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
 
 # from pas_app.services.password import check_session
@@ -45,13 +45,14 @@ def load_encrypted_vault(username: str) -> EncryptedUserVault:
         raise EchoException(e)
 
 
-def load_data(state: State) -> UserVault:
+def load_data(config: UserConfig) -> UserVault:
     from pas_app.services.password import check_session
-
-    if state.current_user is None:
+    config_data = config._refresh()
+    
+    if config_data.default_user is None:
         raise EchoException("No logged")
-    encrypted = load_encrypted_vault(state.current_user)
-    key = check_session(state)
+    encrypted = load_encrypted_vault(config_data.default_user)
+    key = check_session(config=config)
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
         username=encrypted.username,
@@ -61,13 +62,13 @@ def load_data(state: State) -> UserVault:
     return vault_data
 
 
-def save_data(state: State, vault_data: UserVault) -> None:
+def save_data(config: UserConfig, vault_data: UserVault) -> None:
     from pas_app.services.password import check_session
 
     vault_file = VAULTS / f"{vault_data.username}.json"
     if not vault_file.exists():
         raise EchoException(f"File {vault_data.username}.json does not exist")
-    key = check_session(state)
+    key = check_session(config=config)
     encrypted_passwords = encrypt_vault_passwords(
         Passwords(passwords=vault_data.user_passwords), key
     )

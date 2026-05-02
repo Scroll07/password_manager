@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from pydantic import BaseModel
 
@@ -21,9 +22,13 @@ CONFIG_FILE = BASE_DIR / "config.json"
 
 
 class ConfigData(BaseModel):
-    default_user: str
-    BASE_URL: str = BASE_URL
+    default_user: str = "unauthorized"
+    master_password: str = ""               #перенести в keyring
+    bearer_token: str = ""                  #перенести в keyring
+    refresh_token: str = ""                 #перенести в keyring
+    last_action: datetime = datetime.now()  #перенести в keyring
     BOT_TOKEN: str = "no token"
+    BASE_URL: str = BASE_URL
 
 
 class UserConfig:

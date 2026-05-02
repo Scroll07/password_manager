@@ -8,12 +8,13 @@ from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse
 
 
 class Api:
-    def __init__(self) -> None:
+    def __init__(self, bearer_token: str = "") -> None:
         self.headers: dict = {}
         self.base_url = BASE_URL
+        self._update_headers(bearer_token=bearer_token)
 
-    def _update_headers(self, bearer_token: str | None = None) -> None:
-        if bearer_token is not None:
+    def _update_headers(self, bearer_token: str = "") -> None:
+        if not bearer_token:
             self.headers["Authorization"] = f"Bearer {bearer_token}"
 
     async def register(self, user_data: Login_RegisterRequest) -> ApiResponse:

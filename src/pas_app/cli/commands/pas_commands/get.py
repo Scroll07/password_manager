@@ -3,10 +3,10 @@ import typer
 from pas_app.services.file_utils import load_data
 from pas_app.schemas.state import State
 from pas_app.services.password import print_passwords
+from pas_app.config import config
 
 
 def get_command(
-    ctx: typer.Context,
     service: str = typer.Argument(
         ..., help='Метка сервиса (например: github) или "all"/"." для всех записей'
     ),
@@ -31,8 +31,7 @@ def get_command(
 
       pas.py get all              # Все записи, пароли скрыты
     """
-    state: State = ctx.obj
-    data = load_data(state=state)
+    data = load_data(config=config)
     passwords = data.user_passwords
 
     if not data or not data.user_passwords:

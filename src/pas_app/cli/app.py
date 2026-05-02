@@ -17,8 +17,10 @@ from pas_app.cli.commands.pas_commands.export_cmd import export_command
 from pas_app.cli.commands.pas_commands.others_cmd import get_path
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
+from pas_app.cli.commands.pas_commands.configure_config import configure_config
 
 from pas_app.cli.commands.api_commands import cli_app
+
 
 from pas_app.schemas.state import State
 from pas_app.config import config
@@ -82,6 +84,9 @@ app.command("reset-session")(reset_session)
 app.command("change-master")(change_master)
 app.command("get-path")(get_path)
 
+#CONFIG
+app.command("config")(configure_config)
+
 # KEYS
 app.command("create-key")(create_password_command)
 
@@ -91,24 +96,10 @@ app.add_typer(cli_app, name="api")
 
 
 @app.callback()
-def main(ctx: typer.Context):
+def main():
     """Инициализация сессии при запуске."""
-    state: State = ctx.obj
-    print("state: ", state)
-    if not state:
-        state = State(
-            api=Api(),
-            config=config,
-            current_user="unauthorized",
-            master_password=None,
-            last_action=datetime.now(),
-        )
-    ctx.obj = state
     try:
-        if state.current_user == "unauthorized":
-          return
-        check_session(state)
-
+        check_session(config=config)
     except Exception as e:
         typer.echo(e)
-        raise typer.Exit()
+        raise typer.Exit(code=1)

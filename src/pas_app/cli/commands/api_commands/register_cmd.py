@@ -8,17 +8,11 @@ from pas_app.schemas.state import State
 from pas_app.services.password import create_user_vault
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
+from pas_app.config import config
 
-
-async def register(ctx: typer.Context):
-    state: State = ctx.obj
-    config = state.config
-
-    if state.api is None:
-        api = Api()
-        state.api = api
-    else:
-        api = state.api
+async def register():
+    config_data = config._refresh()
+    api = Api(bearer_token=config_data.bearer_token)
 
     user_input_data = cli_register_input()
     user_api_data = Login_RegisterRequest(
@@ -34,7 +28,8 @@ async def register(ctx: typer.Context):
 
         create_user_vault(username=user_input_data.username)
         
-        state.current_user = user_input_data.username
+        config_data.default_user = user_input_data.username
+        config.save_config(data=config_data)
 
 
         #   #Запустить логин чтобы он сразу залогинился
@@ -51,5 +46,5 @@ async def register(ctx: typer.Context):
         )
         raise typer.Exit(code=1)
 
-def register_command(ctx: typer.Context):
-    asyncio.run(register(ctx=ctx))
+def register_command():
+    asyncio.run(register())

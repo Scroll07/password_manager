@@ -6,14 +6,12 @@ import time
 
 
 from pas_app.config import VAULTS
-from pas_app.schemas.state import State
+from pas_app.core.api import Api
+from pas_app.config import config
 
-
-async def upload(ctx: typer.Context):
-    state: State = ctx.obj
-
-    api = state.api
-    config = state.config
+async def upload():
+    config_data = config._refresh()
+    api = Api(bearer_token=config_data.bearer_token)
     cfg_data = config.load_config()
 
     if api is None:
@@ -28,7 +26,7 @@ async def upload(ctx: typer.Context):
 
     response = await api.upload(file_path=vault_file)
     if response.status_code == 200:
-        state.last_action = datetime.now()
+        config_data.last_action = datetime.now()
 
         typer.echo(response.content.message)
         time.sleep(1)
@@ -40,5 +38,5 @@ async def upload(ctx: typer.Context):
         )
         raise typer.Exit(code=1)
 
-def upload_command(ctx: typer.Context):
-    asyncio.run(upload(ctx=ctx))
+def upload_command():
+    asyncio.run(upload())

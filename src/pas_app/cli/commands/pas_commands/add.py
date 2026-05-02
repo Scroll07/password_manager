@@ -4,10 +4,10 @@ import secrets
 from pas_app.services.file_utils import load_data, save_data
 from pas_app.schemas.state import State
 from pas_app.schemas.passwords import Password
+from pas_app.config import config
 
 
 def add_command(
-    ctx: typer.Context,
     service: str = typer.Argument(
         ..., help="Название сервиса (например: github, vk, yandex)"
     ),
@@ -36,7 +36,7 @@ def add_command(
 
       pas.py add work-email -u john@company.com --gen --note "Рабочая почта"
     """
-    state: State = ctx.obj
+    
 
     if password is not None:
         if gen:
@@ -48,7 +48,7 @@ def add_command(
         typer.echo("Нужно указать либо -p либо --gen")
         return
 
-    data = load_data(state)
+    data = load_data(config=config)
 
     labels = set(data)
     base = service.lower()
@@ -63,4 +63,4 @@ def add_command(
     )
     data.user_passwords.append(password_to_append)
 
-    save_data(state, data)
+    save_data(config=config, vault_data=data)
