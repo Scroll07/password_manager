@@ -16,6 +16,10 @@ from pas_app.cli.commands.pas_commands.export_cmd import export_command
 from pas_app.cli.commands.pas_commands.others_cmd import get_path
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
+from pas_app.cli.commands.api_commands.register_cmd import register_command
+from pas_app.cli.commands.api_commands.login_cmd import login_command
+from pas_app.cli.commands.api_commands.upload_cmd import upload_command
+
 
 
 from pas_app.schemas.state import State
@@ -84,7 +88,11 @@ app.command("get-path")(get_path)
 app.command("create-key")(create_password_command)
 
 # API
-#Добавь сюда команды умник
+app.command("register")(register_command)
+app.command("login")(login_command)
+app.command("upload")(upload_command)
+
+
 
 @app.callback()
 def main(ctx: typer.Context):

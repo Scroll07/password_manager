@@ -8,7 +8,7 @@ from pas_app.config import VAULTS
 from pas_app.schemas.state import State
 
 
-async def login_command(ctx: typer.Context):
+async def upload_command(ctx: typer.Context):
     state: State = ctx.obj
 
     api = state.api
