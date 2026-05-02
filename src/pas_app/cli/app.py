@@ -1,6 +1,7 @@
 import typer
 from datetime import datetime
 
+from pas_app.core.api import Api
 from pas_app.services.password import check_session
 
 from pas_app.cli.commands.pas_commands.add import add_command
@@ -16,11 +17,8 @@ from pas_app.cli.commands.pas_commands.export_cmd import export_command
 from pas_app.cli.commands.pas_commands.others_cmd import get_path
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
-from pas_app.cli.commands.api_commands.register_cmd import register_command
-from pas_app.cli.commands.api_commands.login_cmd import login_command
-from pas_app.cli.commands.api_commands.upload_cmd import upload_command
 
-
+from pas_app.cli.commands.api_commands import cli_app
 
 from pas_app.schemas.state import State
 from pas_app.config import config
@@ -88,26 +86,27 @@ app.command("get-path")(get_path)
 app.command("create-key")(create_password_command)
 
 # API
-app.command("register")(register_command)
-app.command("login")(login_command)
-app.command("upload")(upload_command)
+app.add_typer(cli_app, name="api")
 
 
 
 @app.callback()
 def main(ctx: typer.Context):
     """Инициализация сессии при запуске."""
-    state = ctx.obj
+    state: State = ctx.obj
+    print("state: ", state)
     if not state:
         state = State(
-            api=None,
+            api=Api(),
             config=config,
-            current_user=None,
+            current_user="unauthorized",
             master_password=None,
             last_action=datetime.now(),
         )
     ctx.obj = state
     try:
+        if state.current_user == "unauthorized":
+          return
         check_session(state)
 
     except Exception as e:

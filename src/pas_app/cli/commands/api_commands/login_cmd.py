@@ -1,3 +1,5 @@
+import asyncio
+
 import typer
 import time
 
@@ -8,7 +10,7 @@ from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
 
 
-async def login_command(ctx: typer.Context):
+async def login(ctx: typer.Context):
     state: State = ctx.obj
     config = state.config
     if state.api is None:
@@ -40,3 +42,6 @@ async def login_command(ctx: typer.Context):
             f"Login failed\nstatus_code: {response.status_code}, message: {response.content.message}"
         )
         raise typer.Exit(code=1)
+
+def login_command(ctx: typer.Context):
+    asyncio.run(login(ctx=ctx))

@@ -17,7 +17,7 @@ SESSION_TIMEOUT = 300
 
 def check_session(state: State):
     if state.current_user is None:
-        raise EchoException("No logged user")
+        state.current_user = "unauthorized"
 
     expired = (
         state.master_password is None

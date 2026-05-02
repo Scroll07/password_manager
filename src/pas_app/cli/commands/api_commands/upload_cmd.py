@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import typer
@@ -8,7 +9,7 @@ from pas_app.config import VAULTS
 from pas_app.schemas.state import State
 
 
-async def upload_command(ctx: typer.Context):
+async def upload(ctx: typer.Context):
     state: State = ctx.obj
 
     api = state.api
@@ -38,3 +39,6 @@ async def upload_command(ctx: typer.Context):
             f"Upload failed\nstatus_code: {response.status_code}, message: {response.content.message}"
         )
         raise typer.Exit(code=1)
+
+def upload_command(ctx: typer.Context):
+    asyncio.run(upload(ctx=ctx))

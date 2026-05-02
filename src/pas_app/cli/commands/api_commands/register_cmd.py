@@ -1,3 +1,5 @@
+import asyncio
+
 import typer
 
 
@@ -8,7 +10,7 @@ from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
 
 
-async def register_command(ctx: typer.Context):
+async def register(ctx: typer.Context):
     state: State = ctx.obj
     config = state.config
 
@@ -31,6 +33,9 @@ async def register_command(ctx: typer.Context):
         typer.echo(config_message)
 
         create_user_vault(username=user_input_data.username)
+        
+        state.current_user = user_input_data.username
+
 
         #   #Запустить логин чтобы он сразу залогинился
 
@@ -45,3 +50,6 @@ async def register_command(ctx: typer.Context):
             f"Register failed\nstatus_code: {response.status_code}, message: {response.content.message}"
         )
         raise typer.Exit(code=1)
+
+def register_command(ctx: typer.Context):
+    asyncio.run(register(ctx=ctx))
