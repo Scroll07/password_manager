@@ -1,13 +1,13 @@
 import asyncio
 from datetime import datetime
-
 import typer
 import time
-
 
 from pas_app.config import VAULTS
 from pas_app.core.api import Api
 from pas_app.config import config
+from pas_app.exceptions import EchoException
+
 
 async def upload():
     config_data = config._refresh()
@@ -16,14 +16,14 @@ async def upload():
     print("Headers: ", api.headers)
 
     if api is None:
-        raise ValueError("No api client, try to login firstly")
+        raise EchoException("No api client, try to login firstly")
     if not config_data.default_user:
-        raise ValueError("No default user in Config, try to login firstly")
+        raise EchoException("No default user in Config, try to login firstly")
 
     vault_file = VAULTS / f"{config_data.default_user}.json"
 
     if not vault_file.exists():
-        raise FileExistsError(f"File {vault_file.name} does not exist")
+        raise EchoException(f"File {vault_file.name} does not exist")
 
     response = await api.upload(file_path=vault_file)
     if response.status_code == 200:

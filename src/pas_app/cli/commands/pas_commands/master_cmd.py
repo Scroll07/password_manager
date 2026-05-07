@@ -3,7 +3,8 @@ import typer
 from pas_app.adapters.promts import cli_password_promt
 from pas_app.config import VAULTS
 from pas_app.core.crypto import derive_key, encrypt_vault_passwords
-from pas_app.services.file_utils import load_data, save_session
+from pas_app.exceptions import EchoException
+from pas_app.services.file_utils import load_data
 from pas_app.schemas.passwords import Passwords, EncryptedUserVault
 from pas_app.config import config
 
@@ -45,10 +46,9 @@ def change_master(
     
     vault_file = VAULTS / f"{data.username}.json"
     if not vault_file.exists():
-        raise FileExistsError(f"File {data.username}.json does not exist")
+        raise EchoException(f"File {data.username}.json does not exist")
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
     
     typer.echo("Мастер-пароль успешно изменен.")
 
-    save_session(new_key)

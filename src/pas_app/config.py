@@ -2,6 +2,8 @@ from datetime import datetime
 from pathlib import Path
 from pydantic import BaseModel
 
+from pas_app.exceptions import EchoException
+
 
 BASE_DIR = Path.home() / "pas_data"
 EXPORT_DIR = BASE_DIR / "exports"
@@ -38,7 +40,7 @@ class UserConfig:
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
-            raise ValueError("Configfile does not exist")
+            raise EchoException("Configfile does not exist")
 
     def load_config(self) -> ConfigData:
         self.check_exists()

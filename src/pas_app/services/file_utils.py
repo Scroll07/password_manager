@@ -13,15 +13,6 @@ from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
 from pas_app.exceptions import EchoException
 
 
-def save_session(session_key: bytes):
-    session_start_time = time.time()
-    data = {
-        'start_time': session_start_time,
-        'key': base64.urlsafe_b64encode(session_key).decode('utf-8') # type: ignore
-    }
-    with open(SESSION_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
-
 
 def dump_last_matches(
     matches: list[str],
@@ -53,7 +44,7 @@ def load_data(config: UserConfig) -> UserVault:
     encrypted = load_encrypted_vault(config_data.default_user)
     key = get_key()
     if key is None:
-        raise ValueError("Key from check_session is None")
+        raise EchoException("Key from check_session is None")
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
         username=encrypted.username,
@@ -71,7 +62,7 @@ def save_data(config: UserConfig, vault_data: UserVault) -> None:
         raise EchoException(f"File {vault_data.username}.json does not exist")
     key = get_key()
     if key is None:
-        raise ValueError("Key from check_session is None")
+        raise EchoException("Key from check_session is None")
     encrypted_passwords = encrypt_vault_passwords(
         Passwords(passwords=vault_data.user_passwords), key
     )
@@ -108,7 +99,7 @@ def is_vault_files_exists() -> bool:
 def get_vault_usernames() -> list[str]:
     vaults = get_user_vault_files()
     if not vaults:
-        raise FileExistsError("No vaults file to get username")
+        raise EchoException("No vaults file to get username")
     usernames = []
     for v in vaults:
         with open(v, "r", encoding='utf-8') as f:
