@@ -4,7 +4,6 @@ import typer
 
 
 from pas_app.adapters.promts import cli_register_input
-from pas_app.schemas.state import State
 from pas_app.services.password import create_user_vault
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest

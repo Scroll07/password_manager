@@ -20,7 +20,6 @@ from pas_app.cli.commands.pas_commands.configure_config import configure_config
 from pas_app.cli.commands.api_commands import cli_app
 
 
-from pas_app.schemas.state import State
 from pas_app.config import config
 
 

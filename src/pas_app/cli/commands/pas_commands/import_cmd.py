@@ -1,8 +1,6 @@
 import typer
 
-from pas_app.config import BASE_DIR
 from pas_app.adapters.promts import cli_password_promt, cli_improt_file_prompt
-from pas_app.schemas.state import State
 from pas_app.schemas.passwords import EncryptedUserVault
 from pas_app.services.file_utils import delete_file, load_data, save_data
 from pas_app.core.crypto import decrypt_vault_passwords, derive_key

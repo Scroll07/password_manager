@@ -3,7 +3,6 @@ import secrets
 import typer
 
 from pas_app.services.file_utils import load_data, save_data
-from pas_app.schemas.state import State
 from pas_app.config import config
 
 

@@ -4,7 +4,6 @@ from pas_app.adapters.promts import cli_password_promt
 from pas_app.config import VAULTS
 from pas_app.core.crypto import derive_key, encrypt_vault_passwords
 from pas_app.services.file_utils import load_data, save_session
-from pas_app.schemas.state import State
 from pas_app.schemas.passwords import Passwords, EncryptedUserVault
 from pas_app.config import config
 

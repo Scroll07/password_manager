@@ -5,9 +5,8 @@ from typing import Callable
 
 from pas_app.adapters.promts import cli_password_promt, choose_default_user
 from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
-from pas_app.config import VAULTS, ConfigData, UserConfig
+from pas_app.config import VAULTS
 from pas_app.schemas.passwords import Password, EncryptedUserVault
-from pas_app.schemas.state import State
 from pas_app.services.file_utils import load_encrypted_vault, is_vault_files_exists, get_vault_usernames
 from pas_app.exceptions import EchoException
 from pas_app.config import config

@@ -1,4 +1,3 @@
-from pas_app.schemas.state import State
 import typer
 import time
 

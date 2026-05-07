@@ -5,7 +5,6 @@ import time
 
 
 from pas_app.adapters.promts import cli_login_input
-from pas_app.schemas.state import State
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest
 from pas_app.config import config
