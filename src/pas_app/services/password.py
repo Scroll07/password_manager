@@ -1,35 +1,46 @@
 from datetime import datetime
 import tabulate
 import typer
+from typing import Callable
 
-
-from pas_app.adapters.promts import cli_password_promt
+from pas_app.adapters.promts import cli_password_promt, choose_default_user
 from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
 from pas_app.config import VAULTS, ConfigData, UserConfig
 from pas_app.schemas.passwords import Password, EncryptedUserVault
 from pas_app.schemas.state import State
-from pas_app.services.file_utils import load_encrypted_vault
+from pas_app.services.file_utils import load_encrypted_vault, is_vault_files_exists, get_vault_usernames
 from pas_app.exceptions import EchoException
-
+from pas_app.config import config
 
 SESSION_TIMEOUT = 300
 
 
-def check_session(config: UserConfig):
+def check_session() -> None:
     config_data = config._refresh()
-    if not config_data:
-        config.create_empty_config(current_user="unauthorized")
+
+    if not is_vault_files_exists():
+        raise EchoException("Try to register firstly")
+
+    
+    if config_data.default_user == "unauthorized":
+        usernames = get_vault_usernames()
+        username = choose_default_user(usernames=usernames)
+        config_data.default_user = username
         
+    config_data.last_action = datetime.now()
+    config.save_config(data=config_data)
+        
+        
+def get_key() -> bytes:
+    config_data = config._refresh()
     expired = (
-        config_data.master_password is None
-        or config_data.last_action is None
+        not config_data.master_password
+        or not config_data.last_action
         or (datetime.now() - config_data.last_action).total_seconds() > SESSION_TIMEOUT
     )
 
     if expired:
         master_password = cli_password_promt()
-        if not master_password:
-            raise EchoException("Cancelled")
     else:
         master_password = config_data.master_password
 
@@ -39,7 +50,6 @@ def check_session(config: UserConfig):
     decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
 
     config_data.master_password = master_password
-    config_data.last_action = datetime.now()
     config.save_config(data=config_data)
     
     return key
@@ -81,3 +91,19 @@ def print_passwords(passwords: list[Password], show: bool = False) -> None:
 
     if rows:
         typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
+        
+        
+        
+        
+# DECORATOR
+      
+from functools import wraps   
+        
+def check_session_dec(func: Callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        check_session()
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
+

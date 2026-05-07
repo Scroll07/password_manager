@@ -34,14 +34,14 @@ def cli_register_input() -> LoginRegisterInput:
     while True:
         clear_console()
         typer.echo("[Регистрация]")
-        login = cli_input("Введите логин: ")
+        login = cli_input("Введите логин")
         if not (4 <= len(login) <= 16):
             typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
             time.sleep(2)
             continue
 
-        password = cli_input("Введите пароль: ", True)
-        confirm_password = cli_input("Повторите пароль: ", True)
+        password = cli_input("Введите пароль", True)
+        confirm_password = cli_input("Повторите пароль", True)
 
         if password.strip() != confirm_password.strip():
             typer.echo("Пароли должны совпадать")
@@ -60,13 +60,13 @@ def cli_login_input() -> LoginRegisterInput:
     while True:
         clear_console()
         typer.echo("[Вход]")
-        login = cli_input("Введите логин: ")
+        login = cli_input("Введите логин")
         if not (4 <= len(login) <= 16):
             typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
             time.sleep(2)
             continue
 
-        password = cli_input("Введите пароль: ", True)
+        password = cli_input("Введите пароль", True)
 
         if not (4 <= len(password) <= 32):
             typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
@@ -86,7 +86,7 @@ def cli_improt_file_prompt() -> Path:
         typer.echo("Files to import:\n")
         for i, file in enumerate(files, start=1):
             typer.echo(f'[{i}] - {file.name}')
-        choise = typer.prompt("\nChoose number of file to import: ")
+        choise = typer.prompt("\nChoose number of file to import")
 
         if not choise.isdigit():
             typer.echo("Input should be digit")
@@ -103,7 +103,25 @@ def cli_improt_file_prompt() -> Path:
             
 
 
+def choose_default_user(usernames: list[str]) -> str:
+    while True:
+        clear_console()
+        typer.echo("Files to import:\n")
+        for i, username in enumerate(usernames, start=1):
+            typer.echo(f'[{i}] - {username}')
+        choise = typer.prompt("\nChoose username to set as default")
 
+        if not choise.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choise) <= len(usernames):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return usernames[int(choise)-1]
 
 
 

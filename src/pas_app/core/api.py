@@ -14,7 +14,7 @@ class Api:
         self._update_headers(bearer_token=bearer_token)
 
     def _update_headers(self, bearer_token: str = "") -> None:
-        if not bearer_token:
+        if bearer_token:
             self.headers["Authorization"] = f"Bearer {bearer_token}"
 
     async def register(self, user_data: Login_RegisterRequest) -> ApiResponse:

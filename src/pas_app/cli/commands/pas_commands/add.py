@@ -50,7 +50,7 @@ def add_command(
 
     data = load_data(config=config)
 
-    labels = set(data)
+    labels = set(data.user_passwords)
     base = service.lower()
     candidate = base
     i = 1

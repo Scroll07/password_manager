@@ -2,7 +2,7 @@ import typer
 from datetime import datetime
 
 from pas_app.core.api import Api
-from pas_app.services.password import check_session
+from pas_app.services.password import check_session_dec
 
 from pas_app.cli.commands.pas_commands.add import add_command
 from pas_app.cli.commands.pas_commands.list_cmd import list_command
@@ -70,22 +70,33 @@ app = typer.Typer(
 """,
     no_args_is_help=True,
 )
+#Check session Decorator
+add_command = check_session_dec(add_command)
+list_command = check_session_dec(list_command)
+get_command = check_session_dec(get_command)
+copy_command = check_session_dec(copy)
+delete_command = check_session_dec(delete_command)
+find_command = check_session_dec(find_command)
+edit_command = check_session_dec(edit_command)
+export_command = check_session_dec(export_command)
+import_command = check_session_dec(import_data)
 
+
+#Base commands
 app.command("add")(add_command)
 app.command("list")(list_command)
 app.command("get")(get_command)
-app.command("copy")(copy)
+app.command("copy")(copy_command)
 app.command("del")(delete_command)
 app.command("find")(find_command)
 app.command("edit")(edit_command)
 app.command("export")(export_command)
-app.command("import")(import_data)
+app.command("import")(import_command)
 app.command("reset-session")(reset_session)
 app.command("change-master")(change_master)
+app.command("config")(configure_config)
 app.command("get-path")(get_path)
 
-#CONFIG
-app.command("config")(configure_config)
 
 # KEYS
 app.command("create-key")(create_password_command)
@@ -99,7 +110,8 @@ app.add_typer(cli_app, name="api")
 def main():
     """Инициализация сессии при запуске."""
     try:
-        check_session(config=config)
+        config.create_empty_config(current_user="unauthorized")
+        # check_session()
     except Exception as e:
         typer.echo(e)
         raise typer.Exit(code=1)

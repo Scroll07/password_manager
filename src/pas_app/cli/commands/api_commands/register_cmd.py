@@ -23,9 +23,6 @@ async def register():
     if response.status_code == 201:
         typer.echo(response.content.message)
 
-        config_message = config.create_empty_config(user_input_data.username)
-        typer.echo(config_message)
-
         create_user_vault(username=user_input_data.username)
         
         config_data.default_user = user_input_data.username

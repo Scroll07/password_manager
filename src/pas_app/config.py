@@ -38,7 +38,7 @@ class UserConfig:
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
-            raise ValueError("Configfile doesnot exist")
+            raise ValueError("Configfile does not exist")
 
     def load_config(self) -> ConfigData:
         self.check_exists()
@@ -48,9 +48,9 @@ class UserConfig:
         return user_config
 
     def save_config(self, data: ConfigData) -> None:
-        json = data.model_dump_json()
+        json_data = data.model_dump_json(indent=4)
         with open(self.config_file, "w") as f:
-            f.write(json)
+            f.write(json_data)
         return None
 
     def create_empty_config(self, current_user: str) -> str:

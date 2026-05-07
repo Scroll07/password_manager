@@ -12,14 +12,15 @@ from pas_app.config import config
 async def upload():
     config_data = config._refresh()
     api = Api(bearer_token=config_data.bearer_token)
-    cfg_data = config.load_config()
+    print(f"data_headrs: {config_data.bearer_token}")
+    print("Headers: ", api.headers)
 
     if api is None:
         raise ValueError("No api client, try to login firstly")
-    if not cfg_data.default_user:
+    if not config_data.default_user:
         raise ValueError("No default user in Config, try to login firstly")
 
-    vault_file = VAULTS / f"{cfg_data.default_user}.json"
+    vault_file = VAULTS / f"{config_data.default_user}.json"
 
     if not vault_file.exists():
         raise FileExistsError(f"File {vault_file.name} does not exist")
