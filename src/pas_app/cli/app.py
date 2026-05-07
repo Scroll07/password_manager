@@ -26,45 +26,45 @@ from pas_app.config import config
 
 app = typer.Typer(
     help="""
-Менеджер паролей: безопасное хранение логинов и паролей.
+CLI-менеджер паролей с локальным шифрованием vault.
 
-Основной рабочий процесс:
+Быстрый старт:
+  pas add github -u mylogin --gen
+  pas list
+  pas get github
+  pas copy 1
 
-  1. Добавьте запись:
-     pas add <сервис> -u <логин> --gen
+Основные команды:
+  add             Добавить запись
+  list            Показать все записи
+  get             Показать запись по метке
+  copy            Скопировать пароль по номеру
+  edit            Изменить запись
+  del             Удалить запись
+  find            Поиск по vault
 
-  2. Просмотрите список:
-     pas list
+Сессия и безопасность:
+  reset-session   Сбросить текущую сессию
+  change-master   Сменить мастер-пароль
 
-  3. Найдите нужную запись:
-     pas get <метка_или_начало>
+Импорт и экспорт:
+  export          Экспорт vault в файл
+  import          Импорт данных из файла
 
-  4. Скопируйте пароль:
-     pas copy <номер_из_таблицы>
+Настройки и утилиты:
+  config          Настройки приложения
+  create-key      Генератор паролей
+  get-path        Показать путь к файлам vault
 
-Дополнительные команды:
+API и backup:
+  api register    Создать API-аккаунт
+  api login       Войти в API
+  api upload      Загрузить backup vault
+  api download    Скачать backup vault
 
-  - Изменить запись:
-    pas edit <метка> [опции]
-
-  - Поиск по полям:
-    pas find <запрос>
-
-  - Удалить запись:
-    pas del <метка>          (или 'clear-all' для полной очистки)
-
-  - Сбросить сессию:
-    pas reset-session
-
- - Экспорт данных:
-    pas export <файл> [--format json|csv] [--no-passwords]
-
-  - Импорт данных:
-    pas import [--overwrite] [--delete]
-
-Все данные надёжно шифруются в файле store.bin.
-Для справки по любой команде используйте:
-  pas <команда> --help
+Подсказки:
+  pas <command> --help
+  pas api --help
 """,
     no_args_is_help=True,
 )
