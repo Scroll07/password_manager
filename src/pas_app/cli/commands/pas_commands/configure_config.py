@@ -2,9 +2,10 @@ from pas_app.schemas.state import State
 import typer
 import time
 
-from pas_app.adapters.promts import exit_message_and_clear_console, clear_console
+from pas_app.adapters.promts import exit_message_and_clear_console, clear_console, choose_default_user
+from pas_app.services.file_utils import get_vault_usernames
 from pas_app.config import UserConfig
-
+from pas_app.config import config
 
 def change_base_url(config: UserConfig):
     while True:
@@ -73,18 +74,18 @@ def change_bot_token(config: UserConfig):
 
 
 def configure_config(
-    ctx: typer.Context,
     base_url: bool = typer.Option(False, "--url", help="Change Base url"),
     bot_token: bool = typer.Option(False, "--token", help="Change Telegram bot token"),
-    default_user: bool = typer.Option(False, "--user", help="Change Current user"),
+    default_user: bool = typer.Option(False, "--user", help="Change Default user"),
 ):
-    state: State = ctx.obj
-    config = state.config
 
     if base_url:
         change_base_url(config)
     elif bot_token:
         change_bot_token(config)
     elif default_user:
-        # func get users -> возвращает существующих пользователей на этом пк
-        pass
+        usernames = get_vault_usernames()
+        username = choose_default_user(usernames=usernames)
+        config_data = config._refresh()
+        config_data.default_user = username
+        config.save_config(data=config_data)

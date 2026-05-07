@@ -1,7 +1,5 @@
 import typer
-from datetime import datetime
 
-from pas_app.core.api import Api
 from pas_app.services.password import check_session_dec
 
 from pas_app.cli.commands.pas_commands.add import add_command
