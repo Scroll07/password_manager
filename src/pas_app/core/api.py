@@ -4,7 +4,7 @@ from httpx import AsyncClient
 
 from pas_app.config import BASE_URL
 from pas_app.schemas.api import Login_RegisterRequest
-from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse
+from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 
 
 class Api:
@@ -57,4 +57,29 @@ class Api:
                 )
         content = MessageResponse.model_validate(response.json())
 
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+    async def get_backups(self) -> ApiResponse:
+        url = '/backups'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers                
+            )
+        content = BackupsResponse.model_validate(response.json())
+        
+        return ApiResponse(status_code=response.status_code, content=content)
+        
+    
+    async def download(self, backup_id: int) -> ApiResponse:
+        url = '/backups/download'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                json={"backup_id": backup_id},
+                headers=self.headers
+            )
+        content = DownloadResponse.model_validate(response.json())
+        content.file = response.content
+        
         return ApiResponse(status_code=response.status_code, content=content)
