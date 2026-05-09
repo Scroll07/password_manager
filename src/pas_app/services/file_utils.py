@@ -1,12 +1,10 @@
-import time
 import json
 import os
 from pathlib import Path
 import typer
-import base64
 
 from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
-from pas_app.config import BASE_DIR, LAST_MATCHES, SESSION_FILE, VAULTS, UserConfig
+from pas_app.config import BASE_DIR, LAST_MATCHES, VAULTS, UserConfig
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
 
 # from pas_app.services.password import check_session

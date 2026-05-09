@@ -6,7 +6,7 @@ import time
 
 from pas_app.adapters.promts import cli_login_input
 from pas_app.core.api import Api
-from pas_app.schemas.api import Login_RegisterRequest
+from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
 from pas_app.config import config
 
 async def login():
@@ -20,6 +20,11 @@ async def login():
     user_api_data = Login_RegisterRequest(username=username, password=password)
 
     response = await api.login(user_api_data)
+    if not isinstance(response.content, LoginResponse):
+        typer.echo("Wrong response from server")
+        raise typer.Exit(code=1)
+        
+    
     if response.status_code == 200:
         config_data.default_user = user_api_data.username
         config_data.bearer_token = response.content.access_token # type: ignore
@@ -36,4 +41,9 @@ async def login():
         raise typer.Exit(code=1)
 
 def login_command():
+    """
+    Войти в API-аккаунт.
+
+    Получает access token для последующих запросов.
+    """
     asyncio.run(login())

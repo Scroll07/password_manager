@@ -49,7 +49,7 @@ def add_command(
 
     data = load_data(config=config)
 
-    labels = set(data.user_passwords)
+    labels = set(b.service for b in data.user_passwords)
     base = service.lower()
     candidate = base
     i = 1

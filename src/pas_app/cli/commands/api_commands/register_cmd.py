@@ -6,7 +6,7 @@ import typer
 from pas_app.adapters.promts import cli_register_input
 from pas_app.services.password import create_user_vault
 from pas_app.core.api import Api
-from pas_app.schemas.api import Login_RegisterRequest
+from pas_app.schemas.api import Login_RegisterRequest, MessageResponse
 from pas_app.config import config
 
 async def register():
@@ -19,6 +19,10 @@ async def register():
     )
 
     response = await api.register(user_api_data)
+    if not isinstance(response.content, MessageResponse):
+        typer.echo("Wrong response from server")
+        raise typer.Exit(code=1)
+    
     if response.status_code == 201:
         typer.echo(response.content.message)
 
@@ -43,4 +47,10 @@ async def register():
         raise typer.Exit(code=1)
 
 def register_command():
+    """
+    Зарегистрировать API-аккаунт.
+
+    Создаёт новый аккаунт для работы с удалённым vault backup.
+    """
+
     asyncio.run(register())

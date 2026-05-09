@@ -3,10 +3,14 @@ from enum import StrEnum
 from pydantic import BaseModel
 from typing import Union
 
+from pas_app.schemas.passwords import EncryptedUserVault
+
 class Login_RegisterRequest(BaseModel):
     username: str
     password: str
 
+class DownloadRequest(BaseModel):
+    backup_id: int
 
 class BackupData(BaseModel):
     id: int
@@ -36,11 +40,11 @@ class BackupsResponse(MessageResponse):
     backups: list[BackupData]
     type: TypeResponses = TypeResponses.BACKUPS
     
-class DownloadResponse(MessageResponse):
-    file: bytes
+class DownloadResponse(BaseModel):
+    vault_data: EncryptedUserVault
     type: TypeResponses = TypeResponses.DOWNLOAD
 
 
 class ApiResponse(BaseModel):
     status_code: int
-    content: Union[MessageResponse, LoginResponse, BackupsResponse]
+    content: Union[MessageResponse, LoginResponse, BackupsResponse, DownloadResponse]

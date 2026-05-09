@@ -3,8 +3,9 @@ from pathlib import Path
 from httpx import AsyncClient
 
 from pas_app.config import BASE_URL
-from pas_app.schemas.api import Login_RegisterRequest
+from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
+from pas_app.schemas.passwords import EncryptedUserVault
 
 
 class Api:
@@ -73,13 +74,14 @@ class Api:
     
     async def download(self, backup_id: int) -> ApiResponse:
         url = '/backups/download'
+        json = DownloadRequest(backup_id=backup_id).model_dump()
         async with AsyncClient(base_url=self.base_url) as client:
             response = await client.post(
                 url=url,
-                json={"backup_id": backup_id},
+                json=json,
                 headers=self.headers
             )
-        content = DownloadResponse.model_validate(response.json())
-        content.file = response.content
-        
+        vault_data = EncryptedUserVault.model_validate_json(response.content)
+        content = DownloadResponse(vault_data=vault_data)
         return ApiResponse(status_code=response.status_code, content=content)
+        

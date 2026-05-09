@@ -4,8 +4,10 @@ import tkinter as tk
 from tkinter import simpledialog
 import getpass
 import typer
+from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
+from pas_app.schemas.api import BackupData
 from pas_app.schemas.passwords import LoginRegisterInput
 from pas_app.config import IMPORT_DIR
 
@@ -109,19 +111,46 @@ def choose_default_user(usernames: list[str]) -> str:
         typer.echo("Files to import:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choise = typer.prompt("\nChoose username to set as default")
+        choice = typer.prompt("\nChoose username to set as default")
 
-        if not choise.isdigit():
+        if not choice.isdigit():
             typer.echo("Input should be digit")
             time.sleep(2)
             continue
         
-        if not 1 <= int(choise) <= len(usernames):
+        if not 1 <= int(choice) <= len(usernames):
             typer.echo("Wrong number input")
             time.sleep(2)
             continue
             
-        return usernames[int(choise)-1]
+        return usernames[int(choice)-1]
+
+def choose_backup_to_download(backups: list[BackupData]) -> BackupData:
+    headers = ["Id", "Created_at"]
+    data = [[i, b.created_at] for i, b in enumerate(backups, start=1)] 
+    while True:
+        clear_console()
+        typer.echo("Backups to download:\n")
+        typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
+
+        choice = typer.prompt("Choose backup to download")
+        
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(backups):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return backups[int(choice)-1]
+
+
+
+
+
 
 
 
