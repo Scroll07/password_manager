@@ -2,29 +2,9 @@ import os
 from cryptography.fernet import Fernet
 import base64
 import hashlib
+import keyring
 
-from pas_app.schemas.passwords import Passwords
-
-
-# def encrypt_data(data: dict, key: bytes) -> bytes:
-#     json_str = json.dumps(data, ensure_ascii=False)
-#     bytes_data = json_str.encode('utf-8')
-#     cipher = Fernet(key)
-#     encrypted = cipher.encrypt(bytes_data)
-#     return encrypted
-
-# def decrypt_data(encrypted: bytes, key: bytes) -> dict:
-#     cipher = Fernet(key)
-#     try:
-#         decrypted = cipher.decrypt(encrypted)
-#         json_str = decrypted.decode('utf-8')
-#         data = json.loads(json_str)
-#         return data
-#     except InvalidToken:
-#         raise ValueError("Неверный ключ или повреждённые данные.")
-
-# ----NEW----#
-
+from pas_app.schemas.passwords import KeyringValues, Passwords
 
 
 def create_random_salt() -> str:
@@ -55,3 +35,21 @@ def encrypt_vault_passwords(passwords: Passwords, key: bytes) -> str:
     bytes_to_encrypt = data.encode("utf-8")
     encrypted = cipher.encrypt(bytes_to_encrypt)
     return encrypted.decode("ascii")
+
+#Keyring
+SERVICE_NAME = "password_manager"
+
+def set_keyring_value(value_type: KeyringValues, value: str) -> None:
+    keyring.set_password(SERVICE_NAME, value_type, value)
+    return None
+
+def get_keyring_value(value_type: KeyringValues) -> str | None:
+    value = keyring.get_password(SERVICE_NAME, value_type)
+    return value
+
+def delete_keyring_value(value_type: KeyringValues) -> None:
+    keyring.delete_password(SERVICE_NAME, value_type)
+    return None
+    
+
+

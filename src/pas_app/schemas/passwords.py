@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from pydantic import BaseModel
 
 
@@ -27,3 +29,11 @@ class Passwords(BaseModel):
 class LoginRegisterInput(BaseModel):
     username: str
     password: str
+
+
+class KeyringValues(StrEnum):
+    MASTER_PASSWORD = "master_password"
+    BEARER_TOKEN = "bearer_token"
+    REFRESH_TOKEN = "refresh_token"
+    LAST_ACTION = "last_action"
+    
