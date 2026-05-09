@@ -52,7 +52,7 @@ def load_data(config: UserConfig) -> UserVault:
     return vault_data
 
 
-def save_data(config: UserConfig, vault_data: UserVault) -> None:
+def save_data(vault_data: UserVault) -> None:
     from pas_app.services.password import get_key
 
     vault_file = VAULTS / f"{vault_data.username}.json"

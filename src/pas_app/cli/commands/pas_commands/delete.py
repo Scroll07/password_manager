@@ -31,7 +31,7 @@ def delete_command(
             typer.echo("Очистка отменена.")
             return
         data.user_passwords = []
-        save_data(config=config, vault_data=data)
+        save_data(vault_data=data)
         typer.echo("Все данные были успешно удалены")
         raise typer.Exit(code=0)
 
@@ -42,7 +42,7 @@ def delete_command(
                 typer.Exit(code=0)
             data.user_passwords.remove(pas)
             typer.echo(f"Данные с меткой {label} были успешно удалены.")
-            save_data(config=config, vault_data=data)
+            save_data(vault_data=data)
             break
         else:
             typer.echo(f'Метка "{label}" не найдена.')

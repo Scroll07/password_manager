@@ -58,11 +58,15 @@ def cli_register_input() -> LoginRegisterInput:
         return LoginRegisterInput(username=login, password=password)
 
 
-def cli_login_input() -> LoginRegisterInput:
+def cli_login_input(username: str | None = None) -> LoginRegisterInput:
     while True:
         clear_console()
         typer.echo("[Вход]")
-        login = cli_input("Введите логин")
+        if username is None or username == "unauthorized":
+            login = cli_input("Введите логин")
+        else:
+            typer.echo(f"Введите логин: {username}")
+            login = username
         if not (4 <= len(login) <= 16):
             typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
             time.sleep(2)
@@ -108,7 +112,7 @@ def cli_improt_file_prompt() -> Path:
 def choose_default_user(usernames: list[str]) -> str:
     while True:
         clear_console()
-        typer.echo("Files to import:\n")
+        typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
         choice = typer.prompt("\nChoose username to set as default")

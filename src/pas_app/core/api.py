@@ -67,8 +67,11 @@ class Api:
                 url=url,
                 headers=self.headers                
             )
-        content = BackupsResponse.model_validate(response.json())
-        
+        if response.status_code == 200:
+            content = BackupsResponse.model_validate(response.json())
+        else:
+            content = MessageResponse.model_validate(response.json())        
+
         return ApiResponse(status_code=response.status_code, content=content)
         
     
@@ -81,7 +84,10 @@ class Api:
                 json=json,
                 headers=self.headers
             )
-        vault_data = EncryptedUserVault.model_validate_json(response.content)
-        content = DownloadResponse(vault_data=vault_data)
+        if response.status_code == 200:
+            vault_data = EncryptedUserVault.model_validate_json(response.content)
+            content = DownloadResponse(vault_data=vault_data)
+        else:
+            content = MessageResponse.model_validate(response.json())
         return ApiResponse(status_code=response.status_code, content=content)
         

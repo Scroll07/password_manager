@@ -6,7 +6,6 @@ import time
 from pas_app.config import VAULTS
 from pas_app.core.api import Api
 from pas_app.config import config
-from pas_app.exceptions import EchoException
 from pas_app.schemas.api import MessageResponse
 
 
@@ -15,14 +14,16 @@ async def upload():
     api = Api(bearer_token=config_data.bearer_token)
 
     if api is None:
-        raise EchoException("No api client, try to login firstly")
+        typer.echo("No api client, try to login firstly")
+        raise typer.Exit()
     if not config_data.default_user:
-        raise EchoException("No default user in Config, try to login firstly")
+        typer.echo("No default user in Config, try to login firstly")
+        raise typer.Exit()
 
     vault_file = VAULTS / f"{config_data.default_user}.json"
 
     if not vault_file.exists():
-        raise EchoException(f"File {vault_file.name} does not exist")
+        typer.echo(f"File {vault_file.name} does not exist")
 
     response = await api.upload(file_path=vault_file)
     if not isinstance(response.content, MessageResponse):

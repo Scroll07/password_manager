@@ -62,4 +62,4 @@ def add_command(
     )
     data.user_passwords.append(password_to_append)
 
-    save_data(config=config, vault_data=data)
+    save_data(vault_data=data)

@@ -1,8 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from pydantic import BaseModel
-
-from pas_app.exceptions import EchoException
+import typer
 
 
 BASE_DIR = Path.home() / "pas_data"
@@ -40,7 +39,9 @@ class UserConfig:
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
-            raise EchoException("Configfile does not exist")
+            typer.echo("Config file does not exist")
+            raise typer.Exit(code=1)        
+        return None
 
     def load_config(self) -> ConfigData:
         self.check_exists()
@@ -55,15 +56,15 @@ class UserConfig:
             f.write(json_data)
         return None
 
-    def create_empty_config(self, current_user: str) -> str:
+    def create_empty_config(self, current_user: str) -> None:
         if self.config_file.exists():
-            return "config file already exists"
-
+            return
         empty_config = ConfigData(
             default_user=current_user, BASE_URL=BASE_URL, BOT_TOKEN="No token"
         )
         self.save_config(empty_config)
-        return "config file was created"
+        typer.echo("Config file was created")
+        return None
 
     def _refresh(self) -> ConfigData:
         return self.load_config()

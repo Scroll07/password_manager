@@ -13,7 +13,6 @@ def export_command(
     no_passwords: bool = typer.Option(
         False, "--no-passwords", help="Включить если не хочешь сохранять пароли"
     ),
-    # format: str = typer.Option("json", "--format", help="Формат: json или csv (по умолчанию: json)"),
 ):
     """
     Экспорт данных из store.bin в файл.

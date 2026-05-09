@@ -3,17 +3,18 @@ import asyncio
 import typer
 import time
 
-
 from pas_app.adapters.promts import cli_login_input
 from pas_app.core.api import Api
-from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
+from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
 from pas_app.config import config
 
 async def login():
     config_data = config._refresh()
     api = Api(bearer_token=config_data.bearer_token)
 
-    user_input_data = cli_login_input()
+    
+
+    user_input_data = cli_login_input(username=config_data.default_user)
     username = user_input_data.username
     password = user_input_data.password
 
@@ -21,10 +22,12 @@ async def login():
 
     response = await api.login(user_api_data)
     if not isinstance(response.content, LoginResponse):
-        typer.echo("Wrong response from server")
+        if isinstance(response.content, MessageResponse):
+            typer.echo(response.content.message)
+            raise typer.Exit(code=1)
+        typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
         
-    
     if response.status_code == 200:
         config_data.default_user = user_api_data.username
         config_data.bearer_token = response.content.access_token # type: ignore

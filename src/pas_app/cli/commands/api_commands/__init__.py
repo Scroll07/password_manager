@@ -26,6 +26,11 @@ from pas_app.cli.commands.api_commands.login_cmd import login_command
 from pas_app.cli.commands.api_commands.upload_cmd import upload_command
 from pas_app.cli.commands.api_commands.download_cmd import download_command
 
+from pas_app.services.password import check_session_dec
+
+upload_command = check_session_dec(upload_command)
+download_command = check_session_dec(download_command)
+
 
 cli_app.command("register")(register_command)
 cli_app.command("login")(login_command)

@@ -18,10 +18,12 @@ def check_session() -> None:
     config_data = config._refresh()
 
     if not is_vault_files_exists():
-        raise EchoException("Try to register firstly")
-
+        typer.echo("Try to register firstly")
+        raise typer.Exit(code=1)
     
     if config_data.default_user == "unauthorized":
+        print(config_data.default_user, "- default user")
+        print("default_user == unauthorized")
         usernames = get_vault_usernames()
         username = choose_default_user(usernames=usernames)
         config_data.default_user = username

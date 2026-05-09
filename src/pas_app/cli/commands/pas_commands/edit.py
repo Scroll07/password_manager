@@ -85,5 +85,5 @@ def edit_command(
     pas_to_change.password = password
     pas_to_change.note = note
 
-    save_data(config=config, vault_data=data)
+    save_data(vault_data=data)
     typer.echo(f"Запись с меткой {service} была успешно изменена.")

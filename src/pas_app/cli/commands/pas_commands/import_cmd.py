@@ -51,11 +51,6 @@ def import_data(
     key = derive_key(import_password, current_vault.salt) 
     decrypted_passwords = decrypt_vault_passwords(encrypted_passwords=import_data.encrypted_passwords, key=key)
 
-
-    # if not typer.confirm("Импорт может изменить существующие записи. Продолжить?"):
-    #     typer.echo("Импорт отменен. ВЫХОД")
-    #     return
-
     existed_services = {
         p.service: p 
         for p in current_vault.user_passwords
@@ -78,11 +73,7 @@ def import_data(
             current_vault.user_passwords.append(pas)
             typer.echo(f'({pas.service}) was successfully added')
             
-            
-             
-        
-
-    save_data(config=config, vault_data=current_vault)
+    save_data(vault_data=current_vault)
     typer.echo(f"Данные успешно импортированы из {filename_path.name}")
     if will_delete:
         delete_file(filename_path)

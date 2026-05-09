@@ -5,7 +5,7 @@ import typer
 
 from pas_app.adapters.promts import choose_backup_to_download
 from pas_app.core.api import Api
-from pas_app.schemas.api import BackupsResponse, DownloadResponse
+from pas_app.schemas.api import BackupsResponse, DownloadResponse, MessageResponse
 from pas_app.config import VAULTS, config
 
 async def download():
@@ -14,6 +14,9 @@ async def download():
 
     response = await api.get_backups()
     if not isinstance(response.content, BackupsResponse):
+        if isinstance(response.content, MessageResponse):
+            typer.echo(response.content.message)
+            raise typer.Exit(code=1)
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
@@ -33,6 +36,9 @@ async def download():
     response = await api.download(backup_id=backup.id)
     
     if not isinstance(response.content, DownloadResponse):
+        if isinstance(response.content, MessageResponse):
+            typer.echo(response.content.message)
+            raise typer.Exit(code=1)
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
@@ -47,8 +53,8 @@ async def download():
     if not vault_file.exists():
         typer.echo(f"File {vault_file} does not exist")
         typer.Exit(code=1)
-    
 
+    
     data_to_write = response.content.vault_data.model_dump_json()
     
     with open(vault_file, "w", encoding="utf-8") as f:
