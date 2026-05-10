@@ -130,6 +130,7 @@ def choose_default_user(usernames: list[str]) -> str:
         return usernames[int(choice)-1]
 
 def choose_backup_to_download(backups: list[BackupData]) -> BackupData:
+    backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
     headers = ["Id", "Created_at"]
     data = [[i, b.created_at] for i, b in enumerate(backups, start=1)] 
     while True:
