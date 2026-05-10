@@ -28,7 +28,6 @@ def check_session() -> None:
         username = choose_default_user(usernames=usernames)
         config_data.local.default_user = username
         
-    config_data.keyring.last_action = datetime.now()
     config.save_config(data=config_data)
         
         

@@ -76,11 +76,11 @@ class UserConfig:
         with open(self.config_file, "w") as f:
             f.write(json_data)
         
-        last_action_str = datetime.strftime(data.keyring.last_action, self.time_format)
+        last_action_str = datetime.strftime(datetime.now(), self.time_format)
         set_keyring_value(KeyringValues.MASTER_PASSWORD, data.keyring.master_password)
         set_keyring_value(KeyringValues.BEARER_TOKEN, data.keyring.bearer_token)
         set_keyring_value(KeyringValues.REFRESH_TOKEN, data.keyring.refresh_token)
-        set_keyring_value(KeyringValues.LAST_ACTION, last_action_str)                           #РЕШИТЬ ПРОБЛЕМУ С ТЕМ ЧТО LAST_ACTION = '' после
+        set_keyring_value(KeyringValues.LAST_ACTION, last_action_str)
         return None
 
     def create_empty_config(self, current_user: str) -> None:

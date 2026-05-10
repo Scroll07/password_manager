@@ -31,7 +31,6 @@ async def upload():
         raise typer.Exit(code=1)
     
     if response.status_code == 200:
-        config_data.keyring.last_action = datetime.now()
 
         typer.echo(response.content.message)
         time.sleep(1)

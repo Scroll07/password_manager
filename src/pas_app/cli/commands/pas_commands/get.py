@@ -1,6 +1,6 @@
 import typer
 
-from pas_app.services.file_utils import load_data
+from pas_app.services.file_utils import load_data, dump_last_matches
 from pas_app.services.password import print_passwords
 from pas_app.config import config
 
@@ -47,4 +47,5 @@ def get_command(
 
     print_passwords(passwords=passwords, show=show)
 
-    # dump_last_matches(matches) NEED FIX FOR THIS FUNCTION
+    matches = [p.service for p in passwords]
+    dump_last_matches(matches=matches)
