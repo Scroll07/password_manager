@@ -6,15 +6,17 @@ import time
 from pas_app.adapters.promts import cli_login_input
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
+from pas_app.schemas.passwords import KeyringValues 
 from pas_app.config import config
+from pas_app.core.crypto import set_keyring_value
 
 async def login():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.bearer_token)
+    api = Api(bearer_token=config_data.keyring.bearer_token)
 
     
 
-    user_input_data = cli_login_input(username=config_data.default_user)
+    user_input_data = cli_login_input(username=config_data.local.default_user)
     username = user_input_data.username
     password = user_input_data.password
 
@@ -29,8 +31,8 @@ async def login():
         raise typer.Exit(code=1)
         
     if response.status_code == 200:
-        config_data.default_user = user_api_data.username
-        config_data.bearer_token = response.content.access_token # type: ignore
+        config_data.local.default_user = user_api_data.username
+        config_data.keyring.bearer_token = response.content.access_token
         config.save_config(config_data)
 
         typer.echo(response.content.message)

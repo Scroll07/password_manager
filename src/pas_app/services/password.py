@@ -21,36 +21,36 @@ def check_session() -> None:
         typer.echo("Try to register firstly")
         raise typer.Exit(code=1)
     
-    if config_data.default_user == "unauthorized":
-        print(config_data.default_user, "- default user")
+    if config_data.local.default_user == "unauthorized":
+        print(config_data.local.default_user, "- default user")
         print("default_user == unauthorized")
         usernames = get_vault_usernames()
         username = choose_default_user(usernames=usernames)
-        config_data.default_user = username
+        config_data.local.default_user = username
         
-    config_data.last_action = datetime.now()
+    config_data.keyring.last_action = datetime.now()
     config.save_config(data=config_data)
         
         
 def get_key() -> bytes:
     config_data = config._refresh()
     expired = (
-        not config_data.master_password
-        or not config_data.last_action
-        or (datetime.now() - config_data.last_action).total_seconds() > SESSION_TIMEOUT
+        not config_data.keyring.master_password
+        or not config_data.keyring.last_action
+        or (datetime.now() - config_data.keyring.last_action).total_seconds() > SESSION_TIMEOUT
     )
 
     if expired:
         master_password = cli_password_promt()
     else:
-        master_password = config_data.master_password
+        master_password = config_data.keyring.master_password
 
-    encrypted_vault = load_encrypted_vault(config_data.default_user)
+    encrypted_vault = load_encrypted_vault(config_data.local.default_user)
 
     key = derive_key(master_password, encrypted_vault.salt)  # type: ignore
     decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
 
-    config_data.master_password = master_password
+    config_data.keyring.master_password = master_password
     config.save_config(data=config_data)
     
     return key

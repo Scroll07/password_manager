@@ -22,17 +22,17 @@ def change_base_url(config: UserConfig):
             exit_message_and_clear_console("Выход")
 
         elif choice == 1:
-            typer.echo(f"BASE_URL = {config_data.BASE_URL}")
+            typer.echo(f"BASE_URL = {config_data.local.BASE_URL}")
             continue
 
         elif choice == 2:
             user_promt = typer.prompt("Введите Base url: ").strip()
-            config_data.BASE_URL = user_promt
+            config_data.local.BASE_URL = user_promt
             config.save_config(config_data)
             continue
 
         elif choice == 3:
-            config_data.BASE_URL = "http://localhost"
+            config_data.local.BASE_URL = "http://localhost"
             config.save_config(config_data)
             continue
 
@@ -57,12 +57,12 @@ def change_bot_token(config: UserConfig):
             exit_message_and_clear_console("Выход")
 
         elif choice == 1:
-            typer.echo(f"Bot Token = {config_data.BOT_TOKEN}")
+            typer.echo(f"Bot Token = {config_data.local.BOT_TOKEN}")
             continue
 
         elif choice == 2:
             user_promt = typer.prompt("Введите Bot Token: ").strip()
-            config_data.BOT_TOKEN = user_promt
+            config_data.local.BOT_TOKEN = user_promt
             config.save_config(config_data)
             continue
 
@@ -77,6 +77,18 @@ def configure_config(
     bot_token: bool = typer.Option(False, "--token", help="Change Telegram bot token"),
     default_user: bool = typer.Option(False, "--user", help="Change Default user"),
 ):
+    """
+    Configure application settings interactively.
+
+    Allows changing specific configuration parameters one by one.
+    When an option is specified, the user will be prompted to enter a new value.
+
+
+    Options:
+      --url       Change the base URL for API requests
+      --token     Change the Telegram bot authentication token
+      --user      Change the default user identifier
+    """
 
     if base_url:
         change_base_url(config)
@@ -86,5 +98,5 @@ def configure_config(
         usernames = get_vault_usernames()
         username = choose_default_user(usernames=usernames)
         config_data = config._refresh()
-        config_data.default_user = username
+        config_data.local.default_user = username
         config.save_config(data=config_data)

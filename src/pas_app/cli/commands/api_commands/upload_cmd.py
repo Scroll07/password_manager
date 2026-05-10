@@ -11,16 +11,16 @@ from pas_app.schemas.api import MessageResponse
 
 async def upload():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.bearer_token)
+    api = Api(bearer_token=config_data.keyring.bearer_token)
 
     if api is None:
         typer.echo("No api client, try to login firstly")
         raise typer.Exit()
-    if not config_data.default_user:
+    if not config_data.local.default_user:
         typer.echo("No default user in Config, try to login firstly")
         raise typer.Exit()
 
-    vault_file = VAULTS / f"{config_data.default_user}.json"
+    vault_file = VAULTS / f"{config_data.local.default_user}.json"
 
     if not vault_file.exists():
         typer.echo(f"File {vault_file.name} does not exist")
@@ -31,7 +31,7 @@ async def upload():
         raise typer.Exit(code=1)
     
     if response.status_code == 200:
-        config_data.last_action = datetime.now()
+        config_data.keyring.last_action = datetime.now()
 
         typer.echo(response.content.message)
         time.sleep(1)

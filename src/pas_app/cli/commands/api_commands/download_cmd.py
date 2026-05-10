@@ -10,7 +10,7 @@ from pas_app.config import VAULTS, config
 
 async def download():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.bearer_token)
+    api = Api(bearer_token=config_data.keyring.bearer_token)
 
     response = await api.get_backups()
     if not isinstance(response.content, BackupsResponse):
@@ -49,7 +49,7 @@ async def download():
         raise typer.Exit(code=1)
 
     #открыть путь файла и сохранить
-    vault_file = VAULTS / f"{config_data.default_user}.json"
+    vault_file = VAULTS / f"{config_data.local.default_user}.json"
     if not vault_file.exists():
         typer.echo(f"File {vault_file} does not exist")
         typer.Exit(code=1)
@@ -60,7 +60,7 @@ async def download():
     with open(vault_file, "w", encoding="utf-8") as f:
         f.write(data_to_write)
          
-    typer.echo(f"{config_data.default_user} vault file was changed")
+    typer.echo(f"{config_data.local.default_user} vault file was changed")
         
     
 def download_command():

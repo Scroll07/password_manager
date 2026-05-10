@@ -37,9 +37,9 @@ def load_data(config: UserConfig) -> UserVault:
     from pas_app.services.password import get_key
     config_data = config._refresh()
     
-    if config_data.default_user is None:
+    if config_data.local.default_user is None:
         raise EchoException("No logged")
-    encrypted = load_encrypted_vault(config_data.default_user)
+    encrypted = load_encrypted_vault(config_data.local.default_user)
     key = get_key()
     if key is None:
         raise EchoException("Key from check_session is None")

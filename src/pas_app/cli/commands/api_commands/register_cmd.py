@@ -11,7 +11,7 @@ from pas_app.config import config
 
 async def register():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.bearer_token)
+    api = Api(bearer_token=config_data.keyring.bearer_token)
 
     user_input_data = cli_register_input()
     user_api_data = Login_RegisterRequest(
@@ -28,7 +28,7 @@ async def register():
 
         create_user_vault(username=user_input_data.username)
         
-        config_data.default_user = user_input_data.username
+        config_data.local.default_user = user_input_data.username
         config.save_config(data=config_data)
 
 
