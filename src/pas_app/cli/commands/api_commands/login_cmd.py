@@ -14,8 +14,6 @@ async def login():
     config_data = config._refresh()
     api = Api(bearer_token=config_data.keyring.bearer_token)
 
-    
-
     user_input_data = cli_login_input(username=config_data.local.default_user)
     username = user_input_data.username
     password = user_input_data.password
@@ -33,6 +31,8 @@ async def login():
     if response.status_code == 200:
         config_data.local.default_user = user_api_data.username
         config_data.keyring.bearer_token = response.content.access_token
+        if config_data.local.default_user != user_api_data.username:
+            config_data.keyring.master_password = ""
         config.save_config(config_data)
 
         typer.echo(response.content.message)
