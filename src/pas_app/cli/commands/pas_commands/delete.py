@@ -36,14 +36,14 @@ def delete_command(
         raise typer.Exit(code=0)
 
     for pas in data.user_passwords:
-        if label == pas.service:
+        if label.strip() == pas.service.strip():
             if not typer.confirm("Удалить запись? Это действие необратимо!"):
                 typer.echo("Очистка отменена.")
                 typer.Exit(code=0)
             data.user_passwords.remove(pas)
             typer.echo(f"Данные с меткой {label} были успешно удалены.")
             save_data(vault_data=data)
-            break
-        else:
-            typer.echo(f'Метка "{label}" не найдена.')
             raise typer.Exit(code=0)
+
+    typer.echo(f'Метка "{label}" не найдена.')
+    raise typer.Exit(code=0)

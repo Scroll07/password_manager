@@ -36,14 +36,10 @@ def encrypt_vault_passwords(passwords: Passwords, key: bytes) -> str:
     encrypted = cipher.encrypt(bytes_to_encrypt)
     return encrypted.decode("ascii")
 
+
+
 #Keyring
 SERVICE_NAME = "password_manager"
-
-# setup_vales = {
-#     "master_pasword": "",
-#     "bearer_token": "",
-    
-# }
 
 def set_keyring_value(value_type: KeyringValues, value: str) -> None:
     keyring.set_password(SERVICE_NAME, value_type, value)
