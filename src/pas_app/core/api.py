@@ -63,7 +63,7 @@ class Api:
     async def get_backups(self) -> ApiResponse:
         url = '/backups'
         async with AsyncClient(base_url=self.base_url) as client:
-            response = await client.post(
+            response = await client.get(
                 url=url,
                 headers=self.headers                
             )
@@ -90,4 +90,13 @@ class Api:
         else:
             content = MessageResponse.model_validate(response.json())
         return ApiResponse(status_code=response.status_code, content=content)
-        
+    
+    async def delete(self, backup_id: int) -> ApiResponse:
+        url = f'/backups/{backup_id}'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.delete(
+                url=url,
+                headers=self.headers
+            )
+        content = MessageResponse.model_validate(response.json())
+        return ApiResponse(status_code=response.status_code, content=content)

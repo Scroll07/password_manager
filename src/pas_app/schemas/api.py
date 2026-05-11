@@ -11,7 +11,7 @@ class Login_RegisterRequest(BaseModel):
 
 class DownloadRequest(BaseModel):
     backup_id: int
-
+ 
 class BackupData(BaseModel):
     id: int
     created_at: datetime
@@ -21,7 +21,7 @@ class TypeResponses(StrEnum):
     LOGIN = "login"
     BACKUPS = "backups"
     DOWNLOAD = "download"
-    
+
     
 # ===================================
 #           Responses
@@ -43,7 +43,6 @@ class BackupsResponse(MessageResponse):
 class DownloadResponse(BaseModel):
     vault_data: EncryptedUserVault
     type: TypeResponses = TypeResponses.DOWNLOAD
-
 
 class ApiResponse(BaseModel):
     status_code: int

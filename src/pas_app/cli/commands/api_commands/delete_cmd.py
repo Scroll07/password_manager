@@ -5,10 +5,10 @@ import typer
 
 from pas_app.adapters.promts import choose_backup
 from pas_app.core.api import Api
-from pas_app.schemas.api import BackupsResponse, DownloadResponse, MessageResponse
+from pas_app.schemas.api import BackupsResponse, MessageResponse
 from pas_app.config import VAULTS, config
 
-async def download():
+async def delete():
     config_data = config._refresh()
     api = Api(bearer_token=config_data.keyring.bearer_token)
 
@@ -33,40 +33,25 @@ async def download():
     
     backup = choose_backup(backups=backups)
     
-    response = await api.download(backup_id=backup.id)
-    
-    if not isinstance(response.content, DownloadResponse):
-        if isinstance(response.content, MessageResponse):
-            typer.echo(response.content.message)
-            raise typer.Exit(code=1)
+    response = await api.delete(backup_id=backup.id)
+    if not isinstance(response.content, MessageResponse):
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
     if response.status_code != 200:
         typer.echo(
-            f"Download backup failed\nstatus_code: {response.status_code}"
+            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.message}"
         )
         raise typer.Exit(code=1)
-
-    #открыть путь файла и сохранить
-    vault_file = VAULTS / f"{config_data.local.default_user}.json"
-    if not vault_file.exists():
-        typer.echo(f"File {vault_file} does not exist")
-        typer.Exit(code=1)
-
     
-    data_to_write = response.content.vault_data.model_dump_json()
-    
-    with open(vault_file, "w", encoding="utf-8") as f:
-        f.write(data_to_write)
-         
-    typer.echo(f"{config_data.local.default_user} vault file was changed")
+    typer.echo(response.content.message)
+        
         
     
-def download_command():
+        
+    
+def delete_command():
     """
-    Скачать backup vault с сервера.
-
-    Используется для восстановления паролей на другом устройстве.
+    Удалить backup по айди
     """
-    asyncio.run(download())
+    asyncio.run(delete())
