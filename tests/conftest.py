@@ -4,9 +4,8 @@ import pytest
 import secrets
 
 from pas_app.config import UserConfig
-from pas_app.schemas.api import Login_RegisterRequest
+from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
 from pas_app.schemas.passwords import UserVault
-from pas_app.schemas.state import State
 from pas_app.core.api import Api
 from pas_app.services.file_utils import load_data
 from pas_app.services.password import create_user_vault
@@ -25,7 +24,7 @@ def config(tmp_path) -> UserConfig:
 
 
 @pytest.fixture
-def test_vault(tmp_path, monkeypatch, random_username, state) -> UserVault:
+def test_vault(tmp_path, monkeypatch, random_username, config) -> UserVault:
     def mock_cli_input_password() -> str:
         return "test_password"
 
@@ -37,7 +36,7 @@ def test_vault(tmp_path, monkeypatch, random_username, state) -> UserVault:
 
     create_user_vault(random_username)
 
-    new_vault = load_data(state=state)
+    new_vault = load_data(config=config)
 
     return new_vault
 
@@ -56,9 +55,10 @@ async def create_auth_test_user(
 
     response = await api.login(user_data=user_data)
 
+    assert isinstance(response.content, LoginResponse)
     assert response.status_code == 200
-    assert response.content.access_token  # type: ignore
-    assert response.content.token_type  # type: ignore
+    assert response.content.access_token  
+    assert response.content.token_type  
 
     return api
 
@@ -68,21 +68,8 @@ def random_username() -> str:
     return secrets.token_urlsafe(16)
 
 
-# @pytest.fixture
-# def test_username() -> str:
-#     return "test_user"
-
-
 @pytest.fixture
-def state(api: Api, config: UserConfig, random_username) -> State:
-    # create test_config with test user
-    # create user_vault
-    # create test_account with test master password
+def test_username() -> str:
+    return "test_user"
 
-    return State(
-        api=api,
-        config=config,
-        current_user=random_username,
-        master_password=None,
-        last_action=datetime.now(),
-    )
+

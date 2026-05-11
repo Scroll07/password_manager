@@ -27,7 +27,7 @@ def test_add_command(test_vault: UserVault, test_username, state):
     vault_data = UserVault(
         username=test_username, salt=test_vault.salt, user_passwords=passwords
     )
-    save_data(state=state, vault_data=vault_data)
+    save_data(vault_data=vault_data)
 
     loaded_data = load_data(state)
 
