@@ -17,24 +17,48 @@ function check_keyring_installed() {
     return 1
 }
 
-function check_installed() {
-    app="$1"
+function check_installed_quite() {
+    local app="$1"
     if command -v "$app" 1>/dev/null 2>&1; then
+        return 0
+    fi
+    return 1
+}
+
+function check_installed() {
+    local app="$1"
+    if check_installed_quite "$app"; then
         echo "$app was found"
         return 0
     fi
     return 1
 }
 
+function apt_install() {
+    local name="$1"
+
+    sudo apt install "$name"
+}
+
+function pacman_install() {
+    local name="$1"
+
+    sudo pacman -S "$name"
+}
+
 
 function ask_install() {
-    name="$1"
-    pck_mgr="$2"
+    local name="$1"
+    local pck_mgr="$2"
 
     echo "Do you want to install $name? [y/n]"
     read choice
     if [ "$choice" = "y" ] || [ "$choice" = "Y" ]; then
-        #скачать &name не знаю команду как качивать правильно
+        if [ "$pck_mgr" = "pacman" ]; then
+            pacman_install "$name"
+        elif [ "$pck_mgr" = "apt" ]; then
+            apt_install "$name"
+        fi
     else
         echo "Canselled to install $name"
     fi
@@ -43,9 +67,9 @@ function ask_install() {
 
 
 function define_packpage_manager() {
-    if check_installed pacman; then
+    if check_installed_quite pacman; then
         echo "pacman"
-    elif check_installed apt; then
+    elif check_installed_quite apt; then
         echo "apt"
     else
         echo "none"
@@ -56,26 +80,28 @@ function define_packpage_manager() {
 
 
 function install_dependencies () {
-    pck_mgr="$1"
+    local pck_mgr="$1"
     if ! check_keyring_installed; then
-        ask_install #мой keyring я не помню просто $pck_mgr
+        ask_install gnome-keyring "$pck_mgr"
     fi
     if ! check_installed pipx; then
-        ask_install pipx $pck_mgr
+        ask_install pipx "$pck_mgr"
     fi
     if ! check_installed uv; then
-        ask_install uv $pck_mgr
+        ask_install uv "$pck_mgr"
     fi
 }
 
 
 function main() {
-    pck_mgr = define_packpage_manager
-    if [ "$pck_mgr" = "no manager" ]; then
-        #закончить скрипт
+    local pck_mgr=$(define_packpage_manager)
+
+    if [ "$pck_mgr" = "none" ]; then
+        echo "Supported package manager was not found"
+        exit 1
     fi
 
-    install_dependencies $pck_mgr
+    install_dependencies "$pck_mgr"
 
 
     pipx uninstall password-manager
@@ -84,3 +110,5 @@ function main() {
 
     pipx install dist/password_manager-*.whl
 }
+
+main
