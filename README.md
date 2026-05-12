@@ -35,3 +35,4 @@ pas add test -u test -p test --note test
 | pas api login    | Вход в API                                                 | pas api login    |
 | pas api upload   | Загрузить backup файла vault в облако/на сервер            | pas api upload   |
 | pas api download | Скачать backup файла vault для восстановления на другом ПК | pas api download |
+| pas api delete   | Удалить backup                                             | pas api delete   |
