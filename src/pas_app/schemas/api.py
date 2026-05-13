@@ -11,9 +11,16 @@ class Login_RegisterRequest(BaseModel):
 
 class DownloadRequest(BaseModel):
     backup_id: int
+
+
+    
+
+
  
 class BackupData(BaseModel):
     id: int
+    name: str
+    rows: int
     created_at: datetime
     
 class TypeResponses(StrEnum):
@@ -22,7 +29,7 @@ class TypeResponses(StrEnum):
     BACKUPS = "backups"
     DOWNLOAD = "download"
 
-    
+
 # ===================================
 #           Responses
 # ===================================

@@ -49,12 +49,12 @@ class Api:
 
         return ApiResponse(status_code=response.status_code, content=content)
 
-    async def upload(self, file_path: Path) -> ApiResponse:
+    async def upload(self, file_path: Path, name: str, rows: int) -> ApiResponse:
         url = "/backups/upload"
         async with AsyncClient(base_url=self.base_url) as client:
             with open(file_path, "rb") as f:
                 response = await client.post(
-                    url=url, headers=self.headers, files={"file": f}
+                    url=url, headers=self.headers, files={"file": f}, data={"name": name, "rows": rows}
                 )
         content = MessageResponse.model_validate(response.json())
 

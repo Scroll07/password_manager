@@ -131,8 +131,8 @@ def choose_default_user(usernames: list[str]) -> str:
 
 def choose_backup(backups: list[BackupData]) -> BackupData:
     backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
-    headers = ["Id", "Created_at"]
-    data = [[i, b.created_at] for i, b in enumerate(backups, start=1)] 
+    headers = ["Id", "Name", "Rows", "Created_at"]
+    data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
     while True:
         clear_console()
         typer.echo("Backups to download:\n")
@@ -152,6 +152,15 @@ def choose_backup(backups: list[BackupData]) -> BackupData:
             
         return backups[int(choice)-1]
 
+def choose_name_for_backup() -> str:
+    while True:
+        name = typer.prompt("Input a name for backup")
+        if not name:
+            continue
+        if len(name) > 16:
+            typer.echo("too long name - (16 max)")
+            continue
+        return name.strip()
 
 
 
