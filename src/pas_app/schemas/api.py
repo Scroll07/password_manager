@@ -5,6 +5,23 @@ from typing import Union
 
 from pas_app.schemas.passwords import EncryptedUserVault
 
+
+
+
+
+class TokenType(StrEnum):
+    BEARER = "bearer"
+    REFRESH = "refresh"
+
+class Token(BaseModel):
+    token: str
+    token_type: TokenType
+
+
+
+# ===================================
+#               Requests
+# ===================================
 class Login_RegisterRequest(BaseModel):
     username: str
     password: str
@@ -12,10 +29,8 @@ class Login_RegisterRequest(BaseModel):
 class DownloadRequest(BaseModel):
     backup_id: int
 
-
+#====================================
     
-
-
  
 class BackupData(BaseModel):
     id: int
@@ -28,10 +43,11 @@ class TypeResponses(StrEnum):
     LOGIN = "login"
     BACKUPS = "backups"
     DOWNLOAD = "download"
+    REFRESH = "refresh"
 
 
 # ===================================
-#           Responses
+#               Responses
 # ===================================
 class MessageResponse(BaseModel):
     ok: bool
@@ -40,8 +56,11 @@ class MessageResponse(BaseModel):
 
 class LoginResponse(MessageResponse):
     access_token: str
-    token_type: str
+    refresh_token: str
     type: TypeResponses = TypeResponses.LOGIN
+
+class RefreshResponse(LoginResponse):
+    type: TypeResponses = TypeResponses.REFRESH
 
 class BackupsResponse(MessageResponse):
     backups: list[BackupData]
@@ -54,3 +73,5 @@ class DownloadResponse(BaseModel):
 class ApiResponse(BaseModel):
     status_code: int
     content: Union[MessageResponse, LoginResponse, BackupsResponse, DownloadResponse]
+
+#====================================
