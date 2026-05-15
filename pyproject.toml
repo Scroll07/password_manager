@@ -17,6 +17,7 @@ dependencies = [
     "pycparser==2.23",
     "pydantic>=2.13.2",
     "pygments==2.19.2",
+    "pyjwt>=2.12.1",
     "pyperclip==1.11.0",
     "rich==14.2.0",
     "shellingham==1.5.4",
