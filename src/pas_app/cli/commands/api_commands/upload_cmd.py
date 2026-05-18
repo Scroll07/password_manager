@@ -13,7 +13,7 @@ from pas_app.services.file_utils import load_data
 
 async def upload():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.keyring.bearer_token)
+    api = Api()
 
     if api is None:
         typer.echo("No api client, try to login firstly")
@@ -56,10 +56,3 @@ async def upload():
         )
         raise typer.Exit(code=1)
 
-def upload_command():
-    """
-    Загрузить backup vault на сервер.
-
-    Сохраняет зашифрованный vault, чтобы можно было восстановить его на другом ПК.
-    """
-    asyncio.run(upload())

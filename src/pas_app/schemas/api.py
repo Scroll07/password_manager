@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Union
 
 from pas_app.schemas.passwords import EncryptedUserVault
-
+from pas_app.schemas.jwt import EncodedToken
 
 
 
@@ -55,8 +55,8 @@ class MessageResponse(BaseModel):
     type: TypeResponses = TypeResponses.MESSAGE
 
 class LoginResponse(MessageResponse):
-    access_token: str
-    refresh_token: str
+    bearer_token: EncodedToken
+    refresh_token: EncodedToken
     type: TypeResponses = TypeResponses.LOGIN
 
 class RefreshResponse(LoginResponse):

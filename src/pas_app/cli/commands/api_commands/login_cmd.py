@@ -12,7 +12,7 @@ from pas_app.core.crypto import set_keyring_value
 
 async def login():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.keyring.bearer_token)
+    api = Api()
 
     user_input_data = cli_login_input(username=config_data.local.default_user)
     username = user_input_data.username
@@ -30,8 +30,8 @@ async def login():
         
     if response.status_code == 200:
         config_data.local.default_user = user_api_data.username
-        config_data.keyring.bearer_token = response.content.access_token
-        config_data.keyring.refresh_token = response.content.refresh_token
+        config_data.keyring.bearer_token = response.content.bearer_token.token
+        config_data.keyring.refresh_token = response.content.refresh_token.token
         if config_data.local.default_user != user_api_data.username:
             config_data.keyring.master_password = ""
         config.save_config(config_data)
@@ -46,10 +46,3 @@ async def login():
         )
         raise typer.Exit(code=1)
 
-def login_command():
-    """
-    Войти в API-аккаунт.
-
-    Получает access token для последующих запросов.
-    """
-    asyncio.run(login())

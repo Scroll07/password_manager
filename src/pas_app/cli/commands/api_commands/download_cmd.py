@@ -10,7 +10,7 @@ from pas_app.config import VAULTS, config
 
 async def download():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.keyring.bearer_token)
+    api = Api()
 
     response = await api.get_backups()
     if not isinstance(response.content, BackupsResponse):
@@ -63,10 +63,3 @@ async def download():
     typer.echo(f"{config_data.local.default_user} vault file was changed")
         
     
-def download_command():
-    """
-    Скачать backup vault с сервера.
-
-    Используется для восстановления паролей на другом устройстве.
-    """
-    asyncio.run(download())

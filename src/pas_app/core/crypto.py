@@ -62,6 +62,6 @@ def delete_keyring_value(value_type: KeyringValues) -> None:
 ALGORITM = "HS256"
 
 def decode_token(token: str) -> TokenData:
-    decoded = jwt.decode(jwt=token, algorithms=ALGORITM, verify=False)
+    decoded = jwt.decode(jwt=token, algorithms=ALGORITM, options={"verify_signature": False})
     return TokenData.model_validate(decoded)
 

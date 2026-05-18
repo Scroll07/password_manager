@@ -11,7 +11,7 @@ from pas_app.config import config
 
 async def register():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.keyring.bearer_token)
+    api = Api()
 
     user_input_data = cli_register_input()
     user_api_data = Login_RegisterRequest(
@@ -46,11 +46,3 @@ async def register():
         )
         raise typer.Exit(code=1)
 
-def register_command():
-    """
-    Зарегистрировать API-аккаунт.
-
-    Создаёт новый аккаунт для работы с удалённым vault backup.
-    """
-
-    asyncio.run(register())

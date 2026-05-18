@@ -9,8 +9,7 @@ from pas_app.schemas.api import BackupsResponse, MessageResponse
 from pas_app.config import VAULTS, config
 
 async def delete():
-    config_data = config._refresh()
-    api = Api(bearer_token=config_data.keyring.bearer_token)
+    api = Api()
 
     response = await api.get_backups()
     if not isinstance(response.content, BackupsResponse):
@@ -50,8 +49,3 @@ async def delete():
     
         
     
-def delete_command():
-    """
-    Удалить backup по айди
-    """
-    asyncio.run(delete())
