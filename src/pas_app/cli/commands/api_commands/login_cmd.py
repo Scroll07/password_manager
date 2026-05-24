@@ -20,7 +20,7 @@ async def login():
     response = await api.login(user_api_data)
     if not isinstance(response.content, LoginResponse):
         if isinstance(response.content, MessageResponse):
-            typer.echo(response.content.message)
+            typer.echo(response.content.detail)
             raise typer.Exit(code=1)
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
@@ -33,13 +33,13 @@ async def login():
             config_data.keyring.master_password = ""
         config.save_config(config_data)
 
-        typer.echo(response.content.message)
+        typer.echo(response.content.detail)
         time.sleep(1)
 
         raise typer.Exit(code=0)
     else:
         typer.echo(
-            f"Login failed\nstatus_code: {response.status_code}, message: {response.content.message}"
+            f"Login failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
 

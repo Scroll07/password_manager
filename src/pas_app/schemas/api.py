@@ -51,7 +51,7 @@ class TypeResponses(StrEnum):
 # ===================================
 class MessageResponse(BaseModel):
     ok: bool
-    message: str
+    detail: str
     type: TypeResponses = TypeResponses.MESSAGE
 
 class LoginResponse(MessageResponse):

@@ -39,13 +39,13 @@ async def upload():
     
     if response.status_code == 200:
 
-        typer.echo(response.content.message)
+        typer.echo(response.content.detail)
         time.sleep(1)
 
         raise typer.Exit(code=0)
     else:
         typer.echo(
-            f"Upload failed\nstatus_code: {response.status_code}, message: {response.content.message}"
+            f"Upload failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
 

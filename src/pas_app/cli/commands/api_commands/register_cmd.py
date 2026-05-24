@@ -23,7 +23,7 @@ async def register():
         raise typer.Exit(code=1)
     
     if response.status_code == 201:
-        typer.echo(response.content.message)
+        typer.echo(response.content.detail)
 
         create_user_vault(username=user_input_data.username)
         
@@ -41,7 +41,7 @@ async def register():
 
     else:
         typer.echo(
-            f"Register failed\nstatus_code: {response.status_code}, message: {response.content.message}"
+            f"Register failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
 

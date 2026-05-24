@@ -12,14 +12,14 @@ async def delete():
     response = await api.get_backups()
     if not isinstance(response.content, BackupsResponse):
         if isinstance(response.content, MessageResponse):
-            typer.echo(response.content.message)
+            typer.echo(response.content.detail)
             raise typer.Exit(code=1)
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
     if response.status_code != 200:
         typer.echo(
-            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.message}"
+            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
     
@@ -37,11 +37,11 @@ async def delete():
     
     if response.status_code != 200:
         typer.echo(
-            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.message}"
+            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
     
-    typer.echo(response.content.message)
+    typer.echo(response.content.detail)
         
         
     

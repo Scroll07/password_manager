@@ -179,15 +179,15 @@ def check_token_dec(func: Callable):
         if response is not None:
             if not isinstance(response.content, RefreshResponse):
                 if isinstance(response.content, MessageResponse):
-                    typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.message}\nstatus_code: {response.status_code}")
+                    typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
                     typer.Exit(code=1)                
                 raise ValueError("Wrong resposne from api")    
             if response.status_code == 200:
-                typer.echo(response.content.message + "\n")
+                typer.echo(response.content.detail + "\n")
                 result = await func(*args, **kwargs)
                 return result
             else:
-                typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.message}\nstatus_code: {response.status_code}")
+                typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
                 typer.Exit(code=1)
         else:
             typer.echo("Tokens are not expired")
