@@ -5,7 +5,7 @@ import hashlib
 import keyring
 import jwt
 
-from pas_app.schemas.jwt import DecodedToken, TokenData
+from pas_app.schemas.jwt import TokenData
 from pas_app.schemas.passwords import KeyringValues, Passwords
 
 

@@ -1,12 +1,12 @@
 from pathlib import Path
 from datetime import timedelta, datetime, timezone
-from typing import Callable, Coroutine
+from typing import Callable
 from httpx import AsyncClient
 from functools import wraps
 
 import typer
 
-from pas_app.config import BASE_URL, UserConfig, config
+from pas_app.config import BASE_URL, config
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import EncryptedUserVault

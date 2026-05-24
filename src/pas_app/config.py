@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel
 import typer
 
-from pas_app.core.crypto import set_keyring_value, get_keyring_value, delete_keyring_value
+from pas_app.core.crypto import set_keyring_value, get_keyring_value
 from pas_app.schemas.passwords import KeyringValues
 
 BASE_DIR = Path.home() / "pas_data"

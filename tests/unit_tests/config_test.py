@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pas_app.config import BASE_URL, UserConfig, ConfigData, ConfigFileData, KeyringConfig
+from pas_app.config import BASE_URL, UserConfig, ConfigFileData, KeyringConfig
 
 
 def test_create_config(config: UserConfig, tmp_path: Path, test_username: str ):

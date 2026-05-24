@@ -1,4 +1,3 @@
-import asyncio
 
 import typer
 
@@ -6,7 +5,6 @@ import typer
 from pas_app.adapters.promts import choose_backup
 from pas_app.core.api import Api
 from pas_app.schemas.api import BackupsResponse, MessageResponse
-from pas_app.config import VAULTS, config
 
 async def delete():
     api = Api()
