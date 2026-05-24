@@ -1,3 +1,8 @@
+Dependencies that will be installed if you don't have them:
+- gnome-keyring
+- pipx
+- uv
+
 Installation:
 
 ```
