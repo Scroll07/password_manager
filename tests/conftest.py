@@ -57,8 +57,8 @@ async def create_auth_test_user(
 
     assert isinstance(response.content, LoginResponse)
     assert response.status_code == 200
-    assert response.content.access_token  
-    assert response.content.token_type  
+    assert response.content.bearer_token
+    assert response.content.refresh_token
 
     return api
 

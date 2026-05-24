@@ -32,9 +32,7 @@ def test_save_data(test_username: str, monkeypatch, tmp_path: Path, config: User
     def mock_cli_input_password() -> str:
         return "test_password"
 
-    monkeypatch.setattr(
-        "pas_app.services.password.cli_password_promt", mock_cli_input_password
-    )
+    monkeypatch.setattr("pas_app.services.password.cli_password_promt", mock_cli_input_password)
     monkeypatch.setattr("pas_app.services.password.VAULTS", tmp_path)
     monkeypatch.setattr("pas_app.services.file_utils.VAULTS", tmp_path)
     monkeypatch.setattr("pas_app.services.password.config", config)

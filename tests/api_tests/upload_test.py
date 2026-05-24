@@ -12,6 +12,6 @@ async def test_upload_file(
 
     vault_file = tmp_path / f"{random_username}.json"
 
-    response = await api.upload(file_path=vault_file)
+    response = await api.upload(file_path=vault_file, name='test', rows=4)
 
     assert response.status_code == 200
