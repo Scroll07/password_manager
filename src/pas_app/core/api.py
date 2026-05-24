@@ -1,25 +1,53 @@
 from pathlib import Path
-
+from datetime import timedelta, datetime, timezone
+from typing import Callable
 from httpx import AsyncClient
+from functools import wraps
 
-from pas_app.config import BASE_URL
+import typer
+
+from pas_app.config import BASE_URL, config
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import EncryptedUserVault
+from pas_app.core.crypto import decode_token
 
 
 class Api:
-    def __init__(self, bearer_token: str = "") -> None:
+    def __init__(self) -> None:
+        self.config = config
+        self.config_data = self.config._refresh()
         self.headers: dict = {}
         self.base_url = BASE_URL
-        self._update_headers(bearer_token=bearer_token)
+        
+        self.update_headers(
+            bearer_token=self.config_data.keyring.bearer_token, 
+            refresh_token=self.config_data.keyring.refresh_token, 
+            save_to_config=False
+        )
 
-    def _update_headers(self, bearer_token: str = "", refresh_token: str = "") -> None:
+    def _save_token_to_config(self, save_to_config: bool = True, bearer_token: str = "", refresh_token: str = "") -> None:
+        if not save_to_config:
+            return
+        config_data = self.config._refresh()
+        if bearer_token:
+            config_data.keyring.bearer_token = bearer_token
+        if refresh_token:
+            config_data.keyring.refresh_token = refresh_token
+        
+        if bearer_token or refresh_token:
+            self.config.save_config(data=config_data)
+        
+        
+    
+    def update_headers(self, bearer_token: str = "", refresh_token: str = "", save_to_config: bool = True) -> None:
         if bearer_token:
             self.headers["Authorization"] = f"Bearer {bearer_token}"
         
         if refresh_token:
-            self.headers["Refresh"] = bearer_token
+            self.headers["Refresh"] = refresh_token
+            
+        self._save_token_to_config(bearer_token=bearer_token, refresh_token=refresh_token, save_to_config=save_to_config)
 
     async def register(self, user_data: Login_RegisterRequest) -> ApiResponse:
         url = "/register"
@@ -45,7 +73,7 @@ class Api:
 
         if response.status_code == 200:
             content = LoginResponse.model_validate(response.json())
-            self._update_headers(bearer_token=content.access_token, refresh_token=content.refresh_token)
+            self.update_headers(bearer_token=content.bearer_token.token, refresh_token=content.refresh_token.token)
         else:
             content = MessageResponse.model_validate(response.json())
 
@@ -115,8 +143,54 @@ class Api:
             )
         if response.status_code == 200:
             content = RefreshResponse.model_validate(response.json())
-            self._update_headers(bearer_token=content.access_token, refresh_token=content.refresh_token)
+            self.update_headers(bearer_token=content.bearer_token.token, refresh_token=content.refresh_token.token)
         else:
             content = MessageResponse.model_validate(response.json())
         
-        return ApiResponse(status_code=response.status_code, content=content)             
+        return ApiResponse(status_code=response.status_code, content=content)  
+    
+    async def check_token(self) -> ApiResponse | None:
+        token_data = decode_token(token=self.config_data.keyring.bearer_token)
+        if token_data.exp - timedelta(minutes=1) < datetime.now(timezone.utc): #12:49 < 12:50
+            response = await self.refresh()
+            if not isinstance(response.content, RefreshResponse):
+                raise ValueError("Wrong resposne from api")
+            if response.status_code == 200:
+                self.update_headers(
+                    bearer_token=response.content.bearer_token.token,
+                    refresh_token=response.content.refresh_token.token
+                )
+            return response
+        return None
+
+
+
+
+
+def check_token_dec(func: Callable):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        api = Api()
+        config_data = config._refresh()
+        if not config_data.keyring.bearer_token or not config_data.keyring.refresh_token:
+            typer.echo("No Tokens\nTry to Login firstly")
+            return 
+        response = await api.check_token()
+        if response is not None:
+            if not isinstance(response.content, RefreshResponse):
+                if isinstance(response.content, MessageResponse):
+                    typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
+                    typer.Exit(code=1)                
+                raise ValueError("Wrong resposne from api")    
+            if response.status_code == 200:
+                typer.echo(response.content.detail + "\n")
+                result = await func(*args, **kwargs)
+                return result
+            else:
+                typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
+                typer.Exit(code=1)
+        else:
+            typer.echo("Tokens are not expired")
+            return await func(*args, **kwargs)
+                    
+    return wrapper        

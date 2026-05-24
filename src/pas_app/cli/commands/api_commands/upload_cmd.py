@@ -1,5 +1,3 @@
-import asyncio
-from datetime import datetime
 import typer
 import time
 
@@ -13,7 +11,7 @@ from pas_app.services.file_utils import load_data
 
 async def upload():
     config_data = config._refresh()
-    api = Api(bearer_token=config_data.keyring.bearer_token)
+    api = Api()
 
     if api is None:
         typer.echo("No api client, try to login firstly")
@@ -27,8 +25,6 @@ async def upload():
     if not vault_file.exists():
         typer.echo(f"File {vault_file.name} does not exist")
 
-
-
     #name - ask name for backup to show for user
     #count - get summury of rows in user vault - len(user_passwords)
     name = choose_name_for_backup()
@@ -36,9 +32,6 @@ async def upload():
     user_data = load_data(config=config)
     count = len(user_data.user_passwords)
     
-    
-
-
     response = await api.upload(file_path=vault_file, name=name, rows=count)
     if not isinstance(response.content, MessageResponse):
         typer.echo("Wrong response from server")
@@ -46,20 +39,13 @@ async def upload():
     
     if response.status_code == 200:
 
-        typer.echo(response.content.message)
+        typer.echo(response.content.detail)
         time.sleep(1)
 
         raise typer.Exit(code=0)
     else:
         typer.echo(
-            f"Upload failed\nstatus_code: {response.status_code}, message: {response.content.message}"
+            f"Upload failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
 
-def upload_command():
-    """
-    Загрузить backup vault на сервер.
-
-    Сохраняет зашифрованный vault, чтобы можно было восстановить его на другом ПК.
-    """
-    asyncio.run(upload())

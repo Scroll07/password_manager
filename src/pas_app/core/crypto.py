@@ -3,7 +3,9 @@ from cryptography.fernet import Fernet
 import base64
 import hashlib
 import keyring
+import jwt
 
+from pas_app.schemas.jwt import TokenData
 from pas_app.schemas.passwords import KeyringValues, Passwords
 
 
@@ -56,4 +58,10 @@ def delete_keyring_value(value_type: KeyringValues) -> None:
     return None
     
 
+#JWT
+ALGORITM = "HS256"
+
+def decode_token(token: str) -> TokenData:
+    decoded = jwt.decode(jwt=token, algorithms=ALGORITM, options={"verify_signature": False})
+    return TokenData.model_validate(decoded)
 

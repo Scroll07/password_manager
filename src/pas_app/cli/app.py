@@ -17,7 +17,7 @@ from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
 from pas_app.cli.commands.pas_commands.configure_config import configure_config
 
-from pas_app.cli.commands.api_commands import cli_app
+from pas_app.cli.commands.api_commands.api_typer import cli_app
 
 
 from pas_app.config import config
