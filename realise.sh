@@ -92,6 +92,20 @@ function install_dependencies () {
     fi
 }
 
+function delete_old_builds () {
+    local DIR="$1"
+
+    rm -rf "${DIR}/build/"
+    rm -rf "${DIR}/dist/"
+
+    echo "${DIR}/build/ was deleted"
+    echo "${DIR}/dist/ was deleted"
+    
+    return 0
+}
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "$DIR"
 
 function main() {
     local pck_mgr=$(define_packpage_manager)
@@ -103,8 +117,9 @@ function main() {
 
     install_dependencies "$pck_mgr"
 
-
     pipx uninstall password-manager
+
+    delete_old_builds "$DIR"
 
     uv run python -m build --wheel
 

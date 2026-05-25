@@ -21,7 +21,7 @@ def import_data(
     ),
 ):
     """
-     Импорт данных в store.bin из файла.
+     Импорт данных в из файла.
 
     Примеры:
 
@@ -40,8 +40,11 @@ def import_data(
         import_data = f.read()
 
     current_vault = load_data(config=config)
-    import_data = EncryptedUserVault.model_validate(import_data)
-
+    try:
+        import_data = EncryptedUserVault.model_validate(import_data)
+    except Exception:
+        typer.echo("Wrong data for import")
+        raise typer.Exit(code=1)
 
     if import_data.username != current_vault.username or import_data.salt != current_vault.salt:
         raise EchoException("Wrong username or salt")

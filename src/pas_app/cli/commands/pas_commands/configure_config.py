@@ -18,20 +18,20 @@ def change_base_url(config: UserConfig):
         config_data = config._refresh()
 
         choice = typer.prompt(text)
-        if choice == 0:
+        if choice == "0":
             exit_message_and_clear_console("Выход")
 
-        elif choice == 1:
+        elif choice == "1":
             typer.echo(f"BASE_URL = {config_data.local.BASE_URL}")
             continue
 
-        elif choice == 2:
+        elif choice == "2":
             user_promt = typer.prompt("Введите Base url: ").strip()
             config_data.local.BASE_URL = user_promt
             config.save_config(config_data)
             continue
 
-        elif choice == 3:
+        elif choice == "3":
             config_data.local.BASE_URL = "http://localhost"
             config.save_config(config_data)
             continue
@@ -53,14 +53,14 @@ def change_bot_token(config: UserConfig):
         config_data = config._refresh()
 
         choice = typer.prompt(text)
-        if choice == 0:
+        if choice == "0":
             exit_message_and_clear_console("Выход")
 
-        elif choice == 1:
+        elif choice == "1":
             typer.echo(f"Bot Token = {config_data.local.BOT_TOKEN}")
             continue
 
-        elif choice == 2:
+        elif choice == "2":
             user_promt = typer.prompt("Введите Bot Token: ").strip()
             config_data.local.BOT_TOKEN = user_promt
             config.save_config(config_data)
@@ -100,3 +100,5 @@ def configure_config(
         config_data = config._refresh()
         config_data.local.default_user = username
         config.save_config(data=config_data)
+    else:
+        typer.echo("No options to configure")
