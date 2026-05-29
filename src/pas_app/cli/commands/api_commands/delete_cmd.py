@@ -2,7 +2,7 @@
 import typer
 
 
-from pas_app.adapters.promts import choose_backup
+from pas_app.adapters.promts import choose_backup_delete
 from pas_app.core.api import Api
 from pas_app.schemas.api import BackupsResponse, MessageResponse
 
@@ -28,7 +28,7 @@ async def delete():
         typer.echo("You have not uplaoded backups")
         raise typer.Exit(code=0)
     
-    backup = choose_backup(backups=backups)
+    backup = choose_backup_delete(backups=backups)
     
     response = await api.delete(backup_id=backup.id)
     if not isinstance(response.content, MessageResponse):

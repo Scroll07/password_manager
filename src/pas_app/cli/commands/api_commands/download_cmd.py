@@ -2,7 +2,7 @@
 import typer
 
 
-from pas_app.adapters.promts import choose_backup
+from pas_app.adapters.promts import choose_backup_download
 from pas_app.core.api import Api
 from pas_app.schemas.api import BackupsResponse, DownloadResponse, MessageResponse
 from pas_app.config import VAULTS, config
@@ -30,7 +30,7 @@ async def download():
         typer.echo("You have not uplaoded backups")
         raise typer.Exit(code=0)
     
-    backup = choose_backup(backups=backups)
+    backup = choose_backup_download(backups=backups)
     
     response = await api.download(backup_id=backup.id)
     

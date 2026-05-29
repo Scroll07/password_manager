@@ -17,7 +17,7 @@ for dir in (BASE_DIR, EXPORT_DIR, VAULTS, IMPORT_DIR):
 LAST_MATCHES = BASE_DIR / "last_matches.json"
 SESSION_FILE = BASE_DIR / "session.json"
 
-# BASE_URL = "http://localhost:8000"
+# BASE_URL = "http://localhost:80"
 BASE_URL = "http://178.72.184.134:80"
 
 

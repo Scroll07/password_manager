@@ -129,7 +129,7 @@ def choose_default_user(usernames: list[str]) -> str:
             
         return usernames[int(choice)-1]
 
-def choose_backup(backups: list[BackupData]) -> BackupData:
+def choose_backup_download(backups: list[BackupData]) -> BackupData:
     backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
     headers = ["Id", "Name", "Rows", "Created_at"]
     data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
@@ -139,6 +139,29 @@ def choose_backup(backups: list[BackupData]) -> BackupData:
         typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
 
         choice = typer.prompt("Choose backup to download")
+        
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(backups):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return backups[int(choice)-1]
+    
+def choose_backup_delete(backups: list[BackupData]) -> BackupData:
+    backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
+    headers = ["Id", "Name", "Rows", "Created_at"]
+    data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
+    while True:
+        clear_console()
+        typer.echo("Backups to delete:\n")
+        typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
+
+        choice = typer.prompt("Choose backup to delete")
         
         if not choice.isdigit():
             typer.echo("Input should be digit")
