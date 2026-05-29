@@ -18,7 +18,7 @@ class Api:
         self.config = config
         self.config_data = self.config._refresh()
         self.headers: dict = {}
-        self.base_url = BASE_URL
+        self.base_url = f"{BASE_URL}/api"
         
         self.update_headers(
             bearer_token=self.config_data.keyring.bearer_token, 
