@@ -3,7 +3,7 @@ import time
 
 from pas_app.adapters.promts import exit_message_and_clear_console, clear_console, choose_default_user
 from pas_app.services.file_utils import get_vault_usernames
-from pas_app.config import UserConfig
+from pas_app.config import UserConfig, ConfigFileData 
 from pas_app.config import get_config
 
 def change_base_url(config: UserConfig):
@@ -33,7 +33,8 @@ def change_base_url(config: UserConfig):
             continue
 
         elif choice == "3":
-            config_data.local.BASE_URL = "http://localhost"
+            local = ConfigFileData() 
+            config_data.local = local
             config.save_config(config_data)
             continue
 
