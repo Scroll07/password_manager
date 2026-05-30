@@ -5,9 +5,10 @@ import typer
 from pas_app.adapters.promts import choose_backup_download
 from pas_app.core.api import Api
 from pas_app.schemas.api import BackupsResponse, DownloadResponse, MessageResponse
-from pas_app.config import VAULTS, config
+from pas_app.config import VAULTS, get_config
 
 async def download():
+    config = get_config()
     config_data = config._refresh()
     api = Api()
 

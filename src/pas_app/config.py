@@ -18,7 +18,7 @@ LAST_MATCHES = BASE_DIR / "last_matches.json"
 SESSION_FILE = BASE_DIR / "session.json"
 
 # BASE_URL = "http://localhost:80"
-BASE_URL = "http://178.72.184.134:80"
+# BASE_URL = "http://178.72.184.134:80"
 
 
 CONFIG_FILE = BASE_DIR / "config.json"
@@ -26,7 +26,7 @@ CONFIG_FILE = BASE_DIR / "config.json"
 class ConfigFileData(BaseModel):
     default_user: str = "unauthorized"
     BOT_TOKEN: str = "no token"
-    BASE_URL: str = BASE_URL
+    BASE_URL: str = "http://178.72.184.134:80"
 
 
 class KeyringConfig(BaseModel):
@@ -98,4 +98,5 @@ class UserConfig:
         return self.load_config()
 
 
-config = UserConfig(CONFIG_FILE)
+def get_config() -> UserConfig:
+    return UserConfig(config_file=CONFIG_FILE)

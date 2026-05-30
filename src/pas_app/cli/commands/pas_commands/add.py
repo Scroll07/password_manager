@@ -3,7 +3,7 @@ import secrets
 
 from pas_app.services.file_utils import load_data, save_data
 from pas_app.schemas.passwords import Password
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def add_command(
@@ -35,7 +35,7 @@ def add_command(
 
       pas.py add work-email -u john@company.com --gen --note "Рабочая почта"
     """
-    
+    config = get_config()
 
     if password is not None:
         if gen:

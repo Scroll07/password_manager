@@ -3,7 +3,7 @@ import typer
 
 from pas_app.config import EXPORT_DIR
 from pas_app.services.file_utils import load_data
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def export_command(
@@ -23,6 +23,7 @@ def export_command(
 
       pas export my_export.csv --format csv
     """
+    config = get_config()
     data = load_data(config=config)
 
     if not typer.confirm("Экспорт может раскрыть чувствительные данные. Продолжить?"):

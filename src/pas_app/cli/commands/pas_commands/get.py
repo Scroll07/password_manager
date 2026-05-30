@@ -2,7 +2,7 @@ import typer
 
 from pas_app.services.file_utils import load_data, dump_last_matches
 from pas_app.services.password import print_passwords
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def get_command(
@@ -30,6 +30,7 @@ def get_command(
 
       pas.py get all              # Все записи, пароли скрыты
     """
+    config = get_config()
     data = load_data(config=config)
     passwords = data.user_passwords
 

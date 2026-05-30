@@ -3,13 +3,14 @@ import time
 
 from pas_app.config import VAULTS
 from pas_app.core.api import Api
-from pas_app.config import config
+from pas_app.config import get_config
 from pas_app.schemas.api import MessageResponse
 from pas_app.adapters.promts import choose_name_for_backup
 from pas_app.services.file_utils import load_data
 
 
 async def upload():
+    config = get_config()
     config_data = config._refresh()
     api = Api()
 

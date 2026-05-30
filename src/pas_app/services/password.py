@@ -9,12 +9,13 @@ from pas_app.config import VAULTS
 from pas_app.schemas.passwords import Password, EncryptedUserVault
 from pas_app.services.file_utils import load_encrypted_vault, is_vault_files_exists, get_vault_usernames
 from pas_app.exceptions import EchoException
-from pas_app.config import config
+from pas_app.config import get_config
 
 SESSION_TIMEOUT = 300
 
 
 def check_session() -> None:
+    config = get_config()
     config_data = config._refresh()
 
     if not is_vault_files_exists():
@@ -32,6 +33,7 @@ def check_session() -> None:
         
         
 def get_key() -> bytes:
+    config = get_config()
     config_data = config._refresh()
     expired = (
         not config_data.keyring.master_password

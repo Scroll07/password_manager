@@ -2,7 +2,7 @@ import tabulate
 import typer
 
 from pas_app.services.file_utils import load_data
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def list_command(
@@ -12,7 +12,7 @@ def list_command(
 
     Выводит отсортированный список всех доступных записей.
     """
-    
+    config = get_config()
     data = load_data(config=config)
     passwords = data.user_passwords
 

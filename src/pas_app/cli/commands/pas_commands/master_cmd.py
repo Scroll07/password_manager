@@ -6,7 +6,7 @@ from pas_app.core.crypto import derive_key, encrypt_vault_passwords
 from pas_app.exceptions import EchoException
 from pas_app.services.file_utils import load_data
 from pas_app.schemas.passwords import Passwords, EncryptedUserVault
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def change_master(
@@ -19,6 +19,7 @@ def change_master(
 
     Требует ввода текущего и нового пароля.
     """
+    config = get_config()
     data = load_data(config=config)
     
     typer.echo("Введите новый мастер-пароль в отркывшееся окно.")

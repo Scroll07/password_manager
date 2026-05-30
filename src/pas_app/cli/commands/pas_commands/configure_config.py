@@ -3,8 +3,8 @@ import time
 
 from pas_app.adapters.promts import exit_message_and_clear_console, clear_console, choose_default_user
 from pas_app.services.file_utils import get_vault_usernames
-from pas_app.config import UserConfig
-from pas_app.config import config
+from pas_app.config import UserConfig, ConfigFileData 
+from pas_app.config import get_config
 
 def change_base_url(config: UserConfig):
     while True:
@@ -23,6 +23,7 @@ def change_base_url(config: UserConfig):
 
         elif choice == "1":
             typer.echo(f"BASE_URL = {config_data.local.BASE_URL}")
+            time.sleep(2)
             continue
 
         elif choice == "2":
@@ -32,7 +33,8 @@ def change_base_url(config: UserConfig):
             continue
 
         elif choice == "3":
-            config_data.local.BASE_URL = "http://localhost"
+            local = ConfigFileData() 
+            config_data.local = local
             config.save_config(config_data)
             continue
 
@@ -58,6 +60,7 @@ def change_bot_token(config: UserConfig):
 
         elif choice == "1":
             typer.echo(f"Bot Token = {config_data.local.BOT_TOKEN}")
+            time.sleep(2)
             continue
 
         elif choice == "2":
@@ -89,7 +92,7 @@ def configure_config(
       --token     Change the Telegram bot authentication token
       --user      Change the default user identifier
     """
-
+    config = get_config()
     if base_url:
         change_base_url(config)
     elif bot_token:

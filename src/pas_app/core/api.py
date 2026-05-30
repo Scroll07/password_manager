@@ -6,7 +6,7 @@ from functools import wraps
 
 import typer
 
-from pas_app.config import BASE_URL, config
+from pas_app.config import get_config
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import EncryptedUserVault
@@ -15,10 +15,10 @@ from pas_app.core.crypto import decode_token
 
 class Api:
     def __init__(self) -> None:
-        self.config = config
+        self.config = get_config()
         self.config_data = self.config._refresh()
         self.headers: dict = {}
-        self.base_url = f"{BASE_URL}/api"
+        self.base_url = f"{self.config.load_config().local.BASE_URL}/api"
         
         self.update_headers(
             bearer_token=self.config_data.keyring.bearer_token, 
@@ -171,6 +171,7 @@ def check_token_dec(func: Callable):
     @wraps(func)
     async def wrapper(*args, **kwargs):
         api = Api()
+        config = get_config()
         config_data = config._refresh()
         if not config_data.keyring.bearer_token or not config_data.keyring.refresh_token:
             typer.echo("No Tokens\nTry to Login firstly")
