@@ -4,7 +4,7 @@ import typer
 
 from pas_app.services.file_utils import load_data
 from pas_app.config import LAST_MATCHES
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def copy(
@@ -41,6 +41,7 @@ def copy(
         typer.echo(f"Неверный индекс: {idx}. Доступно от 1 до {len(last_matches)}.")
         return
 
+    config = get_config()
     data = load_data(config=config)
 
     match = last_matches[idx - 1]

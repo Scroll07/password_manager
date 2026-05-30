@@ -20,7 +20,7 @@ from pas_app.cli.commands.pas_commands.configure_config import configure_config
 from pas_app.cli.commands.api_commands.api_typer import cli_app
 
 
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 app = typer.Typer(
@@ -109,6 +109,7 @@ app.add_typer(cli_app, name="api")
 def main():
     """Инициализация сессии при запуске."""
     try:
+        config = get_config()
         config.create_empty_config(current_user="unauthorized")
         # check_session()
     except Exception as e:

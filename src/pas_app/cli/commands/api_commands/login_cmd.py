@@ -5,9 +5,10 @@ import time
 from pas_app.adapters.promts import cli_login_input
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
-from pas_app.config import config
+from pas_app.config import get_config
 
 async def login():
+    config = get_config()
     config_data = config._refresh()
     api = Api()
 

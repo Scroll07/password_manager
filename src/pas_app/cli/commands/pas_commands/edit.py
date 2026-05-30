@@ -3,7 +3,7 @@ import secrets
 import typer
 
 from pas_app.services.file_utils import load_data, save_data
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def edit_command(
@@ -37,6 +37,7 @@ def edit_command(
 
       pas.py edit github-1 -u user --gen           # Изменить username и сгенерировать пароль
     """
+    config = get_config()
     data = load_data(config=config)
     pas_to_change = None
     for pas in data.user_passwords:

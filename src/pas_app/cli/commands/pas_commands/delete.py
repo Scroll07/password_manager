@@ -2,7 +2,7 @@ import typer
 
 
 from pas_app.services.file_utils import load_data, save_data
-from pas_app.config import config
+from pas_app.config import get_config
 
 
 def delete_command(
@@ -23,7 +23,7 @@ def delete_command(
 
       pas.py delete "clear-all"   # Удалить все записи (в кавычках!)
     """
-
+    config = get_config()
     data = load_data(config=config)
 
     if label.lower() == "clear-all":

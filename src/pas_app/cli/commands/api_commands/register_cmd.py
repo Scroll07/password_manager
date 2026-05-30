@@ -6,9 +6,10 @@ from pas_app.adapters.promts import cli_register_input
 from pas_app.services.password import create_user_vault
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest, MessageResponse
-from pas_app.config import config
+from pas_app.config import get_config
 
 async def register():
+    config = get_config()
     config_data = config._refresh()
     api = Api()
 
