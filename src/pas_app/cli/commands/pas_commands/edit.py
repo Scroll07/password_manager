@@ -8,34 +8,32 @@ from pas_app.config import get_config
 
 def edit_command(
     service: str = typer.Argument(
-        ..., help='Метка для изменения (например, "github(1)")'
+        ..., help='Label to edit (e.g., "github-1")'
     ),
     username: str | None = typer.Option(
-        None, "-u", "--username", help="Новое имя пользователя"
+        None, "-u", "--username", help="New username"
     ),
-    password: str | None = typer.Option(None, "-p", "--password", help="Новый пароль"),
-    note: str | None = typer.Option(None, "--note", help="Новая заметка"),
-    gen: bool | None = typer.Option(False, "--gen", help="Сгенерировать новый пароль"),
-    length: int = typer.Option(16, "--length", help="Длина генерируемого пароля"),
+    password: str | None = typer.Option(None, "-p", "--password", help="New password"),
+    note: str | None = typer.Option(None, "--note", help="New note"),
+    gen: bool | None = typer.Option(False, "--gen", help="Generate new password"),
+    length: int = typer.Option(16, "--length", help="Length of generated password"),
 ):
     """
-    Изменить существующую запись.
+    Edit an existing entry.
 
-    Указывайте только те поля, которые хотите изменить. Остальные останутся без изменений.
+    Specify only the fields you want to change; others will remain unchanged.
+    Shows a preview of changes and requests confirmation before applying.
 
-    Показывает предварительный просмотр изменений и запрашивает подтверждение.
+    Examples:
+        pas edit github-1 -u newuser              # Change username only
 
-    Примеры:
+        pas edit github-1 -p newpass123           # Change password only
 
-      pas.py edit github-1 -u newuser              # Изменить только username
+        pas edit github-1 --gen --length 24       # Generate new 24-char password
 
-      pas.py edit github-1 -p newpass123           # Изменить только пароль
+        pas edit github-1 --note "New note"  # Change note only
 
-      pas.py edit github-1 --gen --length 24       # Сгенерировать новый пароль длиной 24
-
-      pas.py edit github-1 --note "Новая заметка"  # Изменить только заметку
-
-      pas.py edit github-1 -u user --gen           # Изменить username и сгенерировать пароль
+        pas edit github-1 -u user --gen           # Change username and generate password
     """
     config = get_config()
     data = load_data(config=config)
@@ -51,7 +49,7 @@ def edit_command(
 
     if password is not None:
         if gen:
-            typer.echo("Нельзя вводить одновременно -p И --gen \n ВЫХОД")
+            typer.echo("Cannot use both -p and --gen at the same time. EXIT")
             return
     elif password is None and gen:
         password = secrets.token_urlsafe(length)
@@ -69,15 +67,15 @@ def edit_command(
         changes.append(f"note: {pas_to_change.note} → {note}")
 
     if not changes:
-        typer.echo("Нет изменений для применения.")
+        typer.echo("No changes to apply.")
         return
 
-    typer.echo(f"\nПланируемые изменения для {service}:")
+    typer.echo(f"\nPlanned changes for {service}:")
     for change in changes:
         typer.echo(f"  {change}")
 
-    if not typer.confirm("\nПримененить изменения?"):
-        typer.echo("Изменения отменены.")
+    if not typer.confirm("\nApply changes?"):
+        typer.echo("Changes were canceled.")
         return
 
     pas_to_change.username = (
@@ -87,4 +85,4 @@ def edit_command(
     pas_to_change.note = note
 
     save_data(vault_data=data)
-    typer.echo(f"Запись с меткой {service} была успешно изменена.")
+    typer.echo(f"Entry with label {service} was successfully changed.")

@@ -8,37 +8,37 @@ from pas_app.config import get_config
 
 
 def copy(
-    idx: int = typer.Argument(..., help="Номер записи из таблицы (от 1 до N)"),
+    idx: int = typer.Argument(..., help="Record number from table (from 1 to N)"),
 ):
     """
-    Скопировать пароль в буфер обмена по номеру из последнего результата get.
+    Copy password to clipboard by number from the last get result.
 
-    Сначала выполните команду get для отображения таблицы с номерами, затем используйте copy с нужным номером.
+    First run the 'get' command to display a table with numbers,
+    then use 'copy' with the desired number.
 
-    Примеры:
+    Examples:
+        pas get github    # Show table with numbers
 
-      pas.py get github    # Показать таблицу с номерами
+        pas copy 1        # Copy password from row #1
 
-      pas.py copy 1        # Скопировать пароль из строки №1
-
-      pas.py copy 3        # Скопировать пароль из строки №3
+        pas copy 3        # Copy password from row #3
     """
     if not LAST_MATCHES.exists():
-        typer.echo("last_matches.json не существует.")
+        typer.echo("File last_matches.json does not exist.")
         return
 
     try:
         last_matches = json.loads(LAST_MATCHES.read_text("utf-8"))
     except json.JSONDecodeError:
-        typer.echo("Ошибка чтения last_matches.json.")
+        typer.echo("Error reading last_matches.json.")
         return
 
     if not last_matches:
-        typer.echo("Нет последних матчей.")
+        typer.echo("No recent matches found.")
         return
 
     if idx < 1 or idx > len(last_matches):
-        typer.echo(f"Неверный индекс: {idx}. Доступно от 1 до {len(last_matches)}.")
+        typer.echo(f"Invalid index: {idx}. Available from 1 to {len(last_matches)}.")
         return
 
     config = get_config()
@@ -49,7 +49,7 @@ def copy(
     for password in passwords:
         if password.service == match:
             pyperclip.copy(password.password)
-            typer.echo(f"Пароль для {match} успешно скопирован в буфер обмена.")
+            typer.echo(f"Password for {match} successfully copied to clipboard.")
             break
         else:
-            typer.echo(f"Пароль для {match} не найден")
+            typer.echo(f"Password for {match} not found")

@@ -7,35 +7,32 @@ from pas_app.config import get_config
 
 def get_command(
     service: str = typer.Argument(
-        ..., help='Метка сервиса (например: github) или "all"/"." для всех записей'
+        ..., help='Service label (e.g., github) or "all"/"." for all entries'
     ),
     show: bool = typer.Option(
-        False, "--show", help="Показать пароли открытым текстом (по умолчанию скрыты)"
+        False, "--show", help="Show passwords in plain text (default: hidden)"
     ),
 ):
     """
-    Показать информацию о записях по метке или все записи.
+    Display entry information by label or show all entries.
 
-    Поддерживает поиск по началу метки - "github" найдет github, github-1, github-2 и т.д.
+    Supports prefix matching - "github" will find github, github-1, github-2, etc.
+    By default, passwords are hidden; use --show to display them.
+    Use "all" or "." to display all stored entries.
 
-    По умолчанию пароли скрыты символами ******, используйте --show для отображения.
+    Examples:
+        pas get github           # All entries starting with "github", passwords hidden
 
-    Для всех записей используйте "all" или ".".
+        pas get github --show    # Same, but with passwords shown
 
-    Примеры:
-
-      pas.py get github           # Все записи, начинающиеся с "github", пароли скрыты
-
-      pas.py get github --show    # То же, но с открытыми паролями
-
-      pas.py get all              # Все записи, пароли скрыты
+        pas get all              # All entries, passwords hidden
     """
     config = get_config()
     data = load_data(config=config)
     passwords = data.user_passwords
 
     if not data or not data.user_passwords:
-        typer.echo("Записей нет")
+        typer.echo("No entries found")
         return
 
     if service.lower() == "." or service.lower() == "all":

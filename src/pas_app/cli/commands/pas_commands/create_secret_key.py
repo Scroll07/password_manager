@@ -3,21 +3,20 @@ import typer
 
 
 def create_password_command(
-    length: int = typer.Option(16, "-l", "--length", help="password/key length"),
+    length: int = typer.Option(16, "-l", "--length", help="Password/key length"),
 ):
     """
-    Сгенерировать криптографически стойкий пароль для JWT ключей, паролей БД или API токенов.
+    Generate a cryptographically secure password for JWT keys, database passwords, or API tokens.
 
-    Длина по умолчанию 16 символов — достаточно для JWT HS256 ключей.
+    Default length is 16 characters, which is sufficient for JWT HS256 keys.
+    Increase the length for higher security requirements.
 
+    Examples:
+        pas create-password           # 16-character password
 
-    Примеры:
+        pas create-password -l 32     # 32-character password
 
-      pas.py create-password           # Пароль длиной 16 символов
-
-      pas.py create-password -l 32     # Пароль длиной 32 символа
-
-      pas.py create-password --length 64  # Очень длинный ключ (64 символа)
+        pas create-password --length 64  # Very long key (64 characters)
     """
     password = secrets.token_urlsafe(length)
     typer.echo(password)

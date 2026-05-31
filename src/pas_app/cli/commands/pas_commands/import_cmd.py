@@ -11,29 +11,31 @@ from pas_app.config import get_config
 
 def import_data(
     # filename: str = typer.Argument(
-    #     ..., help="Имя файла для импорта (например, export.json)"
+    #     ..., help="Name of file to import (e.g., export.json)"
     # ),
     overwrite: bool = typer.Option(
-        False, "--overwrite", help="Перезаписать существующие метки"
+        False, "--overwrite", help="Overwrite existing labels"
     ),
     will_delete: bool = typer.Option(
-        False, "--delete", help="Удалять ли файл json сразу после импорта"
+        False, "--delete", help="Delete the JSON file after import"
     ),
 ):
     """
-     Импорт данных в из файла.
+    Import data from a JSON file.
 
-    Примеры:
+    Restores previously exported vault data. Can merge with existing entries
+    or overwrite them. Optionally deletes the import file after completion.
 
-      pas import --overwrite
+    Examples:
+        pas import --overwrite
 
-      pas import --delete             # Импорт из JSON с удалением файла после
+        pas import --delete             # Import from JSON and delete file after
     """
-    #Choose import file by cicle
+    #Choose import file by cycle
     filename_path = cli_improt_file_prompt()
     
     if not filename_path.exists():
-        typer.echo(f"Файл {filename_path.name} не найден.")
+        typer.echo(f"File {filename_path.name} not found.")
         raise typer.Exit(code=1)
     
     with open(filename_path, "r", encoding="utf-8") as f:
@@ -71,15 +73,15 @@ def import_data(
             writable.password = pas.password
             writable.note = pas.note
 
-            typer.echo(f'({pas.service}) was successfully overwroten')
+            typer.echo(f'({pas.service}) was successfully overwritten')
             continue
         else:
             current_vault.user_passwords.append(pas)
             typer.echo(f'({pas.service}) was successfully added')
             
     save_data(vault_data=current_vault)
-    typer.echo(f"Данные успешно импортированы из {filename_path.name}")
+    typer.echo(f"Data successfully imported from {filename_path.name}")
     if will_delete:
         delete_file(filename_path)
     else:
-        typer.echo(f"Файл {filename_path.name} не был удален.")
+        typer.echo(f"File {filename_path.name} was not deleted.")

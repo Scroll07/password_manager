@@ -8,43 +8,45 @@ from pas_app.config import get_config
 
 def add_command(
     service: str = typer.Argument(
-        ..., help="Название сервиса (например: github, vk, yandex)"
+        ..., help="Service name (e.g., github, vk, yandex)"
     ),
     username: str = typer.Option(
-        ..., "-u", "--username", help="Имя пользователя или email"
+        ..., "-u", "--username", help="Username or email"
     ),
     password: str | None = typer.Option(
-        None, "-p", "--password", help="Пароль (если не указан, используйте --gen)"
+        None, "-p", "--password", help="Password (if not specified, use --gen)"
     ),
     note: str | None = typer.Option(
-        None, "--note", help="Дополнительная заметка или описание"
+        None, "--note", help="Additional note or description"
     ),
-    gen: bool = typer.Option(False, "--gen", help="Сгенерировать случайный пароль"),
+    gen: bool = typer.Option(False, "--gen", help="Generate a random password"),
     length: int = typer.Option(
-        16, "--length", help="Длина генерируемого пароля (по умолчанию: 16)"
+        16, "--length", help="Length of generated password (default: 16)"
     ),
 ):
     """
-    Сохранение Логина/Пароля.
+    Add a new login and password entry.
 
-    Примеры:
+    Stores a new service credential in the vault. You can either provide
+    a password directly or generate a secure random one.
 
-      pas.py add github -u myuser -p mypass123
+    Examples:
+        pas add github -u myuser -p mypass123
 
-      pas.py add vk -u user@email.com --gen --length 20
+        pas add vk -u user@email.com --gen --length 20
 
-      pas.py add work-email -u john@company.com --gen --note "Рабочая почта"
+        pas add work-email -u john@company.com --gen --note "Work email"
     """
     config = get_config()
 
     if password is not None:
         if gen:
-            typer.echo("Нельзя вводить одновременно -p И --gen \n ВЫХОД")
+            typer.echo("Cannot use both -p and --gen at the same time. EXIT")
             return
     elif password is None:
         password = secrets.token_urlsafe(length)
     elif password is None and not gen:
-        typer.echo("Нужно указать либо -p либо --gen")
+        typer.echo("You must specify either -p or --gen")
         return
 
     data = load_data(config=config)

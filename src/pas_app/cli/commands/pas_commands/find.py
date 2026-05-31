@@ -7,32 +7,34 @@ from pas_app.config import get_config
 
 def find_command(
     query: str = typer.Argument(
-        ..., help="Поисковый запрос (строка для поиска в полях)"
+        ..., help="Search query (string to search in fields)"
     ),
     show: bool = typer.Option(
-        False, "--show", help="Показать пароли открытым текстом (по умолчанию скрыты)"
+        False, "--show", help="Show passwords in plain text (default: hidden)"
     ),
     exact: bool = typer.Option(
-        False, "--exact", help="Искать точное совпадение (не подстроку)"
+        False, "--exact", help="Search for exact match (not substring)"
     ),
 ):
     """
-    Поиск записей по подстроке в полях (username, password, note).
+    Search entries by substring in fields (username, password, note).
 
-    Ищет подстроку во всех полях записи. Выводит результаты в таблице.
+    Searches all fields of each entry and displays matching results in a table.
+    By default, passwords are hidden; use --show to display them.
 
-    Примеры:
+    Examples:
+        pas find "vova"               # Search "vova" in all fields, passwords hidden
 
-      pas.py find "vova"               # Поиск "vova" во всех полях, пароли скрыты
+        pas find "123" --show         # Search "123" with passwords shown
 
-      pas.py find "123" --show         # Поиск "123" с открытыми паролями
+        pas find "github" --exact     # Exact match search
     """
     config = get_config()
     data = load_data(config=config)
     passwords = data.user_passwords
 
     if not data:
-        typer.echo("Записей нет.")
+        typer.echo("No entries found.")
         raise typer.Exit(code=0)
 
     result = []            
@@ -47,8 +49,8 @@ def find_command(
     
 
     if not result:
-        typer.echo(f'Ничего не найдено по запросу "{query}".')
+        typer.echo(f'Nothing found for query "{query}".')
         raise typer.Exit(code=0)
 
-    typer.echo(f'Найденные записи по запросу "{query}":')
+    typer.echo(f'Found entries for query "{query}":')
     print_passwords(passwords=result, show=show)

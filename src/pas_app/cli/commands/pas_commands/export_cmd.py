@@ -8,26 +8,30 @@ from pas_app.config import get_config
 
 def export_command(
     filename: str = typer.Argument(
-        ..., help="Имя файла для экспорта (например, export.json)"
+        ..., help="Output filename for export (e.g., export.json)"
     ),
     no_passwords: bool = typer.Option(
-        False, "--no-passwords", help="Включить если не хочешь сохранять пароли"
+        False, "--no-passwords", help="Enable to skip storing passwords in export"
     ),
 ):
     """
-    Экспорт данных из store.bin в файл.
+    Export vault data to a JSON file.
 
-    Примеры:
+    Creates a backup file with all your stored credentials. By default,
+    passwords are included; use --no-passwords to exclude them for security.
 
-      pas export my_export.json --format json --no-passwords
+    Examples:
+        pas export my_export.json --no-passwords
 
-      pas export my_export.csv --format csv
+        pas export backup.json
+
+        pas export secrets.json
     """
     config = get_config()
     data = load_data(config=config)
 
-    if not typer.confirm("Экспорт может раскрыть чувствительные данные. Продолжить?"):
-        typer.echo("Экспорт отменен. ВЫХОД")
+    if not typer.confirm("Export may expose sensitive data. Continue?"):
+        typer.echo("Export was canceled. EXIT")
         return
 
     export_data = {}
@@ -41,5 +45,5 @@ def export_command(
     with open(filename_path, "w", encoding="utf-8") as f:
         json.dump(export_data, f, indent=2, ensure_ascii=False)
 
-    typer.echo(f"данные экспортированы в {filename_path} (JSON)")
+    typer.echo(f"Data exported to {filename_path} (JSON)")
     raise typer.Exit(code=0)
