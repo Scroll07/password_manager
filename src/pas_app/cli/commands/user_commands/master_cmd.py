@@ -11,29 +11,37 @@ from pas_app.config import get_config
 
 def change_master(
     current_master: str = typer.Argument(
-        ..., help="Введите действующий мастер-пароль для смены."
+        ..., help="Current master password for change."
     ),
 ):
     """
-    Команда для смены мастер-пароля.
+    Change the master password for local vault.
 
-    Требует ввода текущего и нового пароля.
+    The command requires entering the current password and a new password.
+    The operation is irreversible and will re-encrypt all stored passwords
+    with the new master password.
+
+    Examples:
+        pas user change-master <current-password>
+
+    You will be prompted to enter a new password in a secure input window.
+    Confirm the change when prompted.
     """
     config = get_config()
     data = load_data(config=config)
     
-    typer.echo("Введите новый мастер-пароль в отркывшееся окно.")
+    typer.echo("Enter new master password in the opened window.")
     new_master_password = cli_password_promt()
     if not new_master_password:
-        typer.echo("Ввод пароля отменен. ВЫХОД")
+        typer.echo("Password input was canceled. EXIT")
         raise typer.Exit(code=1)
 
     if new_master_password == current_master:
-        typer.echo("Дейвствующий пароль не может совпадать с новым.")
+        typer.echo("Current password cannot match the new password.")
         return
 
-    if not typer.confirm("Изменить мастер-пароль? Это действие необратимо!"):
-        typer.echo("Смена мастер-пароля отменена.")
+    if not typer.confirm("Change master password? This action is irreversible!"):
+        typer.echo("Master password change was canceled.")
         return
 
     new_key = derive_key(new_master_password, data.salt)
@@ -51,5 +59,5 @@ def change_master(
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
     
-    typer.echo("Мастер-пароль успешно изменен.")
+    typer.echo("Master password was successfully changed.")
 
