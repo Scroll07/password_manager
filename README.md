@@ -41,3 +41,17 @@ pas add test -u test -p test --note test
 | pas api upload   | Загрузить backup файла vault в облако/на сервер            | pas api upload   |
 | pas api download | Скачать backup файла vault для восстановления на другом ПК | pas api download |
 | pas api delete   | Удалить backup                                             | pas api delete   |
+
+**USER COMMANDS**
+| Command                | Description                | Example                |
+| ---------------------- | -------------------------- | ---------------------- |
+| pas user delete        | Delete a local user        | pas user delete        |
+| pas user change-master | Change the master password | pas user change-master |
+
+**CONFIG COMMANDS**
+| Command                  | Description                     | Example                  |
+| ------------------------ | ------------------------------- | ------------------------ |
+| pas config user          | Set the default local user      | pas config user          |
+| pas config url           | View or change the API base URL | pas config url           |
+| pas config token         | View or change the bot token    | pas config token         |
+| pas config reset-session | Reset the current local session | pas config reset-session |
