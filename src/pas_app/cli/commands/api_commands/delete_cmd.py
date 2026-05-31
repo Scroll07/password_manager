@@ -25,7 +25,7 @@ async def delete():
     
     backups = response.content.backups
     if not backups:
-        typer.echo("You have not uplaoded backups")
+        typer.echo("You have not uploaded backups")
         raise typer.Exit(code=0)
     
     backup = choose_backup_delete(backups=backups)

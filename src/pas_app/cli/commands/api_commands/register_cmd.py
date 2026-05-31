@@ -32,7 +32,7 @@ async def register():
         config.save_config(data=config_data)
 
 
-        #   #Запустить логин чтобы он сразу залогинился
+        #Restart login so the user is logged in immediately
 
         # login logic
 
