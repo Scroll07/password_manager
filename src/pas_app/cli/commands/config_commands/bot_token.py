@@ -14,15 +14,15 @@ def change_bot_token(config: UserConfig):
     while True:
         clear_console()
         text = """
-            1 - Посмотреть Bot token
-            2 - Изменить Bot token 
-            0 - Выйти
+            1 - View Bot token
+            2 - Change Bot token 
+            0 - Exit
         """
         config_data = config._refresh()
 
         choice = typer.prompt(text)
         if choice == "0":
-            exit_message_and_clear_console("Выход")
+            exit_message_and_clear_console("Exit")
 
         elif choice == "1":
             typer.echo(f"Bot Token = {config_data.local.BOT_TOKEN}")
@@ -30,7 +30,7 @@ def change_bot_token(config: UserConfig):
             continue
 
         elif choice == "2":
-            user_promt = typer.prompt("Введите Bot Token: ").strip()
+            user_promt = typer.prompt("Enter Bot Token: ").strip()
             config_data.local.BOT_TOKEN = user_promt
             config.save_config(config_data)
             continue

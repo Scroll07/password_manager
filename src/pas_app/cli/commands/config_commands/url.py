@@ -17,16 +17,16 @@ def change_base_url(config: UserConfig):
     while True:
         clear_console()
         text = """
-            1 - Посмотреть Base url
-            2 - Изменить Base url
-            3 - Сбросить Base url
-            0 - Выйти
+            1 - View Base URL
+            2 - Change Base URL
+            3 - Reset Base URL
+            0 - Exit
         """
         config_data = config._refresh()
 
         choice = typer.prompt(text + "\nInput")
         if choice == "0":
-            exit_message_and_clear_console("Выход")
+            exit_message_and_clear_console("Exit")
 
         elif choice == "1":
             typer.echo(f"BASE_URL = {config_data.local.BASE_URL}")
@@ -34,7 +34,7 @@ def change_base_url(config: UserConfig):
             continue
 
         elif choice == "2":
-            user_promt = typer.prompt("Введите Base url: ").strip()
+            user_promt = typer.prompt("Enter Base URL: ").strip()
             config_data.local.BASE_URL = user_promt
             config.save_config(config_data)
             continue
