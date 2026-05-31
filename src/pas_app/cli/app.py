@@ -8,60 +8,57 @@ from pas_app.cli.commands.pas_commands.get import get_command
 from pas_app.cli.commands.pas_commands.delete import delete_command
 from pas_app.cli.commands.pas_commands.find import find_command
 from pas_app.cli.commands.pas_commands.edit import edit_command
-from pas_app.cli.commands.pas_commands.master_cmd import change_master
-from pas_app.cli.commands.pas_commands.session_cmd import reset_session
 from pas_app.cli.commands.pas_commands.import_cmd import import_data
 from pas_app.cli.commands.pas_commands.export_cmd import export_command
-from pas_app.cli.commands.pas_commands.others_cmd import get_path
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
-from pas_app.cli.commands.pas_commands.configure_config import configure_config
 
 from pas_app.cli.commands.api_commands.api_typer import cli_app
-
+from pas_app.cli.commands.config_commands.config_typer import config_app
+from pas_app.cli.commands.user_commands.user_typer import user_app
 
 from pas_app.config import get_config
 
 
 app = typer.Typer(
     help="""
-CLI-менеджер паролей с локальным шифрованием vault.
+CLI password manager with local encrypted vault.
 
-Быстрый старт:
+Quick start:
   pas add github -u mylogin --gen
   pas list
   pas get github
   pas copy 1
 
-Основные команды:
-  add             Добавить запись
-  list            Показать все записи
-  get             Показать запись по метке
-  copy            Скопировать пароль по номеру
-  edit            Изменить запись
-  del             Удалить запись
-  find            Поиск по vault
+Core commands:
+  add             Add a new entry
+  list            Show all entries
+  get             Show entry by label
+  copy            Copy password by number
+  edit            Edit an entry
+  del             Delete an entry
+  find            Search the vault
 
-Сессия и безопасность:
-  reset-session   Сбросить текущую сессию
-  change-master   Сменить мастер-пароль
+Session and security:
+  reset-session   Reset current session
+  change-master   Change master password
 
-Импорт и экспорт:
-  export          Экспорт vault в файл
-  import          Импорт данных из файла
+Import and export:
+  export          Export vault to file
+  import          Import data from file
 
-Настройки и утилиты:
-  config          Настройки приложения
-  create-key      Генератор паролей
-  get-path        Показать путь к файлам vault
+Settings and utilities:
+  config          Application settings
+  create-key      Password generator
+  get-path        Show vault file paths
 
-API и backup:
-  api register    Создать API-аккаунт
-  api login       Войти в API
-  api upload      Загрузить backup vault
-  api download    Скачать backup vault
+API and backup:
+  api register    Create API account
+  api login       Log into API
+  api upload      Upload backup vault
+  api download    Download backup vault
 
-Подсказки:
+Tips:
   pas <command> --help
   pas api --help
 """,
@@ -91,23 +88,20 @@ app.command("find")(find_command)
 app.command("edit")(edit_command)
 app.command("export")(export_command)
 app.command("import")(import_command)
-app.command("reset-session")(reset_session)
-app.command("change-master")(change_master)
-app.command("config")(configure_config)
-app.command("get-path")(get_path)
+app.command("key")(create_password_command)
 
 
-# KEYS
-app.command("create-key")(create_password_command)
 
-# API
+# APPS
 app.add_typer(cli_app, name="api")
+app.add_typer(config_app, name="config")
+app.add_typer(user_app, name="user")
 
 
 
 @app.callback()
 def main():
-    """Инициализация сессии при запуске."""
+    """Initialize session on startup."""
     try:
         config = get_config()
         config.create_empty_config(current_user="unauthorized")

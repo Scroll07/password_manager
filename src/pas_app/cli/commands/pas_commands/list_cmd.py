@@ -8,9 +8,13 @@ from pas_app.config import get_config
 def list_command(
 ):
     """
-    Показать список всех сохраненных меток сервисов.
+    List all saved service labels in the vault.
 
-    Выводит отсортированный список всех доступных записей.
+    Displays a sorted list of all available entries without showing passwords.
+    Useful for quickly viewing what services are stored.
+
+    Examples:
+        pas list
     """
     config = get_config()
     data = load_data(config=config)
@@ -19,7 +23,7 @@ def list_command(
     labels = [p.service for p in passwords]
     table = [[label] for label in labels]
     if not labels:
-        typer.echo("Записей не найдено.")
+        typer.echo("No entries found.")
         return
     else:
-        typer.echo(tabulate.tabulate(table, headers=["Метки"], tablefmt="simple"))
+        typer.echo(tabulate.tabulate(table, headers=["Labels"], tablefmt="simple"))

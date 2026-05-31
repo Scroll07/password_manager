@@ -15,10 +15,10 @@ async def upload():
     api = Api()
 
     if api is None:
-        typer.echo("No api client, try to login firstly")
+        typer.echo("No API client. Try to login first")
         raise typer.Exit()
     if not config_data.local.default_user:
-        typer.echo("No default user in Config, try to login firstly")
+        typer.echo("No default user in config. Try to login first")
         raise typer.Exit()
 
     vault_file = VAULTS / f"{config_data.local.default_user}.json"
@@ -27,7 +27,7 @@ async def upload():
         typer.echo(f"File {vault_file.name} does not exist")
 
     #name - ask name for backup to show for user
-    #count - get summury of rows in user vault - len(user_passwords)
+    #rows - get summary of rows in user vault - len(user_passwords)
     name = choose_name_for_backup()
 
     user_data = load_data(config=config)

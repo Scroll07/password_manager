@@ -28,7 +28,7 @@ async def download():
     
     backups = response.content.backups
     if not backups:
-        typer.echo("You have not uplaoded backups")
+        typer.echo("You have not uploaded backups")
         raise typer.Exit(code=0)
     
     backup = choose_backup_download(backups=backups)
@@ -48,7 +48,7 @@ async def download():
         )
         raise typer.Exit(code=1)
 
-    #открыть путь файла и сохранить
+    #save vault file path and write data
     vault_file = VAULTS / f"{config_data.local.default_user}.json"
     if not vault_file.exists():
         typer.echo(f"File {vault_file} does not exist")

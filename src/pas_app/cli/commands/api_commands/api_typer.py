@@ -3,19 +3,19 @@ import typer
 
 cli_app = typer.Typer(
     help="""
-API-команды для работы с аккаунтом и backup vault.
+API commands for account and backup vault management.
 
-Используй их, чтобы:
+Use them to:
 
-- зарегистрироваться в API;
+- register in the API;
 
-- войти в аккаунт;
+- log into your account;
 
-- загрузить backup vault на сервер;
+- upload backup vault to the server;
 
-- скачать backup vault на другой компьютер.
+- download backup vault to another computer.
 
-Подробности смотри в:
+For more details, see:
 
   pas api <command> --help
 """,
@@ -46,40 +46,70 @@ delete = check_session_dec(delete)
 #Commands
 def register_command():
     """
-    Зарегистрировать API-аккаунт.
+    Register a new API account.
 
-    Создаёт новый аккаунт для работы с удалённым vault backup.
+    Creates a new account for working with remote vault backup storage.
+    You will be prompted to enter a username and password for registration.
+
+    Examples:
+        pas api register
+
+    After successful registration, a local vault will be created.
     """
 
     asyncio.run(register())
 
 def login_command():
     """
-    Войти в API-аккаунт.
+    Log into an existing API account.
 
-    Получает access token для последующих запросов.
+    Authenticates with the API and obtains access tokens for subsequent
+    requests. Tokens are securely stored in the local configuration.
+
+    Examples:
+        pas api login
+
+    You will be prompted to enter your username and password.
     """
     asyncio.run(login())
 
 def upload_command():
     """
-    Загрузить backup vault на сервер.
+    Upload backup vault to the server.
 
-    Сохраняет зашифрованный vault, чтобы можно было восстановить его на другом ПК.
+    Saves an encrypted copy of your local vault to the server.
+    This backup can be restored on another computer if needed.
+
+    Examples:
+        pas api upload
+
+    You will be prompted to enter a backup name for identification.
     """
     asyncio.run(upload())
     
 def download_command():
     """
-    Скачать backup vault с сервера.
+    Download backup vault from the server.
 
-    Используется для восстановления паролей на другом устройстве.
+    Restores a previously uploaded vault backup from the server.
+    This is useful for recovering passwords on another device.
+
+    Examples:
+        pas api download
+
+    You will be prompted to choose a backup from available backups.
     """
     asyncio.run(download())
 
 def delete_command():
     """
-    Удалить backup по айди
+    Delete a backup vault by ID.
+
+    Removes a backup from the server. You will be prompted to choose
+    which backup to delete.
+
+    Examples:
+        pas api delete
     """
     asyncio.run(delete())
 
