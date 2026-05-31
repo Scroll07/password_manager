@@ -22,43 +22,43 @@ from pas_app.config import get_config
 
 app = typer.Typer(
     help="""
-CLI-менеджер паролей с локальным шифрованием vault.
+CLI password manager with local encrypted vault.
 
-Быстрый старт:
+Quick start:
   pas add github -u mylogin --gen
   pas list
   pas get github
   pas copy 1
 
-Основные команды:
-  add             Добавить запись
-  list            Показать все записи
-  get             Показать запись по метке
-  copy            Скопировать пароль по номеру
-  edit            Изменить запись
-  del             Удалить запись
-  find            Поиск по vault
+Core commands:
+  add             Add a new entry
+  list            Show all entries
+  get             Show entry by label
+  copy            Copy password by number
+  edit            Edit an entry
+  del             Delete an entry
+  find            Search the vault
 
-Сессия и безопасность:
-  reset-session   Сбросить текущую сессию
-  change-master   Сменить мастер-пароль
+Session and security:
+  reset-session   Reset current session
+  change-master   Change master password
 
-Импорт и экспорт:
-  export          Экспорт vault в файл
-  import          Импорт данных из файла
+Import and export:
+  export          Export vault to file
+  import          Import data from file
 
-Настройки и утилиты:
-  config          Настройки приложения
-  create-key      Генератор паролей
-  get-path        Показать путь к файлам vault
+Settings and utilities:
+  config          Application settings
+  create-key      Password generator
+  get-path        Show vault file paths
 
-API и backup:
-  api register    Создать API-аккаунт
-  api login       Войти в API
-  api upload      Загрузить backup vault
-  api download    Скачать backup vault
+API and backup:
+  api register    Create API account
+  api login       Log into API
+  api upload      Upload backup vault
+  api download    Download backup vault
 
-Подсказки:
+Tips:
   pas <command> --help
   pas api --help
 """,
@@ -101,7 +101,7 @@ app.add_typer(user_app, name="user")
 
 @app.callback()
 def main():
-    """Инициализация сессии при запуске."""
+    """Initialize session on startup."""
     try:
         config = get_config()
         config.create_empty_config(current_user="unauthorized")
