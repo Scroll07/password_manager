@@ -8,17 +8,14 @@ from pas_app.cli.commands.pas_commands.get import get_command
 from pas_app.cli.commands.pas_commands.delete import delete_command
 from pas_app.cli.commands.pas_commands.find import find_command
 from pas_app.cli.commands.pas_commands.edit import edit_command
-from pas_app.cli.commands.pas_commands.master_cmd import change_master
-from pas_app.cli.commands.pas_commands.session_cmd import reset_session
 from pas_app.cli.commands.pas_commands.import_cmd import import_data
 from pas_app.cli.commands.pas_commands.export_cmd import export_command
-from pas_app.cli.commands.pas_commands.others_cmd import get_path
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
-from pas_app.cli.commands.pas_commands.configure_config import configure_config
 
 from pas_app.cli.commands.api_commands.api_typer import cli_app
-
+from pas_app.cli.commands.config_commands.config_typer import config_app
+from pas_app.cli.commands.user_commands.user_typer import user_app
 
 from pas_app.config import get_config
 
@@ -91,17 +88,14 @@ app.command("find")(find_command)
 app.command("edit")(edit_command)
 app.command("export")(export_command)
 app.command("import")(import_command)
-app.command("reset-session")(reset_session)
-app.command("change-master")(change_master)
-app.command("config")(configure_config)
-app.command("get-path")(get_path)
+app.command("key")(create_password_command)
 
 
-# KEYS
-app.command("create-key")(create_password_command)
 
-# API
+# APPS
 app.add_typer(cli_app, name="api")
+app.add_typer(config_app, name="config")
+app.add_typer(user_app, name="user")
 
 
 

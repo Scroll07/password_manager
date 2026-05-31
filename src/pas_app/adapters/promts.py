@@ -129,6 +129,26 @@ def choose_default_user(usernames: list[str]) -> str:
             
         return usernames[int(choice)-1]
 
+def choose_delete_user(usernames: list[str]) -> str:
+    while True:
+        clear_console()
+        typer.echo("User profiles:\n")
+        for i, username in enumerate(usernames, start=1):
+            typer.echo(f'[{i}] - {username}')
+        choice = typer.prompt("\nChoose username to delete")
+
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(usernames):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return usernames[int(choice)-1]
+
 def choose_backup_download(backups: list[BackupData]) -> BackupData:
     backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
     headers = ["Id", "Name", "Rows", "Created_at"]
