@@ -21,49 +21,11 @@ from pas_app.config import get_config
 
 
 app = typer.Typer(
-    help="""
-CLI password manager with local encrypted vault.
-
-Quick start:
-  pas add github -u mylogin --gen
-  pas list
-  pas get github
-  pas copy 1
-
-Core commands:
-  add             Add a new entry
-  list            Show all entries
-  get             Show entry by label
-  copy            Copy password by number
-  edit            Edit an entry
-  del             Delete an entry
-  find            Search the vault
-
-Session and security:
-  reset-session   Reset current session
-  change-master   Change master password
-
-Import and export:
-  export          Export vault to file
-  import          Import data from file
-
-Settings and utilities:
-  config          Application settings
-  create-key      Password generator
-  get-path        Show vault file paths
-
-API and backup:
-  api register    Create API account
-  api login       Log into API
-  api upload      Upload backup vault
-  api download    Download backup vault
-
-Tips:
-  pas <command> --help
-  pas api --help
-""",
+    help="CLI password manager with a local encrypted vault.",
     no_args_is_help=True,
+    context_settings={"max_content_width": 100},
 )
+
 #Check session Decorator
 add_command = check_session_dec(add_command)
 list_command = check_session_dec(list_command)

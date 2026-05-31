@@ -1,23 +1,7 @@
 import typer
 
 user_app = typer.Typer(
-    help="""
-API commands for account and backup vault management.
-
-Use them to:
-
-- register in the API;
-
-- log into your account;
-
-- upload backup vault to the server;
-
-- download backup vault to another computer.
-
-For more details, see:
-
-  pas user <command> --help
-""",
+    help="User commands for account and backup vault management.",
     no_args_is_help=True
 )
 
