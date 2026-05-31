@@ -1,6 +1,6 @@
 import typer
 
-from pas_app.config import get_config, ConfigFileData, KeyringConfig
+from pas_app.config import get_config, KeyringConfig
 
 
 def reset_session():

@@ -25,7 +25,7 @@ def delete_user():
         typer.echo(f"File {user_file} does not exist")
         return
     if not typer.confirm(f"Delete user: {username}?"):
-        typer.echo(f"Deleting was canceled")
+        typer.echo("Deleting was canceled")
         return
     
     user_file.unlink()
