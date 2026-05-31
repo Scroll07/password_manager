@@ -16,37 +16,34 @@ pas add test -u test -p test --note test
 ```
 
 **BASE COMMANDS**
-| Command           | Description           | Example                      |
-| ----------------- | --------------------- | ---------------------------- |
-| pas add           | Добавить запись       | pas add github -u user --gen |
-| pas list          | Список записей        | pas list                     |
-| pas get           | Показать запись       | pas get git                  |
-| pas copy          | Копировать пароль     | pas copy 2                   |
-| pas edit          | Изменить запись       | pas edit 1 -p newpass        |
-| pas del           | Удалить запись        | pas del github               |
-| pas find          | Поиск                 | pas find @gmail              |
-| pas reset-session | Сброс сессии          | pas reset-session            |
-| pas export        | Экспорт               | pas export backup.json       |
-| pas import        | Импорт                | pas import backup.json       |
-| pas change-master | Сменить мастер-пароль | pas change-master            |
-| pas create-key    | Генератор паролей     | pas create-key -l 32         |
-| pas config        | Настройка конфига     | pas config --token           | 
+| Command    | Description                          | Example                      |
+| ---------- | ------------------------------------ | ---------------------------- |
+| pas add    | Add a new entry to the local vault   | pas add github -u user --gen |
+| pas list   | Show all saved entries               | pas list                     |
+| pas get    | Show an entry by label               | pas get github               |
+| pas copy   | Copy a password by entry number      | pas copy 2                   |
+| pas edit   | Edit an existing entry               | pas edit 1 -p newpass        |
+| pas del    | Delete an entry from the local vault | pas del github               |
+| pas find   | Search entries in the vault          | pas find @gmail              |
+| pas export | Export vault data to a file          | pas export backup.json       |
+| pas import | Import vault data from a file        | pas import backup.json       |
+| pas key    | Generate a password                  | pas key -l 32                |
 
 
 **API COMMANDS**
-| Command          | Description                                                | Example          |
-| ---------------- | ---------------------------------------------------------- | ---------------- |
-| pas api register | Регистрация в API                                          | pas api register |
-| pas api login    | Вход в API                                                 | pas api login    |
-| pas api upload   | Загрузить backup файла vault в облако/на сервер            | pas api upload   |
-| pas api download | Скачать backup файла vault для восстановления на другом ПК | pas api download |
-| pas api delete   | Удалить backup                                             | pas api delete   |
+| Command          | Description                             | Example          |
+| ---------------- | --------------------------------------- | ---------------- |
+| pas api register | Create an API account                   | pas api register |
+| pas api login    | Log into the API                        | pas api login    |
+| pas api upload   | Upload a vault backup to the server     | pas api upload   |
+| pas api download | Download a vault backup from the server | pas api download |
+| pas api delete   | Delete a vault backup from the server   | pas api delete   |
 
 **USER COMMANDS**
-| Command                | Description                | Example                |
-| ---------------------- | -------------------------- | ---------------------- |
-| pas user delete        | Delete a local user        | pas user delete        |
-| pas user change-master | Change the master password | pas user change-master |
+| Command                 | Description                | Example                |
+| ------------------------| -------------------------- | ---------------------- |
+| pas user delete         | Delete a local user        | pas user delete        |
+| pas user change-master  | Change the master password | pas user change-master |
 
 **CONFIG COMMANDS**
 | Command                  | Description                     | Example                  |
