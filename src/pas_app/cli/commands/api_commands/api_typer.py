@@ -27,6 +27,7 @@ from pas_app.cli.commands.api_commands.login_cmd import login
 from pas_app.cli.commands.api_commands.upload_cmd import upload
 from pas_app.cli.commands.api_commands.download_cmd import download
 from pas_app.cli.commands.api_commands.delete_cmd import delete
+from pas_app.cli.commands.api_commands.change_password import change_password
 
 from pas_app.services.password import check_session_dec
 from pas_app.core.api import check_token_dec
@@ -34,6 +35,7 @@ from pas_app.core.api import check_token_dec
 upload = check_token_dec(upload)
 download = check_token_dec(download)
 delete = check_token_dec(delete)
+change_password = check_token_dec(change_password)
 
 upload = check_session_dec(upload)
 download = check_session_dec(download)
@@ -112,9 +114,16 @@ def delete_command():
         pas api delete
     """
     asyncio.run(delete())
+    
+def change_password_command():
+    """
+    Change user password for api
+    """
+    asyncio.run(change_password())
 
 cli_app.command("register")(register_command)
 cli_app.command("login")(login_command)
 cli_app.command("upload")(upload_command)
 cli_app.command("download")(download_command)
 cli_app.command("delete")(delete_command)
+cli_app.command("change-password")(change_password)

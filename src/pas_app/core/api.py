@@ -9,7 +9,7 @@ import typer
 from pas_app.config import get_config
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
-from pas_app.schemas.passwords import EncryptedUserVault
+from pas_app.schemas.passwords import EncryptedUserVault, ChangePasswordSchema
 from pas_app.core.crypto import decode_token
 
 
@@ -149,18 +149,15 @@ class Api:
         
         return ApiResponse(status_code=response.status_code, content=content)  
     
-    async def change_password(self, current_password: str, new_password: str) -> ApiResponse:
+    async def change_password(self, data: ChangePasswordSchema) -> ApiResponse:
         url = "/change-password"
         async with AsyncClient(base_url=self.base_url) as client:
             response = await client.patch(
                 url=url,
-                data={
-                    "current_password": current_password,
-                    "new_password": new_password
-                }
+                data=data.model_dump()
             )
-            data = response.json()
-            content = MessageResponse(detail=data.get("detail"))
+            json = response.json()
+            content = MessageResponse(detail=json.get("detail"))
             return ApiResponse(status_code=response.status_code, content=content)                
     
     
