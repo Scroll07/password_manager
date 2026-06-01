@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
 from pas_app.schemas.api import BackupData
-from pas_app.schemas.passwords import LoginRegisterInput
+from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
 from pas_app.config import IMPORT_DIR
 
 
@@ -205,11 +205,32 @@ def choose_name_for_backup() -> str:
             continue
         return name.strip()
 
-
-
-
-
-
+def change_password_prompt() -> ChangePasswordSchema:
+    while True:
+        clear_console()
+        current_password = typer.prompt("Input your current password")
+        if not current_password:
+            continue
+        new_password = typer.prompt("Input new password")
+        if not new_password:
+            continue
+        if not (3 < len(current_password) < 21):
+            typer.echo("Current password's length should be: 3 < length < 21")
+            time.sleep(2)
+            continue
+        if not (3 < len(new_password) < 21):
+            typer.echo("New password's length should be: 3 < length < 21")
+            time.sleep(2)
+            continue
+        if " " in current_password.strip() or " " in new_password.strip():
+            typer.echo("Password must not contain spaces")
+            time.sleep(2)
+            continue
+        return ChangePasswordSchema(
+            current_password=current_password,
+            new_password=new_password
+        )
+            
 
 def exit_message_and_clear_console(message: str):
     typer.echo(message)

@@ -9,6 +9,7 @@ class UserVault(BaseModel):
     user_passwords: list["Password"]
 
 
+
 class EncryptedUserVault(BaseModel):
     username: str
     salt: str
@@ -25,6 +26,9 @@ class Password(BaseModel):
 class Passwords(BaseModel):
     passwords: list[Password]
 
+class ChangePasswordSchema(BaseModel):
+    current_password: str
+    new_password: str
 
 class LoginRegisterInput(BaseModel):
     username: str
