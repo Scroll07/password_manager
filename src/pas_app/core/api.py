@@ -9,7 +9,7 @@ import typer
 from pas_app.config import get_config
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
-from pas_app.schemas.passwords import EncryptedUserVault
+from pas_app.schemas.passwords import EncryptedUserVault, ChangePasswordSchema
 from pas_app.core.crypto import decode_token
 
 
@@ -149,6 +149,35 @@ class Api:
         
         return ApiResponse(status_code=response.status_code, content=content)  
     
+    async def change_password(self, data: ChangePasswordSchema) -> ApiResponse:
+        url = "/change-password"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.patch(
+                url=url,
+                headers=self.headers,
+                json=data.model_dump()
+            )
+        json = response.json()
+        content = MessageResponse(detail=json.get("detail"))
+        return ApiResponse(status_code=response.status_code, content=content)              
+        
+    async def rename_backup(self, backup_id: int, new_name: str) -> ApiResponse:
+        url = f"/backups/{backup_id}"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.patch(
+                url=url,
+                headers=self.headers,
+                json=new_name
+            )  
+        data = response.json()
+        content = MessageResponse(detail=data.get("detail"))
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+    
+    
+    
+    
+    
     async def check_token(self) -> ApiResponse | None:
         token_data = decode_token(token=self.config_data.keyring.bearer_token)
         if token_data.exp - timedelta(minutes=1) < datetime.now(timezone.utc): #12:49 < 12:50
@@ -163,7 +192,7 @@ class Api:
             return response
         return None
 
-
+        
 
 
 

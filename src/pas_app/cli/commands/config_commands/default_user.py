@@ -20,4 +20,6 @@ def set_default_user():
     username = choose_default_user(usernames=usernames)
     config_data = config._refresh()
     config_data.local.default_user = username
+    config_data.keyring.bearer_token = ""    #RESET TOKENS
+    config_data.keyring.refresh_token = ""
     config.save_config(data=config_data)

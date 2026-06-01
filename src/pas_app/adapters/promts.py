@@ -3,12 +3,13 @@ import time
 import tkinter as tk
 from tkinter import simpledialog
 import getpass
+from typing import Literal
 import typer
 from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
 from pas_app.schemas.api import BackupData
-from pas_app.schemas.passwords import LoginRegisterInput
+from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
 from pas_app.config import IMPORT_DIR
 
 
@@ -149,16 +150,16 @@ def choose_delete_user(usernames: list[str]) -> str:
             
         return usernames[int(choice)-1]
 
-def choose_backup_download(backups: list[BackupData]) -> BackupData:
+def choose_backup(backups: list[BackupData], text: str) -> BackupData:
     backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
     headers = ["Id", "Name", "Rows", "Created_at"]
     data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
     while True:
         clear_console()
-        typer.echo("Backups to download:\n")
+        typer.echo("Backups:\n")
         typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
 
-        choice = typer.prompt("Choose backup to download")
+        choice = typer.prompt(text=text)
         
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -172,28 +173,6 @@ def choose_backup_download(backups: list[BackupData]) -> BackupData:
             
         return backups[int(choice)-1]
     
-def choose_backup_delete(backups: list[BackupData]) -> BackupData:
-    backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
-    headers = ["Id", "Name", "Rows", "Created_at"]
-    data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
-    while True:
-        clear_console()
-        typer.echo("Backups to delete:\n")
-        typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
-
-        choice = typer.prompt("Choose backup to delete")
-        
-        if not choice.isdigit():
-            typer.echo("Input should be digit")
-            time.sleep(2)
-            continue
-        
-        if not 1 <= int(choice) <= len(backups):
-            typer.echo("Wrong number input")
-            time.sleep(2)
-            continue
-            
-        return backups[int(choice)-1]
 
 def choose_name_for_backup() -> str:
     while True:
@@ -205,10 +184,80 @@ def choose_name_for_backup() -> str:
             continue
         return name.strip()
 
+def change_password_prompt() -> ChangePasswordSchema:
+    while True:
+        clear_console()
+        current_password = typer.prompt("Input your current password")
+        if not current_password:
+            continue
+        new_password = typer.prompt("Input new password")
+        if not new_password:
+            continue
+        if not (3 < len(current_password) < 21):
+            typer.echo("Current password's length should be: 3 < length < 21")
+            time.sleep(2)
+            continue
+        if not (3 < len(new_password) < 21):
+            typer.echo("New password's length should be: 3 < length < 21")
+            time.sleep(2)
+            continue
+        if " " in current_password.strip() or " " in new_password.strip():
+            typer.echo("Password must not contain spaces")
+            time.sleep(2)
+            continue
+        return ChangePasswordSchema(
+            current_password=current_password,
+            new_password=new_password
+        )
+            
 
+action = Literal["download", "rename", "delete", "cancel"]
+def choose_action(backup: BackupData) -> action:
+    while True:
+        clear_console()
+        text = f"""
+        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at} 
+        
+        1) Download
+        2) Rename (change name)
+        3) Delete
+        0) Cancel
+        
+        Input number"""
+        choice = typer.prompt(text=text)
+        try:
+            choice = str(choice).strip()
+            if not choice.isdigit():
+                typer.echo("Input should be a digit")
+                time.sleep(2)
+                continue
+        except Exception:
+            typer.echo("Input should be a digit")
+            time.sleep(2)
+            continue
+        choice = int(choice)
+        if choice == 0:
+            return "cancel"
+        elif choice == 1:
+            return "download"
+        elif choice == 2:
+            return "rename"
+        elif choice == 3:
+            return "delete"
+        else:
+            continue
 
-
-
+def input_new_backup_name() -> str:
+    while True:
+        clear_console()
+        new_name = typer.prompt(text="Input new name for backup")
+        if not new_name:
+            continue
+        if len(new_name) > 20:
+            typer.echo("Length of new name must be less than 21")
+            time.sleep(2)
+            continue
+        return new_name
 
 
 def exit_message_and_clear_console(message: str):
