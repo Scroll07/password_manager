@@ -31,13 +31,13 @@ pas add test -u test -p test --note test
 
 
 **API COMMANDS**
-| Command          | Description                             | Example          |
-| ---------------- | --------------------------------------- | ---------------- |
-| pas api register | Create an API account                   | pas api register |
-| pas api login    | Log into the API                        | pas api login    |
-| pas api upload   | Upload a vault backup to the server     | pas api upload   |
-| pas api download | Download a vault backup from the server | pas api download |
-| pas api delete   | Delete a vault backup from the server   | pas api delete   |
+| Command                 | Description                                      | Example                 |
+| ----------------------- | ------------------------------------------------ | ----------------------- |
+| pas api register        | Register a new account for remote backup storage | pas api register        |
+| pas api login           | Authenticate and save API session locally        | pas api login           |
+| pas api upload          | Upload the current local vault as a backup       | pas api upload          |
+| pas api backups         | Interactively manage backups on the server       | pas api backups         |
+| pas api change-password | Change the current account password              | pas api change-password |
 
 **USER COMMANDS**
 | Command                 | Description                | Example                |
