@@ -22,24 +22,25 @@ For more details, see:
     no_args_is_help=True
 )
 
+from pas_app.cli.commands.api_commands.backups import backups
 from pas_app.cli.commands.api_commands.register_cmd import register
 from pas_app.cli.commands.api_commands.login_cmd import login
 from pas_app.cli.commands.api_commands.upload_cmd import upload
-from pas_app.cli.commands.api_commands.download_cmd import download
-from pas_app.cli.commands.api_commands.delete_cmd import delete
 from pas_app.cli.commands.api_commands.change_password import change_password
 
 from pas_app.services.password import check_session_dec
 from pas_app.core.api import check_token_dec
 
 upload = check_token_dec(upload)
-download = check_token_dec(download)
-delete = check_token_dec(delete)
+backups = check_token_dec(backups)
 change_password = check_token_dec(change_password)
+# download = check_token_dec(download)
+# delete = check_token_dec(delete)
 
 upload = check_session_dec(upload)
-download = check_session_dec(download)
-delete = check_session_dec(delete)
+backups = check_session_dec(backups)
+# download = check_session_dec(download)
+# delete = check_session_dec(delete)
 
 
 
@@ -89,41 +90,48 @@ def upload_command():
     """
     asyncio.run(upload())
     
-def download_command():
-    """
-    Download backup vault from the server.
+# def download_command():
+#     """
+#     Download backup vault from the server.
 
-    Restores a previously uploaded vault backup from the server.
-    This is useful for recovering passwords on another device.
+#     Restores a previously uploaded vault backup from the server.
+#     This is useful for recovering passwords on another device.
 
-    Examples:
-        pas api download
+#     Examples:
+#         pas api download
 
-    You will be prompted to choose a backup from available backups.
-    """
-    asyncio.run(download())
+#     You will be prompted to choose a backup from available backups.
+#     """
+#     asyncio.run(download())
 
-def delete_command():
-    """
-    Delete a backup vault by ID.
+# def delete_command():
+#     """
+#     Delete a backup vault by ID.
 
-    Removes a backup from the server. You will be prompted to choose
-    which backup to delete.
+#     Removes a backup from the server. You will be prompted to choose
+#     which backup to delete.
 
-    Examples:
-        pas api delete
-    """
-    asyncio.run(delete())
+#     Examples:
+#         pas api delete
+#     """
+#     asyncio.run(delete())
     
 def change_password_command():
     """
     Change user password for api
     """
     asyncio.run(change_password())
+    
+def backups_command():
+    """
+    Manipulating backups
+    """
+    asyncio.run(backups())
 
 cli_app.command("register")(register_command)
 cli_app.command("login")(login_command)
 cli_app.command("upload")(upload_command)
-cli_app.command("download")(download_command)
-cli_app.command("delete")(delete_command)
+cli_app.command("backups")(backups_command)
 cli_app.command("change-password")(change_password)
+# cli_app.command("download")(download_command)
+# cli_app.command("delete")(delete_command)

@@ -154,12 +154,24 @@ class Api:
         async with AsyncClient(base_url=self.base_url) as client:
             response = await client.patch(
                 url=url,
-                data=data.model_dump()
+                headers=self.headers,
+                json=data.model_dump()
             )
-            json = response.json()
-            content = MessageResponse(detail=json.get("detail"))
-            return ApiResponse(status_code=response.status_code, content=content)                
-    
+        json = response.json()
+        content = MessageResponse(detail=json.get("detail"))
+        return ApiResponse(status_code=response.status_code, content=content)              
+        
+    async def rename_backup(self, backup_id: int, new_name: str) -> ApiResponse:
+        url = f"/backups/{backup_id}"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.patch(
+                url=url,
+                headers=self.headers,
+                json=new_name
+            )  
+        data = response.json()
+        content = MessageResponse(detail=data.get("detail"))
+        return ApiResponse(status_code=response.status_code, content=content)
     
     
     
