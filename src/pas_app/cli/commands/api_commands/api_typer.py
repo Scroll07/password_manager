@@ -118,13 +118,33 @@ def upload_command():
     
 def change_password_command():
     """
-    Change user password for api
+    Change API account password.
+
+    Updates the password for your API account while keeping backups
+    and other account data intact.
+
+    Examples:
+        pas api change-password
+
+    You will be prompted to enter a new password in a secure input window.
     """
     asyncio.run(change_password())
     
 def backups_command():
     """
-    Manipulating backups
+    Manage your uploaded backups.
+
+    Provides an interactive menu to view, rename, download, or delete
+    your vault backups stored on the server. Choose an action from the menu.
+
+    Examples:
+        pas api backups
+
+    Available actions:
+    - View all backups
+    - Download a backup
+    - Rename a backup
+    - Delete a backup
     """
     asyncio.run(backups())
 
@@ -132,6 +152,6 @@ cli_app.command("register")(register_command)
 cli_app.command("login")(login_command)
 cli_app.command("upload")(upload_command)
 cli_app.command("backups")(backups_command)
-cli_app.command("change-password")(change_password)
+cli_app.command("change-password")(change_password_command)
 # cli_app.command("download")(download_command)
 # cli_app.command("delete")(delete_command)
