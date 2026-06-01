@@ -149,6 +149,26 @@ class Api:
         
         return ApiResponse(status_code=response.status_code, content=content)  
     
+    async def change_password(self, current_password: str, new_password: str) -> ApiResponse:
+        url = "/change-password"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.patch(
+                url=url,
+                data={
+                    "current_password": current_password,
+                    "new_password": new_password
+                }
+            )
+            data = response.json()
+            content = MessageResponse(detail=data.get("detail"))
+            return ApiResponse(status_code=response.status_code, content=content)                
+    
+    
+    
+    
+    
+    
+    
     async def check_token(self) -> ApiResponse | None:
         token_data = decode_token(token=self.config_data.keyring.bearer_token)
         if token_data.exp - timedelta(minutes=1) < datetime.now(timezone.utc): #12:49 < 12:50
@@ -163,7 +183,7 @@ class Api:
             return response
         return None
 
-
+        
 
 
 
