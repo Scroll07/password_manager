@@ -27,7 +27,7 @@ pas add test -u test -p test --note test
 | pas find   | Search entries in the vault          | pas find @gmail              |
 | pas export | Export vault data to a file          | pas export backup.json       |
 | pas import | Import vault data from a file        | pas import backup.json       |
-| pas key    | Generate a password                  | pas key -l 32                |
+| pas gen    | Generate a password                  | pas gen -l 32                |
 
 
 **API COMMANDS**

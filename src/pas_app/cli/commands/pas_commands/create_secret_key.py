@@ -12,11 +12,11 @@ def create_password_command(
     Increase the length for higher security requirements.
 
     Examples:
-        pas create-password           # 16-character password
+        pas gen           # 16-character password
 
-        pas create-password -l 32     # 32-character password
+        pas gen -l 32     # 32-character password
 
-        pas create-password --length 64  # Very long key (64 characters)
+        pas gen --length 64  # Very long key (64 characters)
     """
     password = secrets.token_urlsafe(length)
     typer.echo(password)
