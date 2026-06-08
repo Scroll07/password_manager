@@ -99,19 +99,36 @@ def find_digits_in_a_row(row: str) -> int:
     result = 0
     left = 0
     while left < len(row):
-        if not row[left].isdigit():
+        while left < len(row) and not row[left].isdigit():
             left += 1
         right = left + 1
-        while right < len(row):
-            if row[right].isdigit():
-                right += 1
+        while right < len(row) and row[right].isdigit():
+            right += 1
         result = max(result, right - left + 1)
+        left = right
     return result
-         
+
+
+def is_common_pattern(password: str) -> bool:
+    """Check for common weak patterns (sequential, repeated chars, etc)."""
+    common_patterns = [
+        "123", "321", "012", "456", "789",
+        "abc", "bcd", "xyz", "qwerty", "qwertyuiop",
+        "aaa", "bbb", "ccc", "111", "222", "000",
+        "password", "pass", "admin", "user", "test"
+    ]
+    
+    pwd_lower = password.lower()
+    for pattern in common_patterns:
+        if pattern in pwd_lower:
+            return True
+    return False
 
 
 PASSWORD_STRENGTH_LEVEL = Literal["high", "medium", "low"]
 def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
+    score = 0
+    
     data_folder = BASE_DIR / "data"
     data_files = [f for f in data_folder.rglob("*.txt")]
     for file in data_files:
@@ -121,21 +138,47 @@ def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
         if password in data:
             return "low"
     
-    if len(password) < 8:
+    if is_common_pattern(password):
         return "low"
     
-    elif 8 <= len(password) < 16:
+    if len(password) < 8:
+        return "low"
+    elif len(password) >= 16:
+        score += 3
+    elif len(password) >= 12:
+        score += 2
+    else:
+        score += 1
+    
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(not c.isalnum() for c in password)
+    
+    variety = sum([has_upper, has_lower, has_digit, has_special])
+    if variety >= 4:
+        score += 3
+    elif variety >= 3:
+        score += 2
+    elif variety >= 2:
+        score += 1
+    else:
+        return "low"
+    
+    digits = find_digits_in_a_row(row=password)
+    
+    if digits >= 3:
+        score -= 1
+    
+    if score >= 6:
+        return "high"
+    elif score >= 3:
         return "medium"
     else:
-        digits = find_digits_in_a_row(row=password)
-        if digits >= 3:
-            return "medium"
-        return "high"    
-    
-    
+        return "low"
         
-# DECORATOR
       
+# DECORATOR
 from functools import wraps   
         
 def check_session_dec(func: Callable):
