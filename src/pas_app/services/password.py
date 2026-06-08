@@ -1,11 +1,11 @@
 from datetime import datetime
 import tabulate
 import typer
-from typing import Callable
+from typing import Callable, Literal
 
 from pas_app.adapters.promts import cli_password_promt, choose_default_user
 from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
-from pas_app.config import VAULTS
+from pas_app.config import VAULTS, BASE_DIR
 from pas_app.schemas.passwords import Password, EncryptedUserVault
 from pas_app.services.file_utils import load_encrypted_vault, is_vault_files_exists, get_vault_usernames
 from pas_app.exceptions import EchoException
@@ -95,7 +95,44 @@ def print_passwords(passwords: list[Password], show: bool = False) -> None:
         typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
         
         
-        
+def find_digits_in_a_row(row: str) -> int:
+    result = 0
+    left = 0
+    while left < len(row):
+        if not row[left].isdigit():
+            left += 1
+        right = left + 1
+        while right < len(row):
+            if row[right].isdigit():
+                right += 1
+        result = max(result, right - left + 1)
+    return result
+         
+
+
+PASSWORD_STRENGTH_LEVEL = Literal["high", "medium", "low"]
+def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
+    data_folder = BASE_DIR / "data"
+    data_files = [f for f in data_folder.rglob("*.txt")]
+    for file in data_files:
+        if not file.exists():
+            continue
+        data = file.read_text()
+        if password in data:
+            return "low"
+    
+    if len(password) < 8:
+        return "low"
+    
+    elif 8 <= len(password) < 16:
+        return "medium"
+    else:
+        digits = find_digits_in_a_row(row=password)
+        if digits >= 3:
+            return "medium"
+        return "high"    
+    
+    
         
 # DECORATOR
       
