@@ -10,7 +10,7 @@ import typer
 
 from pas_app.adapters.promts import change_password_prompt
 from pas_app.core.api import Api
-from pas_app.schemas.api import BackupsResponse, MessageResponse
+from pas_app.schemas.api import MessageResponse
 
 async def change_password():
     api = Api()
