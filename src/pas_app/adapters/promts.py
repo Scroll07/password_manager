@@ -12,6 +12,8 @@ from pas_app.schemas.api import BackupData
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
 from pas_app.config import IMPORT_DIR
 
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 def gui_password_prompt():
     root = tk.Tk()
@@ -153,7 +155,7 @@ def choose_delete_user(usernames: list[str]) -> str:
 def choose_backup(backups: list[BackupData], text: str) -> BackupData:
     backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
     headers = ["Id", "Name", "Rows", "Created_at"]
-    data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
+    data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(backups, start=1)] 
     while True:
         clear_console()
         typer.echo("Backups:\n")
@@ -216,7 +218,7 @@ def choose_action(backup: BackupData) -> action:
     while True:
         clear_console()
         text = f"""
-        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at} 
+        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at.strftime(DATE_FORMAT)} 
         
         1) Download
         2) Rename (change name)
