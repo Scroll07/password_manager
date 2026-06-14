@@ -42,7 +42,7 @@ def get_key() -> bytes:
     )
 
     if expired:
-        master_password = cli_password_promt()
+        master_password = cli_password_promt().strip()
     else:
         master_password = config_data.keyring.master_password
 

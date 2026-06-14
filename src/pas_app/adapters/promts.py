@@ -30,7 +30,7 @@ def cli_password_promt():
 
 def cli_input(text: str, is_secret: bool = False) -> str:
     data = typer.prompt(text=text, hide_input=is_secret)
-    return data
+    return data.strip()
 
 
 def cli_register_input() -> LoginRegisterInput:
@@ -46,7 +46,7 @@ def cli_register_input() -> LoginRegisterInput:
         password = cli_input("Введите пароль", True)
         confirm_password = cli_input("Повторите пароль", True)
 
-        if password.strip() != confirm_password.strip():
+        if password != confirm_password:
             typer.echo("Пароли должны совпадать")
             time.sleep(2)
             continue
@@ -93,19 +93,19 @@ def cli_improt_file_prompt() -> Path:
         typer.echo("Files to import:\n")
         for i, file in enumerate(files, start=1):
             typer.echo(f'[{i}] - {file.name}')
-        choise = typer.prompt("\nChoose number of file to import")
+        choice = typer.prompt("\nChoose number of file to import").strip()
 
-        if not choise.isdigit():
+        if not choice.isdigit():
             typer.echo("Input should be digit")
             time.sleep(2)
             continue
         
-        if not 1 <= int(choise) <= len(files):
+        if not 1 <= int(choice) <= len(files):
             typer.echo("Wrong number input")
             time.sleep(2)
             continue
             
-        return files[int(choise)-1].absolute()
+        return files[int(choice)-1].absolute()
         
             
 
@@ -116,7 +116,7 @@ def choose_default_user(usernames: list[str]) -> str:
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choice = typer.prompt("\nChoose username to set as default")
+        choice = typer.prompt("\nChoose username to set as default").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -136,7 +136,7 @@ def choose_delete_user(usernames: list[str]) -> str:
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choice = typer.prompt("\nChoose username to delete")
+        choice = typer.prompt("\nChoose username to delete").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -159,7 +159,7 @@ def choose_backup(backups: list[BackupData], text: str) -> BackupData:
         typer.echo("Backups:\n")
         typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
 
-        choice = typer.prompt(text=text)
+        choice = typer.prompt(text=text).strip()
         
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -176,21 +176,21 @@ def choose_backup(backups: list[BackupData], text: str) -> BackupData:
 
 def choose_name_for_backup() -> str:
     while True:
-        name = typer.prompt("Input a name for backup")
+        name = typer.prompt("Input a name for backup").strip()
         if not name:
             continue
         if len(name) > 16:
             typer.echo("too long name - (16 max)")
             continue
-        return name.strip()
+        return name
 
 def change_password_prompt() -> ChangePasswordSchema:
     while True:
         clear_console()
-        current_password = typer.prompt("Input your current password")
+        current_password = typer.prompt("Input your current password").strip()
         if not current_password:
             continue
-        new_password = typer.prompt("Input new password")
+        new_password = typer.prompt("Input new password").strip()
         if not new_password:
             continue
         if not (3 < len(current_password) < 21):
@@ -201,7 +201,7 @@ def change_password_prompt() -> ChangePasswordSchema:
             typer.echo("New password's length should be: 3 < length < 21")
             time.sleep(2)
             continue
-        if " " in current_password.strip() or " " in new_password.strip():
+        if " " in current_password or " " in new_password:
             typer.echo("Password must not contain spaces")
             time.sleep(2)
             continue
@@ -250,7 +250,7 @@ def choose_action(backup: BackupData) -> action:
 def input_new_backup_name() -> str:
     while True:
         clear_console()
-        new_name = typer.prompt(text="Input new name for backup")
+        new_name = typer.prompt(text="Input new name for backup").strip()
         if not new_name:
             continue
         if len(new_name) > 20:

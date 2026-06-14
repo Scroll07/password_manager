@@ -24,7 +24,7 @@ def change_base_url(config: UserConfig):
         """
         config_data = config._refresh()
 
-        choice = typer.prompt(text + "\nInput")
+        choice = typer.prompt(text + "\nInput").strip()
         if choice == "0":
             exit_message_and_clear_console("Exit")
 
