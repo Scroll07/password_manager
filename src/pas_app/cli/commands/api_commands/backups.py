@@ -98,7 +98,7 @@ async def backups():
         typer.echo("You have not uploaded backups")
         raise typer.Exit(code=0)
     
-    backup = choose_backup(backups=backups, text="Choose backup to download")
+    backup = choose_backup(backups=backups, text="Choose backup for action")
     choice = choose_action(backup=backup)
     
     if choice == "cancel":
