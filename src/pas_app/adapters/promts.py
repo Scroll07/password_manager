@@ -152,15 +152,39 @@ def choose_delete_user(usernames: list[str]) -> str:
             
         return usernames[int(choice)-1]
 
-def choose_backup(backups: list[BackupData], text: str) -> BackupData:
-    backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
-    headers = ["Id", "Name", "Rows", "Created_at"]
-    data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(backups, start=1)] 
-    while True:
-        clear_console()
-        typer.echo("Backups:\n")
-        typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
 
+def print_backups(backups: list[BackupData]) -> list[BackupData]:
+    pinned_backups = sorted([b for b in backups if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
+    basic_backups = sorted([b for b in backups if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
+    headers = ["Id", "Name", "Rows", "Created_at"]
+
+    clear_console()
+    if pinned_backups:
+        pinned_data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(pinned_backups, start=1)] 
+        typer.echo("Pinned Backups:\n")
+        typer.echo(tabulate(pinned_data, headers=headers, floatfmt="grid"))
+        
+        typer.echo("\n")
+    
+    if basic_backups:
+        basic_data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(basic_backups, start=len(pinned_backups) + 1)]
+        typer.echo("Backups:\n")
+        typer.echo(tabulate(basic_data, headers=headers, floatfmt="grid"))
+    
+    result = []
+    if pinned_backups:
+        for b in pinned_backups:
+            result.append(b)
+    if basic_backups:
+        for b in basic_backups:
+            result.append(b)
+    return result
+    
+    
+def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:    
+    while True:
+        sorted_backups = print_backups(backups=backups)
+        typer.echo()
         choice = typer.prompt(text=text).strip()
         
         if not choice.isdigit():
@@ -173,7 +197,7 @@ def choose_backup(backups: list[BackupData], text: str) -> BackupData:
             time.sleep(2)
             continue
             
-        return backups[int(choice)-1]
+        return sorted_backups[int(choice)-1]
     
 
 def choose_name_for_backup() -> str:
@@ -213,16 +237,18 @@ def change_password_prompt() -> ChangePasswordSchema:
         )
             
 
-action = Literal["download", "rename", "delete", "cancel"]
+action = Literal["download", "pin", "rename", "delete", "cancel"]
 def choose_action(backup: BackupData) -> action:
     while True:
         clear_console()
+        pin_action = "Unpin" if backup.pinned else "Pin"
         text = f"""
         Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at.strftime(DATE_FORMAT)} 
         
         1) Download
-        2) Rename (change name)
-        3) Delete
+        2) {pin_action}
+        3) Rename (change name)
+        4) Delete
         0) Cancel
         
         Input number"""
@@ -243,8 +269,10 @@ def choose_action(backup: BackupData) -> action:
         elif choice == 1:
             return "download"
         elif choice == 2:
-            return "rename"
+            return "pin"
         elif choice == 3:
+            return "rename"
+        elif choice == 4:
             return "delete"
         else:
             continue

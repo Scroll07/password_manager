@@ -1,7 +1,7 @@
 import typer
 
 
-from pas_app.adapters.promts import choose_backup, choose_action, choose_name_for_backup
+from pas_app.adapters.promts import print_and_choose_backup, choose_action, choose_name_for_backup
 from pas_app.core.api import Api
 from pas_app.schemas.api import BackupData, BackupsResponse, DownloadResponse, MessageResponse
 from pas_app.config import VAULTS, UserConfig, get_config
@@ -75,6 +75,29 @@ async def rename(backup: BackupData):
     typer.echo(response.content.detail)
 
 
+async def pin(backup: BackupData):
+    api = Api()
+
+    response = await api.pin_backup(backup_id=backup.id)
+    if not isinstance(response.content, MessageResponse):
+        typer.echo("Wrong content from api")
+        raise typer.Exit(code=1)
+    
+    if response.status_code != 200:
+        typer.echo(
+            f"Rename backup failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
+        )
+        raise typer.Exit(code=1)
+    
+    typer.echo(response.content.detail)
+
+
+
+
+
+# ==========================
+        #FUNC FOR TYPER
+# ==========================
 async def backups():
     config = get_config()
     api = Api()
@@ -98,7 +121,7 @@ async def backups():
         typer.echo("You have not uploaded backups")
         raise typer.Exit(code=0)
     
-    backup = choose_backup(backups=backups, text="Choose backup for action")
+    backup = print_and_choose_backup(backups=backups, text="Choose backup for action")
     choice = choose_action(backup=backup)
     
     if choice == "cancel":
@@ -106,6 +129,8 @@ async def backups():
         return
     elif choice == "download":
         await download(backup=backup, config=config)
+    elif choice == "pin":
+        await pin(backup=backup)
     elif choice == "rename":
         await rename(backup=backup)
     elif choice == "delete":
