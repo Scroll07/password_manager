@@ -99,42 +99,43 @@ async def pin(backup: BackupData):
         #FUNC FOR TYPER
 # ==========================
 async def backups():
-    config = get_config()
     api = Api()
-    
-    response = await api.get_backups()
-    if not isinstance(response.content, BackupsResponse):
-        if isinstance(response.content, MessageResponse):
-            typer.echo(response.content.detail)
+    while True:
+        config = get_config()
+        
+        response = await api.get_backups()
+        if not isinstance(response.content, BackupsResponse):
+            if isinstance(response.content, MessageResponse):
+                typer.echo(response.content.detail)
+                raise typer.Exit(code=1)
+            typer.echo("Wrong content from api")
             raise typer.Exit(code=1)
-        typer.echo("Wrong content from api")
-        raise typer.Exit(code=1)
-    
-    if response.status_code != 200:
-        typer.echo(
-            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
-        )
-        raise typer.Exit(code=1)
-    
-    backups = response.content.backups
-    if not backups:
-        typer.echo("You have not uploaded backups")
-        raise typer.Exit(code=0)
-    
-    backup = print_and_choose_backup(backups=backups, text="Choose backup for action")
-    choice = choose_action(backup=backup)
-    
-    if choice == "cancel":
-        typer.echo("Cancel")
-        return
-    elif choice == "download":
-        await download(backup=backup, config=config)
-    elif choice == "pin":
-        await pin(backup=backup)
-    elif choice == "rename":
-        await rename(backup=backup)
-    elif choice == "delete":
-        await delete(backup=backup)
+        
+        if response.status_code != 200:
+            typer.echo(
+                f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
+            )
+            raise typer.Exit(code=1)
+        
+        backups = response.content.backups
+        if not backups:
+            typer.echo("You have not uploaded backups")
+            raise typer.Exit(code=0)
+        
+        backup = print_and_choose_backup(backups=backups, text="Choose backup for action")
+        choice = choose_action(backup=backup)
+        
+        if choice == "cancel":
+            typer.echo("Cancel")
+            continue
+        elif choice == "download":
+            await download(backup=backup, config=config)
+        elif choice == "pin":
+            await pin(backup=backup)
+        elif choice == "rename":
+            await rename(backup=backup)
+        elif choice == "delete":
+            await delete(backup=backup)
         
     
     
