@@ -16,7 +16,7 @@ def api() -> Api:
 
 
 @pytest.fixture
-def config(tmp_path) -> UserConfig:
+def config(tmp_path, mock_keyring_secrets) -> UserConfig:
     test_config = tmp_path / "test_config.json"
     config = UserConfig(test_config)
     return config
@@ -109,6 +109,5 @@ def mock_keyring_secrets(monkeypatch) -> None:
     def mock_get_keyring():
         return MockKeyringSecrets()
     
-    monkeypatch.setattr("pas_app.config.KeyringSecrets", MockKeyringSecrets)
-    monkeypatch.setattr("pas_app.config.get_keyring_secrets", mock_get_keyring)
+    monkeypatch.setattr("pas_app.core.keyring.get_keyring_secrets", mock_get_keyring)
     
