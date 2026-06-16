@@ -4,7 +4,7 @@ import secrets
 
 from pas_app.config import UserConfig
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
-from pas_app.schemas.passwords import UserVault
+from pas_app.schemas.passwords import KeyringValues, UserVault
 from pas_app.core.api import Api
 from pas_app.services.file_utils import load_data
 from pas_app.services.password import create_user_vault
@@ -72,3 +72,43 @@ def test_username() -> str:
     return "test_user"
 
 
+
+
+
+
+
+
+
+
+
+class MockKeyringSecrets:
+    def __init__(self) -> None:
+        self.storage = {
+            KeyringValues.MASTER_PASSWORD: "",
+            KeyringValues.BEARER_TOKEN: "",
+            KeyringValues.REFRESH_TOKEN: "",
+            KeyringValues.LAST_ACTION: ""
+        }
+
+    def set_keyring_value(self, value_type: KeyringValues, value: str) -> None:
+        self.storage[value_type] = value
+        return None
+
+    def get_keyring_value(self, value_type: KeyringValues) -> str:
+        value = self.storage.get(value_type)
+        if value is None:
+            return ""
+        return value
+
+    def delete_keyring_value(self, value_type: KeyringValues) -> None:
+        self.storage[value_type] = ""
+        return None
+
+@pytest.fixture
+def mock_keyring_secrets(monkeypatch) -> None:
+    def mock_get_keyring():
+        return MockKeyringSecrets()
+    
+    monkeypatch.setattr("pas_app.config.KeyringSecrets", MockKeyringSecrets)
+    monkeypatch.setattr("pas_app.config.get_keyring_secrets", MockKeyringSecrets)
+    
