@@ -110,5 +110,5 @@ def mock_keyring_secrets(monkeypatch) -> None:
         return MockKeyringSecrets()
     
     monkeypatch.setattr("pas_app.config.KeyringSecrets", MockKeyringSecrets)
-    monkeypatch.setattr("pas_app.config.get_keyring_secrets", MockKeyringSecrets)
+    monkeypatch.setattr("pas_app.config.get_keyring_secrets", mock_get_keyring)
     
