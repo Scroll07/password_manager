@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel
 import typer
 
-from pas_app.core.crypto import set_keyring_value, get_keyring_value
+from pas_app.core.keyring import get_keyring_secrets, KeyringSecrets
 from pas_app.schemas.passwords import KeyringValues
 
 BASE_DIR = Path.home() / "pas_data"
@@ -44,6 +44,7 @@ class UserConfig:
     def __init__(self, config_file: Path):
         self.config_file = config_file
         self.time_format = "%d-%m-%Y %H:%M:%S"
+        self.keyring: KeyringSecrets = get_keyring_secrets()
         # self.config_data = self._refresh()
 
     def check_exists(self) -> None:
@@ -58,13 +59,13 @@ class UserConfig:
             data = f.read()
         file_config = ConfigFileData.model_validate_json(data).model_dump()
         
-        last_action_str = get_keyring_value(KeyringValues.LAST_ACTION)
+        last_action_str = self.keyring.get_keyring_value(KeyringValues.LAST_ACTION)
         last_action_datetime = datetime.strptime(last_action_str, self.time_format)
         
         keyring_config = KeyringConfig(
-            master_password=get_keyring_value(KeyringValues.MASTER_PASSWORD),
-            bearer_token=get_keyring_value(KeyringValues.BEARER_TOKEN),
-            refresh_token=get_keyring_value(KeyringValues.REFRESH_TOKEN),
+            master_password=self.keyring.get_keyring_value(KeyringValues.MASTER_PASSWORD),
+            bearer_token=self.keyring.get_keyring_value(KeyringValues.BEARER_TOKEN),
+            refresh_token=self.keyring.get_keyring_value(KeyringValues.REFRESH_TOKEN),
             last_action=last_action_datetime
         ).model_dump()
         
@@ -77,10 +78,10 @@ class UserConfig:
             f.write(json_data)
         
         last_action_str = datetime.strftime(datetime.now(), self.time_format)
-        set_keyring_value(KeyringValues.MASTER_PASSWORD, data.keyring.master_password)
-        set_keyring_value(KeyringValues.BEARER_TOKEN, data.keyring.bearer_token)
-        set_keyring_value(KeyringValues.REFRESH_TOKEN, data.keyring.refresh_token)
-        set_keyring_value(KeyringValues.LAST_ACTION, last_action_str)
+        self.keyring.set_keyring_value(KeyringValues.MASTER_PASSWORD, data.keyring.master_password)
+        self.keyring.set_keyring_value(KeyringValues.BEARER_TOKEN, data.keyring.bearer_token)
+        self.keyring.set_keyring_value(KeyringValues.REFRESH_TOKEN, data.keyring.refresh_token)
+        self.keyring.set_keyring_value(KeyringValues.LAST_ACTION, last_action_str)
         return None
 
     def create_empty_config(self, current_user: str) -> None:
