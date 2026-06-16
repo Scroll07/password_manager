@@ -1,9 +1,15 @@
 from pathlib import Path
 
 from pas_app.config import UserConfig, ConfigFileData, KeyringConfig
+from conftest import MockKeyringSecrets
 
 
-def test_create_config(config: UserConfig, tmp_path: Path, test_username: str, mock_keyring_secrets):
+def test_create_config(config: UserConfig, tmp_path: Path, test_username: str, monkeypatch):
+    def mock_get_keyring():
+        return MockKeyringSecrets()
+    
+    monkeypatch.setattr("pas_app.config.KeyringSecrets", MockKeyringSecrets)
+    monkeypatch.setattr("pas_app.config.get_keyring_secrets", MockKeyringSecrets)
     config_file = tmp_path / "test_config.json"
     assert not config_file.exists()
     
@@ -20,7 +26,12 @@ def test_create_config(config: UserConfig, tmp_path: Path, test_username: str, m
     assert local_data.BOT_TOKEN == "no token"
     # assert local_data.BASE_URL == 
 
-def test_save_values_after_recreate_config(config: UserConfig, test_username: str, random_username: str, mock_keyring_secrets):
+def test_save_values_after_recreate_config(config: UserConfig, test_username: str, random_username: str, monkeypatch):
+    def mock_get_keyring():
+        return MockKeyringSecrets()
+    
+    monkeypatch.setattr("pas_app.config.KeyringSecrets", MockKeyringSecrets)
+    monkeypatch.setattr("pas_app.config.get_keyring_secrets", MockKeyringSecrets)
     config.create_empty_config(current_user=test_username)
     config_data = config._refresh()
     
@@ -37,7 +48,13 @@ def test_save_values_after_recreate_config(config: UserConfig, test_username: st
     assert config_data.keyring.master_password == "password"
     
 
-def test_load_config(config: UserConfig, test_username: str, mock_keyring_secrets):
+def test_load_config(config: UserConfig, test_username: str, monkeypatch):
+    def mock_get_keyring():
+        return MockKeyringSecrets()
+    
+    monkeypatch.setattr("pas_app.config.KeyringSecrets", MockKeyringSecrets)
+    monkeypatch.setattr("pas_app.config.get_keyring_secrets", MockKeyringSecrets)
+    
     config.create_empty_config(current_user=test_username)    
     config_data = config.load_config()
     
