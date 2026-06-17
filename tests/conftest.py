@@ -1,6 +1,8 @@
 import pytest_asyncio
 import pytest
 import secrets
+from keyring.backend import KeyringBackend
+import keyring
 
 from pas_app.config import UserConfig
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
@@ -16,7 +18,7 @@ def api() -> Api:
 
 
 @pytest.fixture
-def config(tmp_path, mock_keyring_secrets) -> UserConfig:
+def config(tmp_path, mock_keyring) -> UserConfig:
     test_config = tmp_path / "test_config.json"
     config = UserConfig(test_config)
     return config
@@ -81,33 +83,31 @@ def test_username() -> str:
 
 
 
-class MockKeyringSecrets:
-    def __init__(self) -> None:
-        self.storage = {
-            KeyringValues.MASTER_PASSWORD: "",
-            KeyringValues.BEARER_TOKEN: "",
-            KeyringValues.REFRESH_TOKEN: "",
-            KeyringValues.LAST_ACTION: ""
-        }
-
-    def set_keyring_value(self, value_type: KeyringValues, value: str) -> None:
-        self.storage[value_type] = value
-        return None
-
-    def get_keyring_value(self, value_type: KeyringValues) -> str:
-        value = self.storage.get(value_type)
-        if value is None:
-            return ""
-        return value
-
-    def delete_keyring_value(self, value_type: KeyringValues) -> None:
-        self.storage[value_type] = ""
-        return None
-
-@pytest.fixture
-def mock_keyring_secrets(monkeypatch) -> None:
-    def mock_get_keyring():
-        return MockKeyringSecrets()
+class MemoryKeyring(KeyringBackend):
+    priority = 1 # type: ignore
     
-    monkeypatch.setattr("pas_app.core.keyring.get_keyring_secrets", mock_get_keyring)
+    def __init__(self):
+        self._data = {}
+        
+    def set_password(self, service: str, username: str, password: str) -> None:
+        self._data[(service, username)] = password
+        return None
+    
+    def get_password(self, service: str, username: str) -> str | None:
+        return self._data[(service, username)]
+    
+    def delete_password(self, service: str, username: str) -> None:
+        self._data[(service, username)] = ""
+        return None
+        
+@pytest.fixture
+def mock_keyring():
+    backend = MemoryKeyring()
+    old_keyring = keyring.get_keyring()
+    keyring.set_keyring(keyring=backend)
+    
+    yield
+    
+    keyring.set_keyring(old_keyring)
+    
     
