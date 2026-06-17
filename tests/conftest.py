@@ -1,10 +1,12 @@
 import pytest_asyncio
 import pytest
 import secrets
+from keyring.backend import KeyringBackend
+import keyring
 
 from pas_app.config import UserConfig
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
-from pas_app.schemas.passwords import UserVault
+from pas_app.schemas.passwords import KeyringValues, UserVault
 from pas_app.core.api import Api
 from pas_app.services.file_utils import load_data
 from pas_app.services.password import create_user_vault
@@ -16,7 +18,7 @@ def api() -> Api:
 
 
 @pytest.fixture
-def config(tmp_path) -> UserConfig:
+def config(tmp_path, mock_keyring) -> UserConfig:
     test_config = tmp_path / "test_config.json"
     config = UserConfig(test_config)
     return config
@@ -72,3 +74,40 @@ def test_username() -> str:
     return "test_user"
 
 
+
+
+
+
+
+
+
+
+
+class MemoryKeyring(KeyringBackend):
+    priority = 1 # type: ignore
+    
+    def __init__(self):
+        self._data = {}
+        
+    def set_password(self, service: str, username: str, password: str) -> None:
+        self._data[(service, username)] = password
+        return None
+    
+    def get_password(self, service: str, username: str) -> str | None:
+        return self._data[(service, username)]
+    
+    def delete_password(self, service: str, username: str) -> None:
+        self._data[(service, username)] = ""
+        return None
+        
+@pytest.fixture
+def mock_keyring():
+    backend = MemoryKeyring()
+    old_keyring = keyring.get_keyring()
+    keyring.set_keyring(keyring=backend)
+    
+    yield
+    
+    keyring.set_keyring(old_keyring)
+    
+    

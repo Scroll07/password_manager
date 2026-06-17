@@ -36,6 +36,7 @@ class BackupData(BaseModel):
     id: int
     name: str
     rows: int
+    pinned: bool
     created_at: datetime
     
 class TypeResponses(StrEnum):

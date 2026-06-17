@@ -1,10 +1,55 @@
+# Password Manager CLI
+
+A client-side CLI password manager with local vault encryption and remote backup support via REST API.  
+The vault is encrypted with a master password and stored locally. Optional cloud backups are uploaded to a remote API server.
+
+## Features
+
+- Local vault encrypted with a master password
+- Generate, store, search, edit, delete password entries
+- Copy password to clipboard
+- Export/import vault to/from a file
+- Remote backup: upload, download, rename, delete, pin backups on the API server
+- Password strength checker (common patterns, length, character variety)
+- Credentials stored securely via system keyring
+- CLI built with Typer — bash auto-completion out of the box
+
+## Tech Stack
+
+- **Python** — Typer, Cryptography (Fernet/AES), Keyring, Requests
+- **System keyring** — GNOME Keyring (stores master password session)
+- **Remote API** — FastAPI backend (separate repo)
+- **pytest** — test suite
+
+## Project Structure
+
+```text
+src/
+└── pas_app/
+    ├── adapters/         # Console input/output (prompts, console helpers)
+    ├── cli/              # Typer CLI app commands
+    ├── api_commands/     # pas api register/login/upload/backups/...
+    ├── config_commands/  # pas config user/url/token/session
+    ├── pas_commands/     # pas add/list/get/copy/edit/del/find/export/import/gen
+    ├── user_commands/    # pas user delete/change-master
+    ├── core/             # API client, crypto utils, keyring wrapper
+    ├── schemas/          # Pydantic schemas (passwords, API responses, JWT)
+    ├── services/         # Vault logic, password strength checker, file utils
+    ├── config.py         # Config loader (toml + keyring)
+    ├── exceptions.py     # Custom exceptions
+    └── main.py           # Entry point
+
+tests/                # pytest test suite
+data/                 # Common password lists for strength checker
+scripts/              # realise.sh and helpers
+```
+
 Dependencies that will be installed if you don't have them:
 - gnome-keyring
 - pipx
 - uv
 
-Installation:
-
+Installation
 ```
 git clone https://github.com/Scroll07/password_manager.git
 
@@ -12,7 +57,6 @@ cd password_manager
 ./realise.sh
 
 pas api register
-pas add test -u test -p test --note test
 ```
 
 **BASE COMMANDS**
@@ -23,11 +67,11 @@ pas add test -u test -p test --note test
 | pas get    | Show an entry by label               | pas get github               |
 | pas copy   | Copy a password by entry number      | pas copy 2                   |
 | pas edit   | Edit an existing entry               | pas edit 1 -p newpass        |
-| pas del    | Delete an entry from the local vault | pas del github               |
+| pas del    | Delete an entry from the local vault  | pas del github               |
 | pas find   | Search entries in the vault          | pas find @gmail              |
 | pas export | Export vault data to a file          | pas export backup.json       |
 | pas import | Import vault data from a file        | pas import backup.json       |
-| pas key    | Generate a password                  | pas key -l 32                |
+| pas gen    | Generate a password                  | pas gen -l 32                |
 
 
 **API COMMANDS**

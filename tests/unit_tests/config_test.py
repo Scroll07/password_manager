@@ -3,7 +3,7 @@ from pathlib import Path
 from pas_app.config import UserConfig, ConfigFileData, KeyringConfig
 
 
-def test_create_config(config: UserConfig, tmp_path: Path, test_username: str ):
+def test_create_config(config: UserConfig, tmp_path: Path, test_username: str):
     config_file = tmp_path / "test_config.json"
     assert not config_file.exists()
     

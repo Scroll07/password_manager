@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import StrEnum
 from pydantic import BaseModel
 
@@ -9,13 +8,13 @@ class TokenType(StrEnum):
     REFRESH = "refresh"
 
 class TokenData(BaseModel):
-    user_id: int
+    sub: str
+    sid: int
+    exp: int
     type: TokenType
-    exp: datetime
 
 class EncodedToken(BaseModel):
     token: str
-    token_type: TokenType
     
 
 class DecodedToken(BaseModel):

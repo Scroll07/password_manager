@@ -20,7 +20,7 @@ def change_bot_token(config: UserConfig):
         """
         config_data = config._refresh()
 
-        choice = typer.prompt(text)
+        choice = typer.prompt(text).strip()
         if choice == "0":
             exit_message_and_clear_console("Exit")
 

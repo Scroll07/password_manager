@@ -173,14 +173,23 @@ class Api:
         content = MessageResponse(detail=data.get("detail"))
         return ApiResponse(status_code=response.status_code, content=content)
     
-    
+    async def pin_backup(self, backup_id: int) -> ApiResponse:
+        url = f"/backups/{backup_id}/change-pin"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.patch(
+                url=url,
+                headers=self.headers,
+            )  
+        data = response.json()
+        content = MessageResponse(detail=data.get("detail"))
+        return ApiResponse(status_code=response.status_code, content=content)
     
     
     
     
     async def check_token(self) -> ApiResponse | None:
         token_data = decode_token(token=self.config_data.keyring.bearer_token)
-        if token_data.exp - timedelta(minutes=1) < datetime.now(timezone.utc): #12:49 < 12:50
+        if datetime.fromtimestamp(token_data.exp, timezone.utc) - timedelta(minutes=1) < datetime.now(timezone.utc): #12:49 < 12:50
             response = await self.refresh()
             if not isinstance(response.content, RefreshResponse):
                 raise ValueError("Wrong resposne from api")

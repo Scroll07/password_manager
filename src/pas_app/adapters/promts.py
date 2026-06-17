@@ -12,6 +12,8 @@ from pas_app.schemas.api import BackupData
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
 from pas_app.config import IMPORT_DIR
 
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 def gui_password_prompt():
     root = tk.Tk()
@@ -30,7 +32,7 @@ def cli_password_promt():
 
 def cli_input(text: str, is_secret: bool = False) -> str:
     data = typer.prompt(text=text, hide_input=is_secret)
-    return data
+    return data.strip()
 
 
 def cli_register_input() -> LoginRegisterInput:
@@ -46,7 +48,7 @@ def cli_register_input() -> LoginRegisterInput:
         password = cli_input("Введите пароль", True)
         confirm_password = cli_input("Повторите пароль", True)
 
-        if password.strip() != confirm_password.strip():
+        if password != confirm_password:
             typer.echo("Пароли должны совпадать")
             time.sleep(2)
             continue
@@ -93,19 +95,19 @@ def cli_improt_file_prompt() -> Path:
         typer.echo("Files to import:\n")
         for i, file in enumerate(files, start=1):
             typer.echo(f'[{i}] - {file.name}')
-        choise = typer.prompt("\nChoose number of file to import")
+        choice = typer.prompt("\nChoose number of file to import").strip()
 
-        if not choise.isdigit():
+        if not choice.isdigit():
             typer.echo("Input should be digit")
             time.sleep(2)
             continue
         
-        if not 1 <= int(choise) <= len(files):
+        if not 1 <= int(choice) <= len(files):
             typer.echo("Wrong number input")
             time.sleep(2)
             continue
             
-        return files[int(choise)-1].absolute()
+        return files[int(choice)-1].absolute()
         
             
 
@@ -116,7 +118,7 @@ def choose_default_user(usernames: list[str]) -> str:
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choice = typer.prompt("\nChoose username to set as default")
+        choice = typer.prompt("\nChoose username to set as default").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -136,7 +138,7 @@ def choose_delete_user(usernames: list[str]) -> str:
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choice = typer.prompt("\nChoose username to delete")
+        choice = typer.prompt("\nChoose username to delete").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -150,16 +152,40 @@ def choose_delete_user(usernames: list[str]) -> str:
             
         return usernames[int(choice)-1]
 
-def choose_backup(backups: list[BackupData], text: str) -> BackupData:
-    backups = sorted(backups, key=lambda b: b.created_at, reverse=True)
-    headers = ["Id", "Name", "Rows", "Created_at"]
-    data = [[i, b.name, b.rows , b.created_at] for i, b in enumerate(backups, start=1)] 
-    while True:
-        clear_console()
-        typer.echo("Backups:\n")
-        typer.echo(tabulate(data, headers=headers, floatfmt="grid"))
 
-        choice = typer.prompt(text=text)
+def print_backups(backups: list[BackupData]) -> list[BackupData]:
+    pinned_backups = sorted([b for b in backups if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
+    basic_backups = sorted([b for b in backups if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
+    headers = ["Id", "Name", "Rows", "Created_at"]
+
+    clear_console()
+    if pinned_backups:
+        pinned_data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(pinned_backups, start=1)] 
+        typer.echo("Pinned Backups:\n")
+        typer.echo(tabulate(pinned_data, headers=headers, floatfmt="grid"))
+        
+        typer.echo("\n")
+    
+    if basic_backups:
+        basic_data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(basic_backups, start=len(pinned_backups) + 1)]
+        typer.echo("Backups:\n")
+        typer.echo(tabulate(basic_data, headers=headers, floatfmt="grid"))
+    
+    result = []
+    if pinned_backups:
+        for b in pinned_backups:
+            result.append(b)
+    if basic_backups:
+        for b in basic_backups:
+            result.append(b)
+    return result
+    
+    
+def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:    
+    while True:
+        sorted_backups = print_backups(backups=backups)
+        typer.echo()
+        choice = typer.prompt(text=text).strip()
         
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -171,26 +197,26 @@ def choose_backup(backups: list[BackupData], text: str) -> BackupData:
             time.sleep(2)
             continue
             
-        return backups[int(choice)-1]
+        return sorted_backups[int(choice)-1]
     
 
 def choose_name_for_backup() -> str:
     while True:
-        name = typer.prompt("Input a name for backup")
+        name = typer.prompt("Input a name for backup").strip()
         if not name:
             continue
         if len(name) > 16:
             typer.echo("too long name - (16 max)")
             continue
-        return name.strip()
+        return name
 
 def change_password_prompt() -> ChangePasswordSchema:
     while True:
         clear_console()
-        current_password = typer.prompt("Input your current password")
+        current_password = typer.prompt("Input your current password").strip()
         if not current_password:
             continue
-        new_password = typer.prompt("Input new password")
+        new_password = typer.prompt("Input new password").strip()
         if not new_password:
             continue
         if not (3 < len(current_password) < 21):
@@ -201,7 +227,7 @@ def change_password_prompt() -> ChangePasswordSchema:
             typer.echo("New password's length should be: 3 < length < 21")
             time.sleep(2)
             continue
-        if " " in current_password.strip() or " " in new_password.strip():
+        if " " in current_password or " " in new_password:
             typer.echo("Password must not contain spaces")
             time.sleep(2)
             continue
@@ -211,16 +237,18 @@ def change_password_prompt() -> ChangePasswordSchema:
         )
             
 
-action = Literal["download", "rename", "delete", "cancel"]
+action = Literal["download", "pin", "rename", "delete", "cancel"]
 def choose_action(backup: BackupData) -> action:
     while True:
         clear_console()
+        pin_action = "Unpin" if backup.pinned else "Pin"
         text = f"""
-        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at} 
+        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at.strftime(DATE_FORMAT)} 
         
         1) Download
-        2) Rename (change name)
-        3) Delete
+        2) {pin_action}
+        3) Rename (change name)
+        4) Delete
         0) Cancel
         
         Input number"""
@@ -241,8 +269,10 @@ def choose_action(backup: BackupData) -> action:
         elif choice == 1:
             return "download"
         elif choice == 2:
-            return "rename"
+            return "pin"
         elif choice == 3:
+            return "rename"
+        elif choice == 4:
             return "delete"
         else:
             continue
@@ -250,7 +280,7 @@ def choose_action(backup: BackupData) -> action:
 def input_new_backup_name() -> str:
     while True:
         clear_console()
-        new_name = typer.prompt(text="Input new name for backup")
+        new_name = typer.prompt(text="Input new name for backup").strip()
         if not new_name:
             continue
         if len(new_name) > 20:

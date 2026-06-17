@@ -50,7 +50,7 @@ app.command("find")(find_command)
 app.command("edit")(edit_command)
 app.command("export")(export_command)
 app.command("import")(import_command)
-app.command("key")(create_password_command)
+app.command("gen")(create_password_command)
 
 
 

@@ -1,7 +1,7 @@
 import typer
 
 
-from pas_app.adapters.promts import choose_backup, choose_action, choose_name_for_backup
+from pas_app.adapters.promts import print_and_choose_backup, choose_action, choose_name_for_backup
 from pas_app.core.api import Api
 from pas_app.schemas.api import BackupData, BackupsResponse, DownloadResponse, MessageResponse
 from pas_app.config import VAULTS, UserConfig, get_config
@@ -75,41 +75,67 @@ async def rename(backup: BackupData):
     typer.echo(response.content.detail)
 
 
-async def backups():
-    config = get_config()
+async def pin(backup: BackupData):
     api = Api()
-    
-    response = await api.get_backups()
-    if not isinstance(response.content, BackupsResponse):
-        if isinstance(response.content, MessageResponse):
-            typer.echo(response.content.detail)
-            raise typer.Exit(code=1)
+
+    response = await api.pin_backup(backup_id=backup.id)
+    if not isinstance(response.content, MessageResponse):
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
     if response.status_code != 200:
         typer.echo(
-            f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
+            f"Rename backup failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
         )
         raise typer.Exit(code=1)
     
-    backups = response.content.backups
-    if not backups:
-        typer.echo("You have not uploaded backups")
-        raise typer.Exit(code=0)
-    
-    backup = choose_backup(backups=backups, text="Choose backup to download")
-    choice = choose_action(backup=backup)
-    
-    if choice == "cancel":
-        typer.echo("Cancel")
-        return
-    elif choice == "download":
-        await download(backup=backup, config=config)
-    elif choice == "rename":
-        await rename(backup=backup)
-    elif choice == "delete":
-        await delete(backup=backup)
+    typer.echo(response.content.detail)
+
+
+
+
+
+# ==========================
+        #FUNC FOR TYPER
+# ==========================
+async def backups():
+    api = Api()
+    while True:
+        config = get_config()
+        
+        response = await api.get_backups()
+        if not isinstance(response.content, BackupsResponse):
+            if isinstance(response.content, MessageResponse):
+                typer.echo(response.content.detail)
+                raise typer.Exit(code=1)
+            typer.echo("Wrong content from api")
+            raise typer.Exit(code=1)
+        
+        if response.status_code != 200:
+            typer.echo(
+                f"Get backups failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
+            )
+            raise typer.Exit(code=1)
+        
+        backups = response.content.backups
+        if not backups:
+            typer.echo("You have not uploaded backups")
+            raise typer.Exit(code=0)
+        
+        backup = print_and_choose_backup(backups=backups, text="Choose backup for action")
+        choice = choose_action(backup=backup)
+        
+        if choice == "cancel":
+            typer.echo("Cancel")
+            continue
+        elif choice == "download":
+            await download(backup=backup, config=config)
+        elif choice == "pin":
+            await pin(backup=backup)
+        elif choice == "rename":
+            await rename(backup=backup)
+        elif choice == "delete":
+            await delete(backup=backup)
         
     
     
