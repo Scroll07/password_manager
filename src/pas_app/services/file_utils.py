@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 import typer
+from cryptography.fernet import InvalidToken
 
 from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
 from pas_app.config import BASE_DIR, LAST_MATCHES, VAULTS, UserConfig
@@ -43,7 +44,11 @@ def load_data(config: UserConfig) -> UserVault:
     key = get_key()
     if key is None:
         raise EchoException("Key from check_session is None")
-    decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
+    try:
+        decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
+    except InvalidToken:
+        typer.echo("Wrong master password")
+        raise typer.Exit(code=1)
     vault_data = UserVault(
         username=encrypted.username,
         salt=encrypted.salt,

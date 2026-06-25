@@ -7,7 +7,6 @@ from pas_app.config import get_config
 from pas_app.schemas.api import MessageResponse
 from pas_app.adapters.promts import choose_name_for_backup
 from pas_app.services.file_utils import load_data
-from cryptography.fernet import InvalidToken
 
 async def upload():
     config = get_config()
@@ -30,11 +29,7 @@ async def upload():
     #rows - get summary of rows in user vault - len(user_passwords)
     name = choose_name_for_backup()
 
-    try:
-        user_data = load_data(config=config)
-    except InvalidToken:
-        typer.echo("Wrong master password")
-        raise typer.Exit(code=1)
+    user_data = load_data(config=config)
     
     count = len(user_data.user_passwords)
     
