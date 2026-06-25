@@ -41,14 +41,14 @@ def load_data(config: UserConfig) -> UserVault:
     if config_data.local.default_user is None:
         raise EchoException("No logged")
     encrypted = load_encrypted_vault(config_data.local.default_user)
-    key = get_key()
-    if key is None:
-        raise EchoException("Key from check_session is None")
     try:
-        decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
+        key = get_key()
     except InvalidToken:
         typer.echo("Wrong master password")
         raise typer.Exit(code=1)
+    if key is None:
+        raise EchoException("Key from check_session is None")
+    decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
         username=encrypted.username,
         salt=encrypted.salt,
