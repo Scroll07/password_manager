@@ -26,14 +26,14 @@ CONFIG_FILE = BASE_DIR / "config.json"
 class ConfigFileData(BaseModel):
     default_user: str = "unauthorized"
     BOT_TOKEN: str = "no token"
-    BASE_URL: str = "http://178.72.184.134:80"
+    BASE_URL: str = "http://localhost:80"
 
 
 class KeyringConfig(BaseModel):
     master_password: str = ""
     bearer_token: str = ""                  
     refresh_token: str = ""
-    last_action: datetime = datetime.now()
+    last_action: datetime = datetime.today()
 
 
 class ConfigData(BaseModel):
