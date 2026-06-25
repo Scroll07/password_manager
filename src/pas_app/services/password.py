@@ -72,24 +72,35 @@ def create_user_vault(username: str):
         f.write(data)
 
 
-def print_passwords(passwords: list[Password], show: bool = False) -> None:
+def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> None:
     if not passwords:
         typer.echo("Записей нет")
         return
-
-    headers = ["№", "Метка", "Логин", "Пароль", "Заметка"]
     rows = []
-
-    for i, pas in enumerate(passwords, start=1):
-        try:
-            match = pas.service
-            username = pas.username
-            password = pas.password if show else "******"
-            note = pas.note
-            rows.append([i, match, username, password, note])
-        except Exception as e:
-            typer.echo(f"Ошибка: {e}")
-            raise typer.Exit(code=1)
+    if not check:
+        headers = ["№", "Метка", "Логин", "Пароль", "Заметка"]
+        for i, pas in enumerate(passwords, start=1):
+            try:
+                match = pas.service
+                username = pas.username
+                password = pas.password if show else "******"
+                note = pas.note
+                rows.append([i, match, username, password, note])
+            except Exception as e:
+                typer.echo(f"Ошибка: {e}")
+                raise typer.Exit(code=1)
+    else:
+        headers = ["№", "Метка", "Логин", "Пароль", "Strength"]
+        for i, pas in enumerate(passwords, start=1):
+            try:
+                match = pas.service
+                username = pas.username
+                password = pas.password if show else "******"
+                strength = check_password_strength(password=pas.password)
+                rows.append([i, match, username, password, strength])
+            except Exception as e:
+                typer.echo(f"Ошибка: {e}")
+                raise typer.Exit(code=1)
 
     if rows:
         typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
@@ -125,7 +136,7 @@ def is_common_pattern(password: str) -> bool:
     return False
 
 
-PASSWORD_STRENGTH_LEVEL = Literal["high", "medium", "low"]
+PASSWORD_STRENGTH_LEVEL = Literal["HIGH", "MEDIUM", "LOW"]
 def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
     score = 0
     
@@ -136,13 +147,13 @@ def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
             continue
         data = file.read_text()
         if password in data:
-            return "low"
+            return "LOW"
     
     if is_common_pattern(password):
-        return "low"
+        return "LOW"
     
     if len(password) < 8:
-        return "low"
+        return "LOW"
     elif len(password) >= 16:
         score += 3
     elif len(password) >= 12:
@@ -163,7 +174,7 @@ def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
     elif variety >= 2:
         score += 1
     else:
-        return "low"
+        return "LOW"
     
     digits = find_digits_in_a_row(row=password)
     
@@ -171,11 +182,11 @@ def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
         score -= 1
     
     if score >= 6:
-        return "high"
+        return "HIGH"
     elif score >= 3:
-        return "medium"
+        return "MEDIUM"
     else:
-        return "low"
+        return "LOW"
         
 
 # def get_

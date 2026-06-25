@@ -12,6 +12,7 @@ from pas_app.cli.commands.pas_commands.import_cmd import import_data
 from pas_app.cli.commands.pas_commands.export_cmd import export_command
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
+from pas_app.cli.commands.pas_commands.check_password_strength import check_password_strength_command
 
 from pas_app.cli.commands.api_commands.api_typer import cli_app
 from pas_app.cli.commands.config_commands.config_typer import config_app
@@ -36,7 +37,7 @@ find_command = check_session_dec(find_command)
 edit_command = check_session_dec(edit_command)
 export_command = check_session_dec(export_command)
 import_command = check_session_dec(import_data)
-
+check_strength_command = check_session_dec(check_password_strength_command)
 
 
 
@@ -51,7 +52,7 @@ app.command("edit")(edit_command)
 app.command("export")(export_command)
 app.command("import")(import_command)
 app.command("gen")(create_password_command)
-
+app.command("check")(check_strength_command)
 
 
 # APPS
