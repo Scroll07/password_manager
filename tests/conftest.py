@@ -6,7 +6,7 @@ import keyring
 
 from pas_app.config import UserConfig
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
-from pas_app.schemas.passwords import KeyringValues, UserVault
+from pas_app.schemas.passwords import KeyringValues, UserVault, Password
 from pas_app.core.api import Api
 from pas_app.services.file_utils import load_data
 from pas_app.services.password import create_user_vault
@@ -62,6 +62,21 @@ async def create_auth_test_user(
     assert response.content.refresh_token
 
     return api
+
+
+@pytest.fixture
+def passwords() -> list[Password]:
+    passwords = []
+    for i in range(10):
+        passwords.append(
+            Password(
+                service=str(1),
+                username="username",
+                password="password",
+                note=None if i%2==0 else "note"
+            )
+        )
+    return passwords
 
 
 @pytest.fixture

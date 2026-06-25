@@ -19,4 +19,3 @@ class EncodedToken(BaseModel):
 
 class DecodedToken(BaseModel):
     token: TokenData
-    token_type: TokenType
