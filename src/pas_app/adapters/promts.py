@@ -89,6 +89,9 @@ def cli_improt_file_prompt() -> Path:
     files = []
     for file in IMPORT_DIR.glob("*.json"):
         files.append(file)
+    
+    if not files:
+        raise FileExistsError("No files to import")
         
     while True:
         clear_console()
@@ -112,9 +115,10 @@ def cli_improt_file_prompt() -> Path:
             
 
 
-def choose_default_user(usernames: list[str]) -> str:
+def choose_default_user(usernames: list[str], current_username: str) -> str:
     while True:
         clear_console()
+        typer.echo(f"Current User: {current_username}")
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
@@ -294,3 +298,25 @@ def exit_message_and_clear_console(message: str):
     typer.echo(message)
     time.sleep(2)
     raise typer.Exit(code=0)
+
+def input_filename_for_export() -> str:
+    while True:
+        clear_console()
+        filename = typer.prompt("Filename for export file:").strip()
+        if not filename:
+            continue
+        if len(filename) >= 30:
+            typer.echo("Filename is too long")
+            time.sleep(2)
+        if " " in filename:
+            typer.echo("Filename must not contain spaces")
+            time.sleep(2)
+        if "." in filename:
+            typer.echo("Filename must not contain dots")
+            time.sleep(2)
+        bad_chars = ['<', '>', ':', '"', '/', '\\', '|', '*', '?']
+        if any(c in filename for c in bad_chars):
+            typer.echo("Filename must not contain bad chars")
+            time.sleep(2)
+        return f"{filename}.json"
+        

@@ -4,12 +4,9 @@ import typer
 from pas_app.config import EXPORT_DIR
 from pas_app.services.file_utils import load_data
 from pas_app.config import get_config
-
+from pas_app.adapters.promts import input_filename_for_export
 
 def export_command(
-    filename: str = typer.Argument(
-        ..., help="Output filename for export (e.g., export.json)"
-    ),
     no_passwords: bool = typer.Option(
         False, "--no-passwords", help="Enable to skip storing passwords in export"
     ),
@@ -27,6 +24,7 @@ def export_command(
 
         pas export secrets.json
     """
+    filename = input_filename_for_export()
     config = get_config()
     data = load_data(config=config)
 
@@ -38,7 +36,7 @@ def export_command(
     for pas in data.user_passwords:
         export_pas = {"username": pas.username, "note": pas.note}
         if not no_passwords:
-            export_pas["passwords"] = pas.password
+            export_pas["password"] = pas.password
         export_data[pas.service] = export_pas
 
     filename_path = EXPORT_DIR / filename

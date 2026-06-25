@@ -26,7 +26,7 @@ def check_session() -> None:
         print(config_data.local.default_user, "- default user")
         print("default_user == unauthorized")
         usernames = get_vault_usernames()
-        username = choose_default_user(usernames=usernames)
+        username = choose_default_user(usernames=usernames, current_username=config_data.local.default_user)
         config_data.local.default_user = username
         
     config.save_config(data=config_data)
@@ -177,7 +177,11 @@ def check_password_strength(password: str) -> PASSWORD_STRENGTH_LEVEL:
     else:
         return "low"
         
-      
+
+# def get_
+
+
+
 # DECORATOR
 from functools import wraps   
         

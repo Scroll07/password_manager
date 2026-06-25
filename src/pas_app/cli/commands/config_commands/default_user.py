@@ -16,10 +16,9 @@ def set_default_user():
         pas config user
     """
     config = get_config()
-    usernames = get_vault_usernames()
-    username = choose_default_user(usernames=usernames)
     config_data = config._refresh()
+    usernames = get_vault_usernames()
+    username = choose_default_user(usernames=usernames, current_username=config_data.local.default_user)
+    config.reset_config()
     config_data.local.default_user = username
-    config_data.keyring.bearer_token = ""    #RESET TOKENS
-    config_data.keyring.refresh_token = ""
     config.save_config(data=config_data)

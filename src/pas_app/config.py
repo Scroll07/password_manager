@@ -97,6 +97,16 @@ class UserConfig:
 
     def _refresh(self) -> ConfigData:
         return self.load_config()
+    
+    def reset_config(self) -> None:
+        config_data = self.load_config()
+        config_data.local.default_user = ""
+        config_data.keyring.bearer_token = ""
+        # config_data.keyring.refresh_token = ""
+        config_data.keyring.master_password = ""
+        
+        self.save_config(config_data)
+        
 
 
 def get_config() -> UserConfig:
