@@ -26,7 +26,7 @@ async def login():
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
         
-    if response.status_code == 200:
+    if response.status_code == 201:
         config_data.local.default_user = user_api_data.username
         config_data.keyring.bearer_token = response.content.bearer_token.token
         config_data.keyring.refresh_token = response.content.refresh_token.token

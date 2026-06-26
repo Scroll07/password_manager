@@ -27,6 +27,7 @@ class ConfigFileData(BaseModel):
     default_user: str = "unauthorized"
     BOT_TOKEN: str = "no token"
     BASE_URL: str = "http://localhost:80"
+    COLLECT_STATISTIC: bool = True
 
 
 class KeyringConfig(BaseModel):
