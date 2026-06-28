@@ -39,13 +39,6 @@ async def register():
         config_data.local.default_user = username
         config.save_config(data=config_data)
 
-
-        #Restart login so the user is logged in immediately
-
-        # login logic
-
-        # typer.echo(f"Successful login, Hi {user_api_data.username}!")
-        # time.sleep(1)
         logger.info(f"Register successful for user: {username}")
         raise typer.Exit(code=0)
 
