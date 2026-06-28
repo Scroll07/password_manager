@@ -2,11 +2,10 @@ import os
 from cryptography.fernet import Fernet
 import base64
 import hashlib
-import keyring
 import jwt
 
 from pas_app.schemas.jwt import TokenData
-from pas_app.schemas.passwords import KeyringValues, Passwords
+from pas_app.schemas.passwords import Passwords
 
 
 def create_random_salt() -> str:

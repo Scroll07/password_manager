@@ -30,7 +30,12 @@ class DownloadRequest(BaseModel):
     backup_id: int
 
 #====================================
-    
+class BackupStats(BaseModel):
+    backups_count: int
+    max_rows: int
+    min_rows: int
+    avg_rows: int
+    backups_for_week: int
  
 class BackupData(BaseModel):
     id: int
@@ -45,6 +50,7 @@ class TypeResponses(StrEnum):
     BACKUPS = "backups"
     DOWNLOAD = "download"
     REFRESH = "refresh"
+    STATS = "stats"
 
 
 # ===================================
@@ -71,8 +77,15 @@ class DownloadResponse(BaseModel):
     vault_data: EncryptedUserVault
     type: TypeResponses = TypeResponses.DOWNLOAD
 
+class BackupStatsResponse(BaseModel):
+    ok: bool
+    stats: BackupStats
+    type: TypeResponses = TypeResponses.STATS
+
 class ApiResponse(BaseModel):
     status_code: int
-    content: Union[MessageResponse, LoginResponse, BackupsResponse, DownloadResponse]
+    content: Union[MessageResponse, LoginResponse, BackupsResponse, DownloadResponse, BackupStatsResponse]
+    
+
 
 #====================================

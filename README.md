@@ -1,3 +1,17 @@
+# Installation
+```
+git clone https://github.com/Scroll07/password_manager.git
+
+cd password_manager
+./realise.sh
+
+pas api register
+```
+Dependencies that will be installed if you don't have them:
+- gnome-keyring
+- pipx
+- uv
+
 # Password Manager CLI
 
 A client-side CLI password manager with local vault encryption and remote backup support via REST API.  
@@ -44,20 +58,6 @@ data/                 # Common password lists for strength checker
 scripts/              # realise.sh and helpers
 ```
 
-Dependencies that will be installed if you don't have them:
-- gnome-keyring
-- pipx
-- uv
-
-Installation
-```
-git clone https://github.com/Scroll07/password_manager.git
-
-cd password_manager
-./realise.sh
-
-pas api register
-```
 
 **BASE COMMANDS**
 | Command    | Description                          | Example                      |
@@ -73,7 +73,6 @@ pas api register
 | pas import | Import vault data from a file        | pas import backup.json       |
 | pas gen    | Generate a password                  | pas gen -l 32                |
 
-
 **API COMMANDS**
 | Command                 | Description                                      | Example                 |
 | ----------------------- | ------------------------------------------------ | ----------------------- |
@@ -81,6 +80,7 @@ pas api register
 | pas api login           | Authenticate and save API session locally        | pas api login           |
 | pas api upload          | Upload the current local vault as a backup       | pas api upload          |
 | pas api backups         | Interactively manage backups on the server       | pas api backups         |
+│ pas api stats           │ Backup statistics for the user's account.        │ pas api stats           │
 | pas api change-password | Change the current account password              | pas api change-password |
 
 **USER COMMANDS**
