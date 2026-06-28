@@ -112,6 +112,15 @@ def backups_command():
 
 def backup_stats_command():
     """
+    Retrieve and display backup statistics for the user's account.
+
+    Fetches backup statistics including total backup count,
+    maximum, minimum, and average rows per backup, and weekly backup count.
+    The statistics are presented in a formatted table.
+
+    Example:
+        pas api stats
+
     """
     asyncio.run(backups_stats())
 
