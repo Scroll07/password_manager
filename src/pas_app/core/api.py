@@ -7,7 +7,7 @@ from functools import wraps
 import typer
 
 from pas_app.config import get_config
-from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse
+from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse, BackupStatsResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import EncryptedUserVault, ChangePasswordSchema
 from pas_app.core.crypto import decode_token
@@ -184,6 +184,20 @@ class Api:
         content = MessageResponse(detail=data.get("detail"))
         return ApiResponse(status_code=response.status_code, content=content)
     
+    async def stats_backup(self) -> ApiResponse:
+        url = f"/backups/stats"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.get(
+                url=url,
+                headers=self.headers,
+            )  
+        data = response.json()
+        if response.status_code == 200:
+            content = BackupStatsResponse.model_validate(data)
+        else:
+            content = MessageResponse(detail=data.get("detail"))
+        return ApiResponse(status_code=response.status_code, content=content)
+    
     
     
     
@@ -229,7 +243,7 @@ def check_token_dec(func: Callable):
                 typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
                 typer.Exit(code=1)
         else:
-            typer.echo("Tokens are not expired")
+            # typer.echo("Tokens are not expired")
             return await func(*args, **kwargs)
                     
     return wrapper        
