@@ -32,10 +32,11 @@ from pas_app.cli.commands.api_commands.backups_stats import backups_stats
 from pas_app.services.password import check_session_dec
 from pas_app.core.api import check_token_dec
 
-upload = check_token_dec(upload)
-backups = check_token_dec(backups)
-change_password = check_token_dec(change_password)
-backups_stats = check_token_dec(backups_stats)
+# upload = check_token_dec(upload)
+# backups = check_token_dec(backups)
+# change_password = check_token_dec(change_password)
+# backups_stats = check_token_dec(backups_stats)
+
 # download = check_token_dec(download)
 # delete = check_token_dec(delete)
 
