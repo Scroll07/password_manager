@@ -12,7 +12,7 @@ from pas_app.schemas.api import BackupData
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
 from pas_app.config import IMPORT_DIR
 
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+# DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def gui_password_prompt():
@@ -164,14 +164,14 @@ def print_backups(backups: list[BackupData]) -> list[BackupData]:
 
     clear_console()
     if pinned_backups:
-        pinned_data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(pinned_backups, start=1)] 
+        pinned_data = [[i, b.name, b.rows , b.created_at_formatted] for i, b in enumerate(pinned_backups, start=1)] 
         typer.echo("Pinned Backups:\n")
         typer.echo(tabulate(pinned_data, headers=headers, floatfmt="grid"))
         
         typer.echo("\n")
     
     if basic_backups:
-        basic_data = [[i, b.name, b.rows , b.created_at.strftime(DATE_FORMAT)] for i, b in enumerate(basic_backups, start=len(pinned_backups) + 1)]
+        basic_data = [[i, b.name, b.rows , b.created_at_formatted] for i, b in enumerate(basic_backups, start=len(pinned_backups) + 1)]
         typer.echo("Backups:\n")
         typer.echo(tabulate(basic_data, headers=headers, floatfmt="grid"))
     
@@ -247,7 +247,7 @@ def choose_action(backup: BackupData) -> action:
         clear_console()
         pin_action = "Unpin" if backup.pinned else "Pin"
         text = f"""
-        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at.strftime(DATE_FORMAT)} 
+        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at_formatted} 
         
         1) Download
         2) {pin_action}
