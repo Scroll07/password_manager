@@ -65,7 +65,9 @@ def register_command():
 
     asyncio.run(register())
 
-def login_command():
+def login_command(
+    change_user: bool = typer.Option(False, "-u", "--user")
+):
     """
     Log into an existing API account.
 
@@ -77,7 +79,7 @@ def login_command():
 
     You will be prompted to enter your username and password.
     """
-    asyncio.run(login())
+    asyncio.run(login(change_user=change_user))
 
 def upload_command():
     """

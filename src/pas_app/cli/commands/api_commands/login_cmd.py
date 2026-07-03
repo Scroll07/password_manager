@@ -3,17 +3,24 @@ import typer
 import time
 
 from pas_app.adapters.promts import cli_login_input
+from pas_app.config import get_config
 from pas_app.core.api import Api
 from pas_app.core.logger import get_logger
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
-from pas_app.config import get_config
+from pas_app.cli.commands.config_commands.default_user import set_default_user
 
 logger = get_logger()
 
-async def login():
+async def login(
+    change_user: bool
+):
     config = get_config()
-    config_data = config._refresh()
+
+    if change_user:
+        set_default_user()
+
     api = Api()
+    config_data = config._refresh()
 
     user_input_data = cli_login_input(username=config_data.local.default_user)
     username = user_input_data.username
