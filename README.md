@@ -80,7 +80,7 @@ scripts/              # realise.sh and helpers
 | pas api login           | Authenticate and save API session locally        | pas api login           |
 | pas api upload          | Upload the current local vault as a backup       | pas api upload          |
 | pas api backups         | Interactively manage backups on the server       | pas api backups         |
-│ pas api stats           │ Backup statistics for the user's account.        │ pas api stats           │
+| pas api stats           | Backup statistics for the user's account         | pas api stats           |
 | pas api change-password | Change the current account password              | pas api change-password |
 
 **USER COMMANDS**
