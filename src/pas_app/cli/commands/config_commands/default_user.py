@@ -13,7 +13,7 @@ def set_default_user():
     as the default user for future CLI operations.
 
     Examples:
-        pas config user
+        pas user set | pas config user
     """
     config = get_config()
     config_data = config._refresh()

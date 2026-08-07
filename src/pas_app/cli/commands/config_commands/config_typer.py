@@ -41,7 +41,7 @@ from pas_app.cli.commands.config_commands.session_cmd import reset_session
 config_app.command("user")(set_default_user)
 config_app.command("url")(url_cmd)
 config_app.command("token")(token_cmd)
-config_app.command("reset-session")(reset_session)
+config_app.command("reset")(reset_session)
 
 
 

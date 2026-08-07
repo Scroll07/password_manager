@@ -11,7 +11,7 @@ def reset_session():
     keeping the current Base URL and bot token values.
 
     Examples:
-        pas config reset-session
+        pas config reset
     """
     config = get_config()
     config_data = config._refresh()
@@ -21,4 +21,4 @@ def reset_session():
     
     config.save_config(data=config_data)
     
-    typer.echo("The session was reset")
+    typer.echo("The config was reset")
