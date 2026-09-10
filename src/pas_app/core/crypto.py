@@ -8,6 +8,8 @@ from pas_app.schemas.jwt import TokenData
 from pas_app.schemas.passwords import Passwords
 
 
+
+
 def create_random_salt() -> str:
     salt = base64.urlsafe_b64encode(os.urandom(16)).decode("ascii")
     return salt
@@ -20,6 +22,17 @@ def derive_key(master_password: str, salt_b64: str, iteration: int = 100000) -> 
     )
     fernet_key = base64.urlsafe_b64encode(raw_key)
     return fernet_key
+
+def create_dek(kek: bytes) -> tuple[bytes, bytes]:
+    dek = Fernet.generate_key()
+    cipher = Fernet(key=kek)
+    encrypted_dek = cipher.encrypt(data=dek)
+    return dek, encrypted_dek
+
+def decrypt_dek(kek: bytes, encrypted_dek: bytes) -> bytes:
+    cipher = Fernet(key=kek)
+    dek = cipher.decrypt(token=encrypted_dek)
+    return dek
 
 
 def decrypt_vault_passwords(encrypted_passwords: str, key: bytes) -> Passwords:
@@ -36,8 +49,6 @@ def encrypt_vault_passwords(passwords: Passwords, key: bytes) -> str:
     bytes_to_encrypt = data.encode("utf-8")
     encrypted = cipher.encrypt(bytes_to_encrypt)
     return encrypted.decode("ascii")
-
-
 
 
     
