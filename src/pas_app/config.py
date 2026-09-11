@@ -89,7 +89,7 @@ class UserConfig:
         if self.config_file.exists():
             return
         empty_config = ConfigData(
-            local=ConfigFileData(default_user=current_user),
+            local=ConfigFileData(DEFAULT_USER=current_user),
             keyring=KeyringConfig()
         )
         self.save_config(empty_config)
@@ -103,7 +103,7 @@ class UserConfig:
         config_data = self.load_config()
         config_data.local.DEFAULT_USER = ""
         config_data.keyring.bearer_token = ""
-        # config_data.keyring.refresh_token = ""
+        config_data.keyring.refresh_token = ""
         config_data.keyring.master_password = ""
         
         self.save_config(config_data)
