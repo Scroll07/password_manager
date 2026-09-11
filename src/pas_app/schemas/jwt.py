@@ -1,11 +1,11 @@
 from enum import StrEnum
 from pydantic import BaseModel
 
+from pas_app.schemas.api import TokenType
 
 
-class TokenType(StrEnum):
-    BEARER = "bearer"
-    REFRESH = "refresh"
+class EncodedToken(BaseModel):
+    token: str
 
 class TokenData(BaseModel):
     sub: str
@@ -13,9 +13,6 @@ class TokenData(BaseModel):
     exp: int
     type: TokenType
 
-class EncodedToken(BaseModel):
-    token: str
-    
-
 class DecodedToken(BaseModel):
     token: TokenData
+    

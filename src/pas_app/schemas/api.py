@@ -12,6 +12,7 @@ from pas_app.schemas.jwt import EncodedToken
 class TokenType(StrEnum):
     BEARER = "bearer"
     REFRESH = "refresh"
+    VAULT = 'vault'
 
 class Token(BaseModel):
     token: str
