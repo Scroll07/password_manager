@@ -1,7 +1,7 @@
 import pytest
 from cryptography.fernet import InvalidToken
 
-from pas_app.schemas.api import TokenType
+from pas_app.schemas.jwt import TokenType
 from pas_app.schemas.passwords import Password, Passwords
 from pas_app.core.crypto import create_random_salt
 from pas_app.core.crypto import derive_key, decrypt_vault_passwords, encrypt_vault_passwords
