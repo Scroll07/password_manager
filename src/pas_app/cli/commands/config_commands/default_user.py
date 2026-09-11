@@ -18,7 +18,7 @@ def set_default_user():
     config = get_config()
     config_data = config._refresh()
     usernames = get_vault_usernames()
-    username = choose_default_user(usernames=usernames, current_username=config_data.local.default_user)
+    username = choose_default_user(usernames=usernames, current_username=config_data.local.DEFAULT_USER)
     config.reset_config()
-    config_data.local.default_user = username
+    config_data.local.DEFAULT_USER = username
     config.save_config(data=config_data)

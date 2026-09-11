@@ -36,7 +36,7 @@ async def register():
 
         create_user_vault(username=username)
 
-        config_data.local.default_user = username
+        config_data.local.DEFAULT_USER = username
         config.save_config(data=config_data)
 
         logger.info(f"Register successful for user: {username}")

@@ -38,9 +38,9 @@ def load_data(config: UserConfig) -> UserVault:
     from pas_app.services.password import get_key
     config_data = config._refresh()
     
-    if config_data.local.default_user is None:
+    if config_data.local.DEFAULT_USER is None:
         raise EchoException("No logged")
-    encrypted = load_encrypted_vault(config_data.local.default_user)
+    encrypted = load_encrypted_vault(config_data.local.DEFAULT_USER)
     try:
         key = get_key()
     except InvalidToken:

@@ -43,7 +43,7 @@ async def download(backup: BackupData, config: UserConfig):
         raise typer.Exit(code=1)
 
     #save vault file path and write data
-    vault_file = VAULTS / f"{config_data.local.default_user}.json"
+    vault_file = VAULTS / f"{config_data.local.DEFAULT_USER}.json"
     if not vault_file.exists():
         typer.echo(f"File {vault_file} does not exist")
         raise typer.Exit(code=1)
@@ -54,7 +54,7 @@ async def download(backup: BackupData, config: UserConfig):
     with open(vault_file, "w", encoding="utf-8") as f:
         f.write(data_to_write)
          
-    typer.echo(f"{config_data.local.default_user} vault file was changed")
+    typer.echo(f"{config_data.local.DEFAULT_USER} vault file was changed")
 
 
 async def rename(backup: BackupData):

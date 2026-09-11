@@ -22,12 +22,12 @@ def check_session() -> None:
         typer.echo("Try to register firstly")
         raise typer.Exit(code=1)
     
-    if config_data.local.default_user == "unauthorized":
-        print(config_data.local.default_user, "- default user")
+    if config_data.local.DEFAULT_USER == "unauthorized":
+        print(config_data.local.DEFAULT_USER, "- default user")
         print("default_user == unauthorized")
         usernames = get_vault_usernames()
-        username = choose_default_user(usernames=usernames, current_username=config_data.local.default_user)
-        config_data.local.default_user = username
+        username = choose_default_user(usernames=usernames, current_username=config_data.local.DEFAULT_USER)
+        config_data.local.DEFAULT_USER = username
         
     config.save_config(data=config_data)
         
@@ -46,7 +46,7 @@ def get_key() -> bytes:
     else:
         master_password = config_data.keyring.master_password
 
-    encrypted_vault = load_encrypted_vault(config_data.local.default_user)
+    encrypted_vault = load_encrypted_vault(config_data.local.DEFAULT_USER)
 
     key = derive_key(master_password, encrypted_vault.salt)  # type: ignore
     decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)

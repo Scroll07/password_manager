@@ -24,7 +24,7 @@ SESSION_FILE = BASE_DIR / "session.json"
 CONFIG_FILE = BASE_DIR / "config.json"
 
 class ConfigFileData(BaseModel):
-    default_user: str = "unauthorized"
+    DEFAULT_USER: str = "unauthorized"
     BOT_TOKEN: str = "no token"
     BASE_URL: str = "http://localhost:80"
     COLLECT_STATISTIC: bool = True
@@ -101,7 +101,7 @@ class UserConfig:
     
     def reset_config(self) -> None:
         config_data = self.load_config()
-        config_data.local.default_user = ""
+        config_data.local.DEFAULT_USER = ""
         config_data.keyring.bearer_token = ""
         # config_data.keyring.refresh_token = ""
         config_data.keyring.master_password = ""
