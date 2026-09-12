@@ -1,31 +1,14 @@
-from datetime import datetime
 from pathlib import Path
 from pydantic import BaseModel
-import typer
+
+from pas_app.core.settings import CONFIG_FILE
 
 
-BASE_DIR = Path.home() / "pas_data"
-EXPORT_DIR = BASE_DIR / "exports"
-VAULTS = BASE_DIR / "Vaults"
-IMPORT_DIR = BASE_DIR / "imports"
-for dir in (BASE_DIR, EXPORT_DIR, VAULTS, IMPORT_DIR):
-    dir.mkdir(parents=True, exist_ok=True)
-
-
-LAST_MATCHES = BASE_DIR / "last_matches.json"
-SESSION_FILE = BASE_DIR / "session.json"
-
-# BASE_URL = "http://localhost:80"
-# BASE_URL = "http://178.72.184.134:80"
-
-
-CONFIG_FILE = BASE_DIR / "config.json"
 
 class ConfigData(BaseModel):
     BOT_TOKEN: str = "no token"
     BASE_URL: str = "http://localhost:80"
     COLLECT_STATISTIC: bool = True
-
 
 
 class UserConfig:
@@ -34,8 +17,7 @@ class UserConfig:
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
-            typer.echo("Config file does not exist")
-            raise typer.Exit(code=1)        
+            raise(FileExistsError(f"{self.config_file} does not exist"))       
         return None
 
     def load_config(self) -> ConfigData:
