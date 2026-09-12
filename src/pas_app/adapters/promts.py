@@ -115,7 +115,7 @@ def cli_improt_file_prompt() -> Path:
             
 
 
-def choose_default_user(usernames: list[str], current_username: str) -> str:
+def choose_current_user(usernames: list[str], current_username: str) -> str:
     while True:
         clear_console()
         typer.echo(f"Current User: {current_username}")
@@ -135,6 +135,27 @@ def choose_default_user(usernames: list[str], current_username: str) -> str:
             continue
             
         return usernames[int(choice)-1]
+    
+def choose_current_vault(vault_names: list[str], current_vault: str) -> str:
+    while True:
+        clear_console()
+        typer.echo(f"Current Vault: {current_vault}")
+        typer.echo("Vaults:\n")
+        for i, vault_name in enumerate(vault_names, start=1):
+            typer.echo(f'[{i}] - {vault_name}')
+        choice = typer.prompt("\nChoose username to set as default").strip()
+
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(vault_names):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return vault_names[int(choice)-1]
 
 def choose_delete_user(usernames: list[str]) -> str:
     while True:

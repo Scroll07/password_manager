@@ -4,14 +4,16 @@ from datetime import datetime
 from pydantic import BaseModel
 
 class KeyringData(BaseModel):
-    default_user: str = ""
+    current_vault: str = ""
+    current_user: str = ""
     master_password: str = ""
     bearer_token: str = ""                  
     refresh_token: str = ""
     last_action: datetime = datetime.today()
 
 class KeyringValues(StrEnum):
-    DEFAULT_USER = "default_user"
+    CURRENT_USER = "current_user"
+    CURRENT_VAULT = 'current_vault'
     MASTER_PASSWORD = "master_password"
     BEARER_TOKEN = "bearer_token"
     REFRESH_TOKEN = "refresh_token"
@@ -42,7 +44,8 @@ class KeyringTool:
     
     def save(self, data: KeyringData) -> None:
         last_action_str = datetime.strftime(datetime.now(), self.time_format)
-        self.set_keyring_value(KeyringValues.DEFAULT_USER, data.default_user)
+        self.set_keyring_value(KeyringValues.CURRENT_USER, data.current_user)
+        self.set_keyring_value(KeyringValues.CURRENT_VAULT, data.current_vault)
         self.set_keyring_value(KeyringValues.BEARER_TOKEN, data.bearer_token)
         self.set_keyring_value(KeyringValues.MASTER_PASSWORD, data.master_password)
         self.set_keyring_value(KeyringValues.REFRESH_TOKEN, data.refresh_token)
@@ -53,7 +56,8 @@ class KeyringTool:
         last_action_str = self.get_keyring_value(KeyringValues.LAST_ACTION)
         last_action_datetime = datetime.strptime(last_action_str, self.time_format)
         data = KeyringData(
-            default_user=self.get_keyring_value(KeyringValues.DEFAULT_USER),
+            current_user=self.get_keyring_value(KeyringValues.CURRENT_USER),
+            current_vault=self.get_keyring_value(KeyringValues.CURRENT_VAULT),
             master_password=self.get_keyring_value(KeyringValues.MASTER_PASSWORD),
             bearer_token=self.get_keyring_value(KeyringValues.BEARER_TOKEN),
             refresh_token=self.get_keyring_value(KeyringValues.REFRESH_TOKEN),

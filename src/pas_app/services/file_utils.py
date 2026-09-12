@@ -5,13 +5,20 @@ import typer
 from cryptography.fernet import InvalidToken
 
 from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
-from pas_app.config import BASE_DIR, LAST_MATCHES, VAULTS, UserConfig
+from pas_app.config import UserConfig
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
+from pas_app.core.settings import (
+    VAULTS,
+    LAST_MATCHES
+)
 
 # from pas_app.services.password import check_session
 from pas_app.exceptions import EchoException
 
 
+
+def create_vault_path(username: str, vault_name: str) -> Path:
+    return VAULTS / username / f'{vault_name}.json'
 
 def dump_last_matches(
     matches: list[str],
@@ -23,8 +30,8 @@ def dump_last_matches(
         typer.echo("OSError")
 
 
-def load_encrypted_vault(username: str) -> EncryptedUserVault:
-    vault_file = VAULTS / f"{username}.json"
+def load_encrypted_vault(username: str, vault_name: str) -> EncryptedUserVault:
+    vault_file = create_vault_path(username=username, vault_name=vault_name)
     try:
         with open(vault_file, "r") as f:
             data = f.read()
@@ -34,13 +41,9 @@ def load_encrypted_vault(username: str) -> EncryptedUserVault:
         raise EchoException(e)
 
 
-def load_data(config: UserConfig) -> UserVault:
+def load_data(username: str, vault_name: str) -> UserVault:
     from pas_app.services.password import get_key
-    config_data = config._refresh()
-    
-    if config_data.local.DEFAULT_USER is None:
-        raise EchoException("No logged")
-    encrypted = load_encrypted_vault(config_data.local.DEFAULT_USER)
+    encrypted = load_encrypted_vault(username=username, vault_name=vault_name)
     try:
         key = get_key()
     except InvalidToken:
@@ -53,14 +56,15 @@ def load_data(config: UserConfig) -> UserVault:
         username=encrypted.username,
         salt=encrypted.salt,
         user_passwords=decoded_passwords.passwords,
+        encrypted_dek=encrypted.encrypted_dek
     )
     return vault_data
 
 
-def save_data(vault_data: UserVault) -> None:
+def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
     from pas_app.services.password import get_key
 
-    vault_file = VAULTS / f"{vault_data.username}.json"
+    vault_file = create_vault_path(username=username, vault_name=vault_name)
     if not vault_file.exists():
         raise EchoException(f"File {vault_data.username}.json does not exist")
     key = get_key()
@@ -73,41 +77,36 @@ def save_data(vault_data: UserVault) -> None:
         username=vault_data.username,
         salt=vault_data.salt,
         encrypted_passwords=encrypted_passwords,
+        encrypted_dek=vault_data.encrypted_dek
     )
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
-    typer.echo("Данные успешно сохранены.")
 
+# def create_vault # <----------------------СДЕЛАЙ 
 
-def delete_file(filename: Path):
-    file_to_delete = BASE_DIR / filename
-    if not file_to_delete.exists():
-        raise EchoException(f"Файла {filename} не обнаружено.")
+def get_user_vault_files(username: str) -> list[Path]:
+    dir = VAULTS / username
+    vaults = [v for v in dir.glob("*.json")]
+    return vaults
 
-    try:
-        os.remove(file_to_delete)
-        raise EchoException(f"Файл {filename} успешно удален.")
-    except Exception as e:
-        raise EchoException(f"Ошибка при удалении файла {filename}: {e}")
-
-def get_user_vault_files() -> list[Path]:
-    vaults = [v for v in VAULTS.glob("*.json")]
-    return vaults    
-
-def is_vault_files_exists() -> bool:
-    vaults = get_user_vault_files()
-    return True if vaults else False
 
 
 def get_vault_usernames() -> list[str]:
-    vaults = get_user_vault_files()
-    if not vaults:
+    user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]
+    if not user_folders:
         raise EchoException("No vaults file to get username")
     usernames = []
-    for v in vaults:
-        with open(v, "r", encoding='utf-8') as f:
-            data = f.read()
-        encrypted = EncryptedUserVault.model_validate_json(data)
-        usernames.append(encrypted.username)
+    for folder in user_folders:
+        folder_name = folder.parts[-1]
+        for v in folder.glob('*.json'):
+            if not v.is_file():
+                continue # добавить логирование
+            with open(v, "r", encoding='utf-8') as f:
+                data = f.read()
+            encrypted = EncryptedUserVault.model_validate_json(data)
+            if folder_name == encrypted.username:
+                usernames.append(encrypted.username)
+            # else:
+                # добавить логирование
     
     return usernames

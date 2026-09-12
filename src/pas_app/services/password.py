@@ -3,33 +3,65 @@ import tabulate
 import typer
 from typing import Callable, Literal
 
-from pas_app.adapters.promts import cli_password_promt, choose_default_user
+from pas_app.adapters.promts import (
+    cli_password_promt, 
+    choose_current_user,
+    choose_current_vault
+)
 from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
-from pas_app.config import VAULTS, BASE_DIR
 from pas_app.schemas.passwords import Password, EncryptedUserVault
-from pas_app.services.file_utils import load_encrypted_vault, is_vault_files_exists, get_vault_usernames
+from pas_app.services.file_utils import (
+    create_vault_path,
+    load_encrypted_vault,
+    get_vault_usernames,
+    get_user_vault_files
+)
 from pas_app.exceptions import EchoException
 from pas_app.config import get_config
+from pas_app.core.keyring import get_keyring_tool
+
 
 SESSION_TIMEOUT = 300
 
 
 def check_session() -> None:
-    config = get_config()
-    config_data = config._refresh()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
 
-    if not is_vault_files_exists():
-        typer.echo("Try to register firstly")
-        raise typer.Exit(code=1)
-    
-    if config_data.local.DEFAULT_USER == "unauthorized":
-        print(config_data.local.DEFAULT_USER, "- default user")
-        print("default_user == unauthorized")
-        usernames = get_vault_usernames()
-        username = choose_default_user(usernames=usernames, current_username=config_data.local.DEFAULT_USER)
-        config_data.local.DEFAULT_USER = username
+    if not keyring_data.current_user:
+        # choose current user
+        # username = ...
+        # keyring_data.current_user = username
         
-    config.save_config(data=config_data)
+        usernames = get_vault_usernames()
+        if not usernames:
+            raise EchoException("There are no accounts on this device.\nTry to sync accounts or create new.")
+        selected_username = choose_current_user(usernames=usernames, current_username="Not selected")
+        keyring_data.current_user = selected_username
+        
+    if not keyring_data.current_vault:
+        # choose current vault
+        # vault_name = ...
+        # keyring_data.current_vault = vault_name
+
+        vaults = get_user_vault_files(username=keyring_data.current_user)
+        if not vaults:
+            raise EchoException(f"There are no vaults on this device for {keyring_data.current_user}.\nTry to sync accounts or create new.")
+        vault_names = [v.parts[0] for v in vaults]
+        selected_vault = choose_current_vault(vault_names=vault_names, current_vault="Not selected")
+        keyring_data.current_vault = selected_vault
+
+
+    
+    vault_file = create_vault_path(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
+    if not vault_file.exists():
+        raise FileExistsError(f'{vault_file} does not exist')
+        
+    encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
+    if keyring_data.current_user != encrypted_vault_data.username:
+        raise ValueError()
+    
+    keyring.save(data=keyring_data)        
         
         
 def get_key() -> bytes:
