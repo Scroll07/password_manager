@@ -17,8 +17,11 @@ from pas_app.services.file_utils import (
     get_user_vault_files
 )
 from pas_app.exceptions import EchoException
-from pas_app.config import get_config
-from pas_app.core.keyring import get_keyring_tool
+from pas_app.dependencies import (
+    get_keyring_tool,
+    get_config,
+    get_logger
+)
 
 
 SESSION_TIMEOUT = 300
