@@ -23,11 +23,11 @@ def derive_key(master_password: str, salt_b64: str, iteration: int = 100000) -> 
     fernet_key = base64.urlsafe_b64encode(raw_key)
     return fernet_key
 
-def create_dek(kek: bytes) -> tuple[bytes, bytes]:
+def create_dek(kek: bytes) -> bytes:
     dek = Fernet.generate_key()
     cipher = Fernet(key=kek)
     encrypted_dek = cipher.encrypt(data=dek)
-    return dek, encrypted_dek
+    return encrypted_dek
 
 def decrypt_dek(kek: bytes, encrypted_dek: bytes) -> bytes:
     cipher = Fernet(key=kek)

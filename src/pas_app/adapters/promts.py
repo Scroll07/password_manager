@@ -10,7 +10,6 @@ from tabulate import tabulate
 from pas_app.adapters.console import clear_console
 from pas_app.schemas.api import BackupData
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
-from pas_app.config import IMPORT_DIR
 
 # DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -85,13 +84,9 @@ def cli_login_input(username: str | None = None) -> LoginRegisterInput:
         return LoginRegisterInput(username=login, password=password)
 
 
-def cli_improt_file_prompt() -> Path:
-    files = []
-    for file in IMPORT_DIR.glob("*.json"):
-        files.append(file)
-    
+def cli_improt_file_prompt(files: list[Path]) -> Path:
     if not files:
-        raise FileExistsError("No files to import")
+        raise FileNotFoundError("No files to import")
         
     while True:
         clear_console()
@@ -227,13 +222,43 @@ def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:
 
 def choose_name_for_backup() -> str:
     while True:
-        name = typer.prompt("Input a name for backup").strip()
+        name = typer.prompt("Enter the new backup name").strip()
         if not name:
             continue
         if len(name) > 16:
-            typer.echo("too long name - (16 max)")
+            typer.echo("Name too long (max 16 characters)")
             continue
         return name
+    
+
+def select_new_vault_name() -> str:
+    max_length = 16
+    while True:
+        name = typer.prompt("Enter new vault name").strip()
+        if not name:
+            typer.echo("Name cannot be empty")
+            continue
+        if len(name) > max_length:
+            typer.echo(f"Name too long (max {max_length} characters)")
+            continue
+        return name.strip()
+
+
+def select_master_password() -> str:
+    min_length = 4
+    max_length = 32
+    while True:
+        password = typer.prompt("Enter master password", hide_input=True).strip()
+        if not password:
+            typer.echo("Password cannot be empty")
+            continue
+        if len(password) < min_length:
+            typer.echo(f"Password too short (min {min_length} characters)")
+            continue
+        if len(password) > max_length:
+            typer.echo(f"Password too long (max {max_length} characters)")
+            continue
+        return password
 
 def change_password_prompt() -> ChangePasswordSchema:
     while True:

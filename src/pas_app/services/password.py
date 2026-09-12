@@ -50,7 +50,7 @@ def check_session() -> None:
         vaults = get_user_vault_files(username=keyring_data.current_user)
         if not vaults:
             raise EchoException(f"There are no vaults on this device for {keyring_data.current_user}.\nTry to sync accounts or create new.")
-        vault_names = [v.parts[0] for v in vaults]
+        vault_names = [v.name for v in vaults]
         selected_vault = choose_current_vault(vault_names=vault_names, current_vault="Not selected")
         keyring_data.current_vault = selected_vault
 
@@ -58,7 +58,7 @@ def check_session() -> None:
     
     vault_file = create_vault_path(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
     if not vault_file.exists():
-        raise FileExistsError(f'{vault_file} does not exist')
+        raise FileNotFoundError(f'{vault_file} does not exist')
         
     encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
     if keyring_data.current_user != encrypted_vault_data.username:

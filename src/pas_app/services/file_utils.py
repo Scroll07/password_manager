@@ -1,10 +1,17 @@
+import base64
 import json
 import os
 from pathlib import Path
 import typer
 from cryptography.fernet import InvalidToken
 
-from pas_app.core.crypto import decrypt_vault_passwords, encrypt_vault_passwords
+from pas_app.core.crypto import (
+    decrypt_vault_passwords, 
+    encrypt_vault_passwords,
+    derive_key,
+    create_dek,
+    create_random_salt
+)
 from pas_app.config import UserConfig
 from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
 from pas_app.core.settings import (
@@ -14,7 +21,10 @@ from pas_app.core.settings import (
 
 # from pas_app.services.password import check_session
 from pas_app.exceptions import EchoException
-
+from pas_app.adapters.promts import (
+    select_new_vault_name,
+    select_master_password
+)
 
 
 def create_vault_path(username: str, vault_name: str) -> Path:
@@ -82,7 +92,28 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
 
-# def create_vault # <----------------------СДЕЛАЙ 
+def create_vault(username: str) -> None:
+    vault_name = select_new_vault_name()
+    new_vault_path = create_vault_path(username=username, vault_name=vault_name)
+    vaults = get_user_vault_files(username=username)
+    if new_vault_path in vaults:
+        raise FileExistsError('Vault with such name already exists')
+    
+    master_password = select_master_password()
+    salt = create_random_salt()
+    kek = derive_key(master_password=master_password, salt_b64=salt)
+    encrypted_dek = create_dek(kek=kek)
+    encrypted_dek_str = base64.b64encode(encrypted_dek).decode('ascii')
+    data = EncryptedUserVault(
+        username=username,
+        salt=salt,
+        encrypted_dek=encrypted_dek_str,
+        encrypted_passwords=''
+    )
+    with open(new_vault_path, 'w', encoding='utf-8') as f:
+        json.dump(data.model_dump(), f, indent=4)
+    
+    
 
 def get_user_vault_files(username: str) -> list[Path]:
     dir = VAULTS / username
@@ -97,7 +128,7 @@ def get_vault_usernames() -> list[str]:
         raise EchoException("No vaults file to get username")
     usernames = []
     for folder in user_folders:
-        folder_name = folder.parts[-1]
+        folder_name = folder.name
         for v in folder.glob('*.json'):
             if not v.is_file():
                 continue # добавить логирование

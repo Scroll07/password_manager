@@ -17,7 +17,7 @@ class UserConfig:
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
-            raise(FileExistsError(f"{self.config_file} does not exist"))       
+            raise(FileNotFoundError(f"{self.config_file} does not exist"))       
         return None
 
     def load_config(self) -> ConfigData:
