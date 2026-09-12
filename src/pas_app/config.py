@@ -3,8 +3,6 @@ from pathlib import Path
 from pydantic import BaseModel
 import typer
 
-from pas_app.core.keyring import get_keyring_secrets, KeyringSecrets
-from pas_app.schemas.passwords import KeyringValues
 
 BASE_DIR = Path.home() / "pas_data"
 EXPORT_DIR = BASE_DIR / "exports"
@@ -23,30 +21,16 @@ SESSION_FILE = BASE_DIR / "session.json"
 
 CONFIG_FILE = BASE_DIR / "config.json"
 
-class ConfigFileData(BaseModel):
-    # DEFAULT_USER: str = "unauthorized"
+class ConfigData(BaseModel):
     BOT_TOKEN: str = "no token"
     BASE_URL: str = "http://localhost:80"
     COLLECT_STATISTIC: bool = True
 
 
-class KeyringConfig(BaseModel):
-    master_password: str = ""
-    bearer_token: str = ""                  
-    refresh_token: str = ""
-    last_action: datetime = datetime.today()
-
-
-class ConfigData(BaseModel):
-    local: ConfigFileData
-    keyring: KeyringConfig
 
 class UserConfig:
     def __init__(self, config_file: Path):
         self.config_file = config_file
-        self.time_format = "%d-%m-%Y %H:%M:%S"
-        self.keyring: KeyringSecrets = get_keyring_secrets()
-        # self.config_data = self._refresh()
 
     def check_exists(self) -> None:
         if not self.config_file.exists():
@@ -58,56 +42,29 @@ class UserConfig:
         self.check_exists()
         with open(self.config_file, "r") as f:
             data = f.read()
-        file_config = ConfigFileData.model_validate_json(data).model_dump()
-        
-        last_action_str = self.keyring.get_keyring_value(KeyringValues.LAST_ACTION)
-        last_action_datetime = datetime.strptime(last_action_str, self.time_format)
-        
-        keyring_config = KeyringConfig(
-            master_password=self.keyring.get_keyring_value(KeyringValues.MASTER_PASSWORD),
-            bearer_token=self.keyring.get_keyring_value(KeyringValues.BEARER_TOKEN),
-            refresh_token=self.keyring.get_keyring_value(KeyringValues.REFRESH_TOKEN),
-            last_action=last_action_datetime
-        ).model_dump()
-        
-        user_config = ConfigData(local=ConfigFileData(**file_config), keyring=KeyringConfig(**keyring_config))
-        return user_config
+        config_data = ConfigData.model_validate_json(data)
+        return config_data
 
-    def save_config(self, data: ConfigData) -> None: #переделать
-        json_data = data.local.model_dump_json(indent=4)
+    def save_config(self, data: ConfigData) -> None:
+        self.check_exists()
+        json_data = data.model_dump_json(indent=4)
         with open(self.config_file, "w") as f:
             f.write(json_data)
-        
-        last_action_str = datetime.strftime(datetime.now(), self.time_format)
-        self.keyring.set_keyring_value(KeyringValues.MASTER_PASSWORD, data.keyring.master_password)
-        self.keyring.set_keyring_value(KeyringValues.BEARER_TOKEN, data.keyring.bearer_token)
-        self.keyring.set_keyring_value(KeyringValues.REFRESH_TOKEN, data.keyring.refresh_token)
-        self.keyring.set_keyring_value(KeyringValues.LAST_ACTION, last_action_str)
         return None
 
-    def create_empty_config(self, current_user: str) -> None:
+    def create_empty_config(self) -> None:
         if self.config_file.exists():
             return
-        empty_config = ConfigData(
-            local=ConfigFileData(DEFAULT_USER=current_user),
-            keyring=KeyringConfig()
-        )
+        empty_config = ConfigData()
         self.save_config(empty_config)
-        typer.echo("Config file was created")
         return None
-
-    def _refresh(self) -> ConfigData:
-        return self.load_config()
     
     def reset_config(self) -> None:
-        config_data = self.load_config()
-        config_data.local.DEFAULT_USER = ""
-        config_data.keyring.bearer_token = ""
-        config_data.keyring.refresh_token = ""
-        config_data.keyring.master_password = ""
-        
-        self.save_config(config_data)
-        
+        self.check_exists()
+        empty_config = ConfigData()
+        self.save_config(empty_config)
+        return None
+
 
 
 def get_config() -> UserConfig:
