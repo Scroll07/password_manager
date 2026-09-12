@@ -24,7 +24,7 @@ SESSION_FILE = BASE_DIR / "session.json"
 CONFIG_FILE = BASE_DIR / "config.json"
 
 class ConfigFileData(BaseModel):
-    DEFAULT_USER: str = "unauthorized"
+    # DEFAULT_USER: str = "unauthorized"
     BOT_TOKEN: str = "no token"
     BASE_URL: str = "http://localhost:80"
     COLLECT_STATISTIC: bool = True

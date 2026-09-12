@@ -34,7 +34,7 @@ def check_session() -> None:
         
 def get_key() -> bytes:
     config = get_config()
-    config_data = config._refresh()
+    config_data = config.load_config()
     expired = (
         not config_data.keyring.master_password
         or not config_data.keyring.last_action
@@ -48,7 +48,8 @@ def get_key() -> bytes:
 
     encrypted_vault = load_encrypted_vault(config_data.local.DEFAULT_USER)
 
-    key = derive_key(master_password, encrypted_vault.salt)  # type: ignore
+    kek = derive_key(master_password, encrypted_vault.salt)
+    dek = 
     decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
 
     config_data.keyring.master_password = master_password
