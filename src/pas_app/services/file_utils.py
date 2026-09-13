@@ -59,8 +59,6 @@ def load_data(username: str, vault_name: str) -> UserVault:
     except InvalidToken:
         typer.echo("Wrong master password")
         raise typer.Exit(code=1)
-    if key is None:
-        raise EchoException("Key from check_session is None")
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
         username=encrypted.username,
@@ -78,8 +76,6 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
     if not vault_file.exists():
         raise EchoException(f"File {vault_data.username}.json does not exist")
     key = get_key()
-    if key is None:
-        raise EchoException("Key from check_session is None")
     encrypted_passwords = encrypt_vault_passwords(
         Passwords(passwords=vault_data.user_passwords), key
     )

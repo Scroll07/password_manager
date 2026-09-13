@@ -29,7 +29,7 @@ def create_dek(kek: bytes) -> bytes:
     encrypted_dek = cipher.encrypt(data=dek)
     return encrypted_dek
 
-def decrypt_dek(kek: bytes, encrypted_dek: bytes) -> bytes:
+def decrypt_dek(kek: bytes, encrypted_dek: str) -> bytes:
     cipher = Fernet(key=kek)
     dek = cipher.decrypt(token=encrypted_dek)
     return dek

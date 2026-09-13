@@ -2,19 +2,25 @@ from datetime import datetime
 import tabulate
 import typer
 from typing import Callable, Literal
+from cryptography.fernet import InvalidToken
 
 from pas_app.adapters.promts import (
     cli_password_promt, 
     choose_current_user,
     choose_current_vault
 )
-from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
+from pas_app.core.crypto import (
+    create_random_salt, 
+    decrypt_vault_passwords, 
+    derive_key,
+    decrypt_dek
+)
 from pas_app.schemas.passwords import Password, EncryptedUserVault
 from pas_app.services.file_utils import (
     create_vault_path,
     load_encrypted_vault,
     get_vault_usernames,
-    get_user_vault_files
+    get_user_vault_files,
 )
 from pas_app.exceptions import EchoException
 from pas_app.dependencies import (
@@ -22,6 +28,7 @@ from pas_app.dependencies import (
     get_config,
     get_logger
 )
+from pas_app.core.settings import BASE_DIR
 
 
 SESSION_TIMEOUT = 300
@@ -32,10 +39,6 @@ def check_session() -> None:
     keyring_data = keyring.load()
 
     if not keyring_data.current_user:
-        # choose current user
-        # username = ...
-        # keyring_data.current_user = username
-        
         usernames = get_vault_usernames()
         if not usernames:
             raise EchoException("There are no accounts on this device.\nTry to sync accounts or create new.")
@@ -43,18 +46,12 @@ def check_session() -> None:
         keyring_data.current_user = selected_username
         
     if not keyring_data.current_vault:
-        # choose current vault
-        # vault_name = ...
-        # keyring_data.current_vault = vault_name
-
         vaults = get_user_vault_files(username=keyring_data.current_user)
         if not vaults:
             raise EchoException(f"There are no vaults on this device for {keyring_data.current_user}.\nTry to sync accounts or create new.")
         vault_names = [v.name for v in vaults]
         selected_vault = choose_current_vault(vault_names=vault_names, current_vault="Not selected")
         keyring_data.current_vault = selected_vault
-
-
     
     vault_file = create_vault_path(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
     if not vault_file.exists():
@@ -68,44 +65,33 @@ def check_session() -> None:
         
         
 def get_key() -> bytes:
-    config = get_config()
-    config_data = config.load_config()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
     expired = (
-        not config_data.keyring.master_password
-        or not config_data.keyring.last_action
-        or (datetime.now() - config_data.keyring.last_action).total_seconds() > SESSION_TIMEOUT
+        not keyring_data.master_password
+        or not keyring_data.last_action
+        or (datetime.now() - keyring_data.last_action).total_seconds() > SESSION_TIMEOUT
     )
 
     if expired:
         master_password = cli_password_promt().strip()
     else:
-        master_password = config_data.keyring.master_password
+        master_password = keyring_data.master_password
 
-    encrypted_vault = load_encrypted_vault(config_data.local.DEFAULT_USER)
+    encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
 
-    kek = derive_key(master_password, encrypted_vault.salt)
-    dek = 
-    decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
+    kek = derive_key(master_password, encrypted_vault_data.salt)
+    dek = decrypt_dek(kek=kek, encrypted_dek=encrypted_vault_data.encrypted_dek)
 
-    config_data.keyring.master_password = master_password
-    config.save_config(data=config_data)
+    # attempt to decrypt (if wrong master password raises InvalidToken)
+    decrypt_vault_passwords(encrypted_passwords=encrypted_vault_data.encrypted_passwords, key=dek)
     
-    return key
+    keyring_data.master_password = master_password
+    keyring.save(data=keyring_data)
+    
+    return dek
 
 
-def create_user_vault(username: str):
-    new_vault = VAULTS / f"{username}.json"
-    if new_vault.exists():
-        raise EchoException(f"File {username}.json already exists")
-
-    salt = create_random_salt()
-    vault_data = EncryptedUserVault(
-        username=username, salt=salt, encrypted_passwords=""
-    )
-
-    data = vault_data.model_dump_json()
-    with open(new_vault, "w") as f:
-        f.write(data)
 
 
 def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> None:
