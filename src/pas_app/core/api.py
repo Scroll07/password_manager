@@ -6,7 +6,11 @@ from functools import wraps
 
 import typer
 
-from pas_app.config import get_config
+from pas_app.dependencies import (
+    get_keyring_tool,
+    get_config,
+    get_logger,
+)
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse, BackupStatsResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import EncryptedUserVault, ChangePasswordSchema
@@ -16,27 +20,29 @@ from pas_app.core.crypto import decode_token
 class Api:
     def __init__(self) -> None:
         self.config = get_config()
-        self.config_data = self.config._refresh()
+        self.keyring = get_keyring_tool()
+        self.config_data = self.config.load_config()
+        self.keyring_data = self.keyring.load()
         self.headers: dict = {}
-        self.base_url = f"{self.config.load_config().local.BASE_URL}/api"
+        self.base_url = f"{self.config_data.BASE_URL}/api"
         
         self.update_headers(
-            bearer_token=self.config_data.keyring.bearer_token, 
-            refresh_token=self.config_data.keyring.refresh_token, 
+            bearer_token=self.keyring_data.bearer_token, 
+            refresh_token=self.keyring_data.refresh_token, 
             save_to_config=False
         )
 
-    def _save_token_to_config(self, save_to_config: bool = True, bearer_token: str = "", refresh_token: str = "") -> None:
+    def _save_token_to_keyring(self, save_to_config: bool = True, bearer_token: str = "", refresh_token: str = "") -> None:
         if not save_to_config:
             return
-        config_data = self.config._refresh()
+        self.keyring_data = self.keyring.load()
         if bearer_token:
-            config_data.keyring.bearer_token = bearer_token
+            self.keyring_data.bearer_token = bearer_token
         if refresh_token:
-            config_data.keyring.refresh_token = refresh_token
+            self.keyring_data.refresh_token = refresh_token
         
         if bearer_token or refresh_token:
-            self.config.save_config(data=config_data)
+            self.keyring.save(data=self.keyring_data)
         
         
     
@@ -47,7 +53,7 @@ class Api:
         if refresh_token:
             self.headers["Refresh"] = refresh_token
             
-        self._save_token_to_config(bearer_token=bearer_token, refresh_token=refresh_token, save_to_config=save_to_config)
+        self._save_token_to_keyring(bearer_token=bearer_token, refresh_token=refresh_token, save_to_config=save_to_config)
 
     async def register(self, user_data: Login_RegisterRequest) -> ApiResponse:
         url = "/register"
@@ -202,7 +208,7 @@ class Api:
     
     
     async def check_token(self) -> ApiResponse | None:
-        token_data = decode_token(token=self.config_data.keyring.bearer_token)
+        token_data = decode_token(token=self.keyring_data.bearer_token)
         if datetime.fromtimestamp(token_data.exp, timezone.utc) - timedelta(minutes=1) < datetime.now(timezone.utc): #12:49 < 12:50
             response = await self.refresh()
             if not isinstance(response.content, RefreshResponse):
@@ -223,9 +229,9 @@ def check_token_dec(func: Callable):
     @wraps(func)
     async def wrapper(*args, **kwargs):
         api = Api()
-        config = get_config()
-        config_data = config._refresh()
-        if not config_data.keyring.bearer_token or not config_data.keyring.refresh_token:
+        keyring = get_keyring_tool()
+        keyring_data = keyring.load()
+        if not keyring_data.bearer_token or not keyring_data.refresh_token:
             typer.echo("No Tokens\nTry to Login firstly")
             return 
         response = await api.check_token()
