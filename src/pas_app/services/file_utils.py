@@ -28,7 +28,9 @@ from pas_app.adapters.promts import (
 
 
 def create_vault_path(username: str, vault_name: str) -> Path:
-    return VAULTS / username / f'{vault_name}.json'
+    dir = VAULTS / username
+    dir.mkdir(exist_ok=True, parents=True)
+    return dir / f'{vault_name}.json'
 
 def dump_last_matches(
     matches: list[str],

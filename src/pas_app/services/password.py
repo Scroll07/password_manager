@@ -81,7 +81,7 @@ def get_key() -> bytes:
     encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
 
     kek = derive_key(master_password, encrypted_vault_data.salt)
-    dek = decrypt_dek(kek=kek, encrypted_dek=encrypted_vault_data.encrypted_dek)
+    dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault_data.encrypted_dek)
 
     # attempt to decrypt (if wrong master password raises InvalidToken)
     decrypt_vault_passwords(encrypted_passwords=encrypted_vault_data.encrypted_passwords, key=dek)
