@@ -98,8 +98,7 @@ def create_vault(username: str) -> None:
     master_password = select_master_password()
     salt = create_random_salt()
     kek = derive_key(master_password=master_password, salt_b64=salt)
-    encrypted_dek = create_dek(kek=kek)
-    encrypted_dek_str = base64.b64encode(encrypted_dek).decode('ascii')
+    encrypted_dek_str = create_dek(kek=kek)
     data = EncryptedUserVault(
         username=username,
         salt=salt,
