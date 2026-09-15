@@ -67,8 +67,7 @@ def main():
     """Initialize session on startup."""
     try:
         config = get_config()
-        config.create_empty_config(current_user="unauthorized")
-        # check_session()
+        config.create_empty_config()
     except Exception as e:
         typer.echo(e)
         raise typer.Exit(code=1)

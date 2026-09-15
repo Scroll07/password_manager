@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable
+from typing import Callable, TypeVar, ParamSpec, cast
 
 from pas_app.services.file_utils import (
     load_data,
@@ -13,12 +13,16 @@ from pas_app.dependencies import (
 )
 
 
-def vault_transaction(func: Callable):
+P = ParamSpec("P")
+R = TypeVar("R")
+
+def vault_transaction(func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
-    def wrapper(self: "PasswordTool", *args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs):
+        self = cast("PasswordTool", args[0])
         self._load_data()
         try:
-            return func(args, kwargs)
+            return func(*args, **kwargs)
         finally:
             self._save_data()
     return wrapper
@@ -50,8 +54,64 @@ class PasswordTool:
         self.vault_data.user_passwords.append(pas_data)
     
     @vault_transaction
-    def get(self) -> list[Password]:
+    def get_all_passwords(self) -> list[Password]:
         return self.vault_data.user_passwords
+    
+    @vault_transaction
+    def get_one_password(
+        self, 
+        service: str,
+    ) -> Password | None:
+        service = service.strip().lower()
+        passwords = self.vault_data.user_passwords
+        for p in passwords:
+            if p.service == service:
+                return p
+        return None
+    
+    @vault_transaction
+    def get_passwords_by_service(
+        self, 
+        service: str
+    ) -> list[Password]:
+        service = service.strip().lower()
+        passwords = self.vault_data.user_passwords
+        result = []
+        for p in passwords:
+            if p.service.startswith(service):
+                result.append(p)
+        return result
+
+    @vault_transaction
+    def edit(
+        self,
+        service: str,
+        username: str | None = None,
+        password: str | None = None,
+        note: str | None = None,
+    ) -> Password | None:
+        service = service.strip().lower()
+        pas = self.get_one_password(service=service)
+        if pas is None:
+            return None
+        
+        pas.username = username if username is not None else pas.username
+        pas.password = password if password is not None else pas.password
+        pas.note = username if note is not None else pas.note
+        return pas
+    
+    @vault_transaction
+    def delete(self, service: str) -> Password | None:
+        service = service.strip().lower()
+        pas = self.get_one_password(service=service)
+        if pas is None:
+            return None
+        
+        self.vault_data.user_passwords.remove(pas)
+        
+    # @vault_transaction
+    # def find(self,)
+        
     
     
         
