@@ -38,7 +38,9 @@ class UserConfig:
         if self.config_file.exists():
             return
         empty_config = ConfigData()
-        self.save_config(empty_config)
+        json_data = empty_config.model_dump_json(indent=4)
+        with open(self.config_file, "w") as f:
+            f.write(json_data)
         return None
     
     def reset_config(self) -> None:

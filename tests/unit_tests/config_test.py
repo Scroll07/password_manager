@@ -1,46 +1,47 @@
 from pathlib import Path
+import pytest
 
-from pas_app.config import UserConfig, ConfigFileData, KeyringConfig
+from pas_app.config import (
+    UserConfig,
+    ConfigData
+)
 
 
-def test_create_config(config: UserConfig, tmp_path: Path, test_username: str):
+def test_create_config(config: UserConfig, tmp_path: Path):
     config_file = tmp_path / "test_config.json"
     assert not config_file.exists()
     
-    config.create_empty_config(current_user=test_username)
-
+    config.create_empty_config()
     assert config_file.exists()
-    
+
     with open(config_file, "r", encoding="utf-8") as f:
         data = f.read()
     
-    local_data = ConfigFileData.model_validate_json(data, strict=True)
+    local_data = ConfigData.model_validate_json(data, strict=True)
     
-    assert local_data.DEFAULT_USER == test_username
     assert local_data.BOT_TOKEN == "no token"
-    # assert local_data.BASE_URL == 
+    assert local_data.BASE_URL == "http://localhost:80"
+    assert local_data.COLLECT_STATISTIC == True    
 
-def test_save_values_after_recreate_config(config: UserConfig, test_username: str, random_username: str):
-    config.create_empty_config(current_user=test_username)
-    config_data = config._refresh()
-    
-    config_data.local.DEFAULT_USER = random_username
-    config_data.keyring.master_password = "password"
-    
+def test_save_values_after_recreate_config(config: UserConfig):
+    test_data = {
+        "BOT_TOKEN": "123456789",
+        "BASE_URL": "https:google.com:80",
+        "COLLECT_STATISTIC": False
+    }
+    config.create_empty_config()
+    config_data = config.load_config()
+
+    config_data.BOT_TOKEN = test_data['BOT_TOKEN']
+    config_data.BASE_URL = test_data['BASE_URL']
+    config_data.COLLECT_STATISTIC = test_data['COLLECT_STATISTIC']
     config.save_config(data=config_data)
     
-    config.create_empty_config(current_user=test_username)
+    config.create_empty_config()
     
-    config_data = config._refresh()
-    
-    assert config_data.local.DEFAULT_USER == random_username
-    assert config_data.keyring.master_password == "password"
-    
-
-def test_load_config(config: UserConfig, test_username: str):
-    config.create_empty_config(current_user=test_username)    
     config_data = config.load_config()
+    assert config_data.BOT_TOKEN == test_data['BOT_TOKEN']
+    assert config_data.BASE_URL == test_data['BASE_URL']
+    assert config_data.COLLECT_STATISTIC == test_data['COLLECT_STATISTIC']
     
-    assert isinstance(config_data.local, ConfigFileData)
-    assert isinstance(config_data.keyring, KeyringConfig)
     
