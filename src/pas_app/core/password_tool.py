@@ -27,7 +27,7 @@ def vault_transaction(func: Callable[P, R]) -> Callable[P, R]:
             self._save_data()
     return wrapper
 
-
+logger = get_logger()
 
 
 class PasswordTool:
@@ -40,7 +40,7 @@ class PasswordTool:
         try:
             self._load_data()
         except Exception as e:
-            # add logging
+            logger.exception(f"Exception while initilization Password tool: {e}")
             raise e
     
     
