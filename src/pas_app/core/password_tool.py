@@ -129,13 +129,16 @@ class PasswordTool:
         return pas
     
     @vault_transaction
-    def delete(self, service: str) -> Password | None:
-        service = service.strip().lower()
-        pas = self.get_one_password(service=service)
-        if pas is None:
-            return None
-        
-        self.vault_data.user_passwords.remove(pas)
+    def delete(self, service: str, delete_all: bool = False) -> Password | None:
+        if delete_all:
+            self.vault_data.user_passwords = []
+            return
+        else: 
+            service = service.strip().lower()
+            pas = self.get_one_password(service=service)
+            if pas is None:
+                return None
+            self.vault_data.user_passwords.remove(pas)
         
     # @vault_transaction
     # def find(self,)
