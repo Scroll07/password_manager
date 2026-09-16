@@ -9,11 +9,10 @@ from pas_app.services.file_utils import (
     create_vault
 )
 
-VAULT_NAME = "Vault"
 
-def test_create_user_vault(monkeypatch, tmp_path, test_username):
+def test_create_user_vault(monkeypatch, tmp_path, test_username, test_vault_name):
     monkeypatch.setattr("pas_app.services.file_utils.VAULTS", tmp_path)
-    monkeypatch.setattr("pas_app.services.file_utils.select_new_vault_name", lambda: VAULT_NAME)
+    monkeypatch.setattr("pas_app.services.file_utils.select_new_vault_name", lambda: test_vault_name)
     monkeypatch.setattr("pas_app.services.file_utils.select_master_password", lambda: "admin")
 
     create_vault(test_username)
@@ -21,14 +20,14 @@ def test_create_user_vault(monkeypatch, tmp_path, test_username):
 
     assert test_vault.exists()
     
-def test_user_vault_start_data(monkeypatch, tmp_path: Path, test_username: str):
+def test_user_vault_start_data(monkeypatch, tmp_path: Path, test_username: str, test_vault_name: str):
     monkeypatch.setattr("pas_app.services.file_utils.VAULTS", tmp_path)
-    monkeypatch.setattr("pas_app.services.file_utils.select_new_vault_name", lambda: VAULT_NAME)
+    monkeypatch.setattr("pas_app.services.file_utils.select_new_vault_name", lambda: test_vault_name)
     monkeypatch.setattr("pas_app.services.file_utils.select_master_password", lambda: "admin")
 
     create_vault(test_username)
     
-    enctypted = load_encrypted_vault(username=test_username, vault_name=VAULT_NAME)
+    enctypted = load_encrypted_vault(username=test_username, vault_name=test_vault_name)
     
     assert enctypted.username == test_username
     assert enctypted.salt is not None and type(enctypted.salt) == str

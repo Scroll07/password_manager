@@ -22,7 +22,7 @@ class Password(BaseModel):
     service: str
     username: str
     password: str
-    note: str | None
+    note: str = ''
 
 
 class Passwords(BaseModel):

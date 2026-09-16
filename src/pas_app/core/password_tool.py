@@ -36,9 +36,14 @@ class PasswordTool:
         keyring_data = keyring.load()
         self.username = keyring_data.current_user
         self.vault_name = keyring_data.current_vault
-        self._load_data()
-        # self.vault_data: UserVault = load_data(username=self.username, vault_name=self.vault_name)
         
+        try:
+            self._load_data()
+        except Exception as e:
+            # add logging
+            raise e
+    
+    
     def _load_data(self) -> None:
         self.vault_data: UserVault = load_data(username=self.username, vault_name=self.vault_name)
     
@@ -50,7 +55,19 @@ class PasswordTool:
         )
 
     @vault_transaction    
-    def add(self, pas_data: Password) -> None:
+    def add(
+        self,
+        service: str,
+        username: str,
+        password: str,
+        note: str = ''
+    ) -> None:
+        pas_data = Password(
+            service=service.strip().lower(),
+            username=username,
+            password=password,
+            note=note
+        )
         self.vault_data.user_passwords.append(pas_data)
     
     @vault_transaction
@@ -97,7 +114,7 @@ class PasswordTool:
         
         pas.username = username if username is not None else pas.username
         pas.password = password if password is not None else pas.password
-        pas.note = username if note is not None else pas.note
+        pas.note = note if note is not None else pas.note
         return pas
     
     @vault_transaction
