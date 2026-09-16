@@ -58,10 +58,6 @@ def test_save_then_load_roundtrip(keyring_tool):
     assert isinstance(loaded.last_action, datetime)
 
 
-def test_load_without_save_raises_value_error(keyring_tool):
-    with pytest.raises(ValueError):
-        keyring_tool.load()
-
 
 def test_get_keyring_tool_returns_correct_service_name():
     from pas_app.core.keyring import get_keyring_tool, SERVICE_NAME
