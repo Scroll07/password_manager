@@ -62,8 +62,16 @@ class PasswordTool:
         password: str,
         note: str = ''
     ) -> None:
+        base = service.strip().lower()
+        labels = [p.service for p in self.vault_data.user_passwords if p.service.startswith(base)]
+        cantidate = base
+        i = 0
+        while cantidate in labels:
+            cantidate = base + '-' + str(i)
+            i += 1
+        
         pas_data = Password(
-            service=service.strip().lower(),
+            service=cantidate,
             username=username,
             password=password,
             note=note
@@ -72,7 +80,9 @@ class PasswordTool:
     
     @vault_transaction
     def get_all_passwords(self) -> list[Password]:
-        return self.vault_data.user_passwords
+        passwords = self.vault_data.user_passwords
+        passwords.sort(key=lambda x: x.service)
+        return passwords
     
     @vault_transaction
     def get_one_password(
@@ -97,6 +107,7 @@ class PasswordTool:
         for p in passwords:
             if p.service.startswith(service):
                 result.append(p)
+        result.sort(key=lambda x: x.service)
         return result
 
     @vault_transaction

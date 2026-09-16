@@ -1,8 +1,7 @@
 import typer
 
-from pas_app.services.file_utils import load_data, dump_last_matches
 from pas_app.services.password import print_passwords
-from pas_app.config import get_config
+from pas_app.dependencies import get_password_tool
 
 
 def get_command(
@@ -11,6 +10,9 @@ def get_command(
     ),
     show: bool = typer.Option(
         False, "--show", help="Show passwords in plain text (default: hidden)"
+    ),
+    strict: bool = typer.Option(
+        False, "--strict", help="Get passwords that strictly correspond (default: no strict)"
     ),
 ):
     """
@@ -27,23 +29,19 @@ def get_command(
 
         pas get all              # All entries, passwords hidden
     """
-    config = get_config()
-    data = load_data(config=config)
-    passwords = data.user_passwords
+    password_tool = get_password_tool()
+    service = service.strip().lower()
+    if service in ["all", "."]:
+        passwords = password_tool.get_all_passwords()
+    else:
+        if strict:
+            password = password_tool.get_one_password(service=service)
+            passwords = [password] if password is not None else []
+        else:
+            passwords = password_tool.get_passwords_by_service(service=service)
 
-    if not data or not data.user_passwords:
+    if not passwords:
         typer.echo("No entries found")
         return
 
-    if service.lower() == "." or service.lower() == "all":
-        passwords = sorted(passwords, key=lambda p: p.service)
-    else:
-        passwords = sorted(
-            [p for p in passwords if p.service.lower().startswith(service.lower())],
-            key=lambda p: p.service,
-        )
-
     print_passwords(passwords=passwords, show=show)
-
-    matches = [p.service for p in passwords]
-    dump_last_matches(matches=matches)
