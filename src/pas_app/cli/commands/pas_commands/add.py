@@ -1,9 +1,7 @@
 import typer
 import secrets
 
-from pas_app.schemas.passwords import Password
-from pas_app.config import get_config
-
+from pas_app.dependencies import get_password_tool
 
 def add_command(
     service: str = typer.Argument(
@@ -15,8 +13,8 @@ def add_command(
     password: str | None = typer.Option(
         None, "-p", "--password", help="Password (if not specified, use --gen)"
     ),
-    note: str | None = typer.Option(
-        None, "--note", help="Additional note or description"
+    note: str = typer.Option(
+        '', "--note", help="Additional note or description"
     ),
     gen: bool = typer.Option(False, "--gen", help="Generate a random password"),
     length: int = typer.Option(
@@ -36,8 +34,6 @@ def add_command(
 
         pas add work-email -u john@company.com --gen --note "Work email"
     """
-    config = get_config()
-
     if password is not None:
         if gen:
             typer.echo("Cannot use both -p and --gen at the same time. EXIT")
@@ -48,19 +44,10 @@ def add_command(
         typer.echo("You must specify either -p or --gen")
         return
 
-    data = load_data(config=config)
-
-    labels = set(b.service for b in data.user_passwords)
-    base = service.lower()
-    candidate = base
-    i = 1
-    while candidate in labels:
-        candidate = base + "-" + str(i)
-        i += 1
-
-    password_to_append = Password(
-        service=candidate, username=username, password=password, note=note
+    passwrod_tool = get_password_tool()
+    passwrod_tool.add(
+        service=service.strip().lower(),
+        username=username,
+        password=password,
+        note=note
     )
-    data.user_passwords.append(password_to_append)
-
-    save_data(vault_data=data)
