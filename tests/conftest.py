@@ -15,11 +15,14 @@ from pas_app.services.file_utils import (
 )
 from pas_app.core.password_tool import PasswordTool
 from pas_app.dependencies import get_keyring_tool 
-from pas_app.core.keyring import KeyringValues
+from pas_app.core.keyring import KeyringTool, KeyringValues
 @pytest.fixture
 def api() -> Api:
     return Api()
 
+@pytest.fixture
+def keyring_tool(mock_keyring):
+    return KeyringTool(service_name="password_manager")
 
 @pytest.fixture
 def config(tmp_path) -> UserConfig:
@@ -28,7 +31,7 @@ def config(tmp_path) -> UserConfig:
     return config
 
 @pytest.fixture
-def vault_fixture(tmp_path, monkeypatch, test_username, test_vault_name):
+def vault_fixture(tmp_path, monkeypatch, test_username, test_vault_name, mock_keyring):
     monkeypatch.setattr('pas_app.services.file_utils.VAULTS', tmp_path)
     monkeypatch.setattr("pas_app.services.file_utils.select_new_vault_name", lambda: test_vault_name)
     monkeypatch.setattr("pas_app.services.file_utils.select_master_password", lambda: "admin")

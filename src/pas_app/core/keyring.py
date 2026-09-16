@@ -54,7 +54,10 @@ class KeyringTool:
     
     def load(self) -> KeyringData:
         last_action_str = self.get_keyring_value(KeyringValues.LAST_ACTION)
-        last_action_datetime = datetime.strptime(last_action_str, self.time_format)
+        if last_action_str == '':
+            last_action_datetime = datetime(year=1, month=1, day=1)
+        else:
+            last_action_datetime = datetime.strptime(last_action_str, self.time_format)
         data = KeyringData(
             current_user=self.get_keyring_value(KeyringValues.CURRENT_USER),
             current_vault=self.get_keyring_value(KeyringValues.CURRENT_VAULT),
