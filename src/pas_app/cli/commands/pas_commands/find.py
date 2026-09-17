@@ -1,8 +1,7 @@
 import typer
 
-from pas_app.services.file_utils import load_data
+from pas_app.dependencies import get_password_tool
 from pas_app.services.password import print_passwords
-from pas_app.config import get_config
 
 
 def find_command(
@@ -29,28 +28,12 @@ def find_command(
 
         pas find "github" --exact     # Exact match search
     """
-    config = get_config()
-    data = load_data(config=config)
-    passwords = data.user_passwords
+    password_tool = get_password_tool()
+    passwords = password_tool.find(query=query, exact=exact)
 
-    if not data:
-        typer.echo("No entries found.")
-        raise typer.Exit(code=0)
-
-    result = []            
-    for pas in passwords:
-        data = pas.model_dump()
-        if exact:
-            if query in (data.values()):
-                result.append(pas)
-        else:
-            if any(query in value for value in data.values()):
-                result.append(pas) 
-    
-
-    if not result:
+    if len(passwords) == 0:
         typer.echo(f'Nothing found for query "{query}".')
-        raise typer.Exit(code=0)
-
-    typer.echo(f'Found entries for query "{query}":')
-    print_passwords(passwords=result, show=show)
+    else:
+        typer.echo(f'Found entries for query "{query}":')
+        print_passwords(passwords=passwords, show=show)
+        

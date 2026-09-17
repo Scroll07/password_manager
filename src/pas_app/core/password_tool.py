@@ -78,13 +78,11 @@ class PasswordTool:
         )
         self.vault_data.user_passwords.append(pas_data)
     
-    @vault_transaction
     def get_all_passwords(self) -> list[Password]:
         passwords = self.vault_data.user_passwords
         passwords.sort(key=lambda x: x.service)
         return passwords
     
-    @vault_transaction
     def get_one_password(
         self, 
         service: str,
@@ -96,7 +94,6 @@ class PasswordTool:
                 return p
         return None
     
-    @vault_transaction
     def get_passwords_by_service(
         self, 
         service: str
@@ -140,8 +137,25 @@ class PasswordTool:
                 return None
             self.vault_data.user_passwords.remove(pas)
         
-    # @vault_transaction
-    # def find(self,)
+    def find(
+        self,
+        query: str,
+        exact: bool,
+    ) -> list[Password]:
+        query = query.strip()
+        passwords = self.get_all_passwords()
+        result = []
+        for pas in passwords:
+            data = pas.model_dump()
+            if exact:
+                if query in (data.values()):
+                    result.append(pas)
+            else:
+                if any(query in value for value in data.values()):
+                    result.append(pas)
+        return result
+        
+        
         
     
     
