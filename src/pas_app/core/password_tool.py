@@ -1,16 +1,21 @@
+from datetime import datetime
 from functools import wraps
+import json
+from pathlib import Path
 from typing import Callable, TypeVar, ParamSpec, cast
+
 
 from pas_app.services.file_utils import (
     load_data,
     save_data,
 )
-from pas_app.schemas.passwords import Password, UserVault
+from pas_app.schemas.passwords import Password, UserVault, Passwords
 from pas_app.dependencies import (
     get_keyring_tool,
     get_config,
     get_logger
 )
+from pas_app.core.settings import IMPORT_DIR, EXPORT_DIR
 
 
 P = ParamSpec("P")
@@ -154,9 +159,62 @@ class PasswordTool:
                 if any(query in value for value in data.values()):
                     result.append(pas)
         return result
+    
+    def export_passwords(
+        self,
+    ) -> Path:
+        if not self.vault_data.user_passwords:
+            raise ValueError("No data for export")
+        passwords = Passwords(passwords=self.vault_data.user_passwords).model_dump()
+        date = datetime.today().strftime("%Y_%m_%d")
+        filename = f'{self.username}_{self.vault_name}_{date}.json'
+        path = EXPORT_DIR / filename
+        with open(path, "w", encoding='utf-8') as f:
+            json.dump(passwords, f, indent=4)
+        return path
+
+    @vault_transaction
+    def import_passwords(
+        self,
+        passwords: list[Password],
+        skip_same_service: bool = False,
+        overwrite: bool = False
+    ) -> None:
+        if skip_same_service and overwrite:
+            raise ValueError("incompatible flags")
+        if skip_same_service:
+            labels = [p.service.lower() for p in self.vault_data.user_passwords]
+            for pas in passwords:
+                if pas.service.lower() not in labels:
+                    self.vault_data.user_passwords.append(pas)
+        elif overwrite:
+            labels = [p.service.lower() for p in self.vault_data.user_passwords]
+            for pas in passwords:
+                label = pas.service.lower()
+                if label in labels:
+                    self.delete(service=label)
+                    self.vault_data.user_passwords.append(pas)
+        else:
+            for pas in passwords:
+                self.add(
+                    service=pas.service,
+                    username=pas.username,
+                    password=pas.password,
+                    note=pas.note
+                )
+
+
+
+                    
         
         
         
+        
+        
+
+# with open(file_path, "r", encoding='utf-8') as f:
+#     data = f.read()
+# passwords = Passwords.model_validate_json(data).passwords
     
     
         

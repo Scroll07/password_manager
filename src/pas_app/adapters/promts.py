@@ -25,7 +25,7 @@ def gui_password_prompt():
 
 
 def cli_password_promt():
-    password = getpass.getpass("Введите пароль: ")
+    password = getpass.getpass("Enter password: ")
     return password
 
 
@@ -84,28 +84,7 @@ def cli_login_input(username: str | None = None) -> LoginRegisterInput:
         return LoginRegisterInput(username=login, password=password)
 
 
-def cli_improt_file_prompt(files: list[Path]) -> Path:
-    if not files:
-        raise FileNotFoundError("No files to import")
-        
-    while True:
-        clear_console()
-        typer.echo("Files to import:\n")
-        for i, file in enumerate(files, start=1):
-            typer.echo(f'[{i}] - {file.name}')
-        choice = typer.prompt("\nChoose number of file to import").strip()
 
-        if not choice.isdigit():
-            typer.echo("Input should be digit")
-            time.sleep(2)
-            continue
-        
-        if not 1 <= int(choice) <= len(files):
-            typer.echo("Wrong number input")
-            time.sleep(2)
-            continue
-            
-        return files[int(choice)-1].absolute()
         
             
 
