@@ -30,6 +30,12 @@ def create_dek(kek: bytes) -> str:
     encrypted_dek_str = base64.b64encode(encrypted_dek).decode("ascii") 
     return encrypted_dek_str
 
+def encrypt_dek(dek: bytes, new_kek: bytes) -> str:
+    cipher = Fernet(key=new_kek)
+    encrypted_dek = cipher.encrypt(data=dek)
+    encrypted_dek_str = base64.b64encode(encrypted_dek).decode("ascii") 
+    return encrypted_dek_str
+
 def decrypt_dek(kek: bytes, encrypted_dek_str: str) -> bytes:
     encrypted_dek = base64.b64decode(encrypted_dek_str.encode('ascii'))
     cipher = Fernet(key=kek)

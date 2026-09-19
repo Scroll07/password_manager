@@ -25,8 +25,12 @@ def gui_password_prompt():
 
 
 def cli_password_promt():
-    password = getpass.getpass("Enter password: ")
-    return password
+    while True:
+        password = getpass.getpass("Enter password: ").strip()
+        if ' ' in password:
+            typer.echo("Password must not contain any spaces")
+            continue
+        return password
 
 
 def cli_input(text: str, is_secret: bool = False) -> str:
@@ -113,7 +117,7 @@ def choose_current_user(usernames: list[str], current_username: str) -> str:
 def choose_current_vault(vault_names: list[str], current_vault: str) -> str:
     while True:
         clear_console()
-        typer.echo(f"Current Vault: {current_vault}")
+        typer.echo(f"Current Vault: {current_vault if current_vault else "Not selected"}")
         typer.echo("Vaults:\n")
         for i, vault_name in enumerate(vault_names, start=1):
             typer.echo(f'[{i}] - {vault_name}')

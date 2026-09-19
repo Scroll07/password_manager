@@ -2,32 +2,14 @@ from pathlib import Path
 import time
 import typer
 from pydantic import ValidationError
-from cryptography.fernet import InvalidToken
 
 from pas_app.adapters.promts import cli_password_promt, clear_console
 from pas_app.schemas.passwords import EncryptedUserVault, Password, Passwords
-from pas_app.core.crypto import (
-    decrypt_vault_passwords, 
-    derive_key,
-    decrypt_dek,
-)
 from pas_app.core.settings import IMPORT_DIR
 from pas_app.dependencies import get_password_tool
+from pas_app.services.password import attempt_decrypt_vault
 
 
-def attempt_decrypt_vault(encrypted_vault: EncryptedUserVault) -> list[Password] | None:
-    clear_console()
-    typer.echo("Master password of the import vault")
-    master_password = cli_password_promt()
-    kek = derive_key(master_password=master_password, salt_b64=encrypted_vault.salt)
-    dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
-    try:
-        passwords = decrypt_vault_passwords(encrypted_passwords=encrypted_vault.encrypted_passwords, key=dek)
-    except InvalidToken:
-        typer.echo("Wrong master password")
-        time.sleep(2)
-        return None
-    return passwords.passwords
     
 
 
@@ -123,16 +105,22 @@ def import_data(
             typer.echo("No passwords for import")
             return
         
+        username = encrypted_vault.username
+        vault_name = choosed_path.name
         i = 0
-        while i < 5 or passwords is not None:
-            passwords = attempt_decrypt_vault(encrypted_vault=encrypted_vault)
+        while i < 5 and passwords is None:
+            passwords = attempt_decrypt_vault(
+                username=username,
+                vault_name=vault_name, 
+                text="Enter master password of import vault"
+            )
         if passwords is None:
             typer.echo("Too many attempts")
             return
         
         password_tool = get_password_tool()
         password_tool.import_passwords(
-            passwords=passwords.passwords,
+            passwords=passwords,
             skip_same_service=skip_same_service,
             overwrite=overwrite
         )   

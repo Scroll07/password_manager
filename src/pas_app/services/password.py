@@ -1,9 +1,11 @@
 from datetime import datetime
+import time
 import tabulate
 import typer
 from typing import Callable, Literal
 from cryptography.fernet import InvalidToken
 
+from pas_app.adapters.console import clear_console
 from pas_app.adapters.promts import (
     cli_password_promt, 
     choose_current_user,
@@ -127,6 +129,24 @@ def print_passwords(passwords: list[Password], show: bool = False, check: bool =
     if rows:
         typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
         
+        
+
+def attempt_decrypt_vault(username: str, vault_name: str, text: str) -> list[Password] | None:
+    encrypted_vault = load_encrypted_vault(username=username, vault_name=vault_name)
+    clear_console()
+    typer.echo(text)
+    master_password = cli_password_promt()
+    kek = derive_key(master_password=master_password, salt_b64=encrypted_vault.salt)
+    dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
+    try:
+        passwords = decrypt_vault_passwords(encrypted_passwords=encrypted_vault.encrypted_passwords, key=dek)
+    except InvalidToken:
+        typer.echo("Wrong master password")
+        time.sleep(2)
+        return None
+    return passwords.passwords
+
+
         
 def find_digits_in_a_row(row: str) -> int:
     result = 0

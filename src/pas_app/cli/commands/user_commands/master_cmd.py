@@ -1,19 +1,40 @@
+import time
+import json
+from cryptography.fernet import InvalidToken
 import typer
 
+from pas_app.adapters.console import clear_console
 from pas_app.adapters.promts import cli_password_promt
-from pas_app.config import VAULTS
-from pas_app.core.crypto import derive_key, encrypt_vault_passwords
-from pas_app.exceptions import EchoException
-from pas_app.services.file_utils import load_data
-from pas_app.schemas.passwords import Passwords, EncryptedUserVault
-from pas_app.config import get_config
+from pas_app.core.crypto import (
+    decrypt_dek, 
+    decrypt_vault_passwords, 
+    derive_key,
+    encrypt_dek
+)
+from pas_app.schemas.passwords import EncryptedUserVault
+from pas_app.services.file_utils import (
+    load_encrypted_vault,
+    create_vault_path
+)
+from pas_app.dependencies import get_keyring_tool
 
 
-def change_master(
-    current_master: str = typer.Argument(
-        ..., help="Current master password for change."
-    ),
-):
+def _local_attempt_decrypt_vault(username: str, vault_name: str, text: str) -> tuple[EncryptedUserVault, str] | tuple[None, None]:
+    encrypted_vault = load_encrypted_vault(username=username, vault_name=vault_name)
+    clear_console()
+    typer.echo(text)
+    master_password = cli_password_promt()
+    kek = derive_key(master_password=master_password, salt_b64=encrypted_vault.salt)
+    dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
+    try:
+        passwords = decrypt_vault_passwords(encrypted_passwords=encrypted_vault.encrypted_passwords, key=dek)
+    except InvalidToken:
+        typer.echo("Wrong master password")
+        time.sleep(2)
+        return None, None
+    return encrypted_vault, master_password
+
+def change_master():
     """
     Change the master password for local vault.
 
@@ -24,19 +45,31 @@ def change_master(
     Examples:
         pas user change-master <current-password>
 
-    You will be prompted to enter a new password in a secure input window.
-    Confirm the change when prompted.
     """
-    config = get_config()
-    data = load_data(config=config)
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
     
-    typer.echo("Enter new master password in the opened window.")
+    encrypted_vault, current_master_password = None, None
+    username = keyring_data.current_user
+    vault_name = keyring_data.current_vault
+    i = 0
+    while i < 5 and current_master_password is None:
+        encrypted_vault, current_master_password = _local_attempt_decrypt_vault(
+            username=username,
+            vault_name=vault_name, 
+            text="Enter master password of current vault"
+        )
+    if current_master_password is None or encrypted_vault is None:
+        typer.echo("Too many attempts")
+        return
+
+    typer.echo("Enter new master password.")
     new_master_password = cli_password_promt()
     if not new_master_password:
         typer.echo("Password input was canceled. EXIT")
         raise typer.Exit(code=1)
-
-    if new_master_password == current_master:
+    
+    if new_master_password == current_master_password:
         typer.echo("Current password cannot match the new password.")
         return
 
@@ -44,20 +77,16 @@ def change_master(
         typer.echo("Master password change was canceled.")
         return
 
-    new_key = derive_key(new_master_password, data.salt)
-    encrypted_passwords = encrypt_vault_passwords(Passwords(passwords=data.user_passwords), new_key)
+    current_kek = derive_key(master_password=current_master_password, salt_b64=encrypted_vault.salt)
+    new_kek = derive_key(master_password=new_master_password, salt_b64=encrypted_vault.salt)
+    dek = decrypt_dek(kek=current_kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
+    new_encrypted_dek = encrypt_dek(dek=dek, new_kek=new_kek)
+
+    encrypted_vault.encrypted_dek = new_encrypted_dek
     
-    encrypted_vault = EncryptedUserVault(
-        username=data.username,
-        salt=data.salt,
-        encrypted_passwords=encrypted_passwords
-    )
-    
-    vault_file = VAULTS / f"{data.username}.json"
-    if not vault_file.exists():
-        raise EchoException(f"File {data.username}.json does not exist")
-    with open(vault_file, "w") as f:
-        f.write(encrypted_vault.model_dump_json())
+    vault_path = create_vault_path(username=username, vault_name=vault_name)
+    with open(vault_path, 'w', encoding='utf-8') as f:
+        json.dump(encrypted_vault.model_dump(), f, indent=4)
     
     typer.echo("Master password was successfully changed.")
 
