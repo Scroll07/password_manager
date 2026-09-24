@@ -132,7 +132,7 @@ def get_vault_usernames() -> list[str]:
             with open(v, "r", encoding='utf-8') as f:
                 data = f.read()
             encrypted = EncryptedUserVault.model_validate_json(data)
-            if folder_name == encrypted.username:
+            if folder_name == encrypted.username and folder_name not in user_folders:
                 usernames.append(encrypted.username)
             # else:
                 # добавить логирование

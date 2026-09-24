@@ -9,8 +9,9 @@ vault_app = typer.Typer(
     no_args_is_help=True
 )
 
+# move this decorator somewhere to use globaly
 # add decorator to check current_user before every command
-def check_current_values_dec(func: Callable) -> Callable:
+def check_current_user_dec(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args, **kwargs):
         keyring = get_keyring_tool()
