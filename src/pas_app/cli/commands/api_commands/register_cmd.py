@@ -3,17 +3,16 @@ import typer
 
 
 from pas_app.adapters.promts import cli_register_input
-from pas_app.services.password import create_user_vault
 from pas_app.core.api import Api
-from pas_app.core.logger import get_logger
 from pas_app.schemas.api import Login_RegisterRequest, MessageResponse
-from pas_app.config import get_config
+from pas_app.dependencies import (
+    get_logger,
+    get_keyring_tool
+)
 
 logger = get_logger()
 
 async def register():
-    config = get_config()
-    config_data = config._refresh()
     api = Api()
 
     user_input_data = cli_register_input()
@@ -34,14 +33,13 @@ async def register():
     if response.status_code == 201:
         typer.echo(response.content.detail)
 
-        create_user_vault(username=username)
-
-        config_data.local.DEFAULT_USER = username
-        config.save_config(data=config_data)
-
+        keyring = get_keyring_tool()
+        keyring_data = keyring.load()
+        keyring_data.current_user = username
+        keyring.save(data=keyring_data)
+        
         logger.info(f"Register successful for user: {username}")
         raise typer.Exit(code=0)
-
     else:
         logger.error(f"Register failed for user {username}: status_code {response.status_code}, message: {response.content.detail}")
         typer.echo(

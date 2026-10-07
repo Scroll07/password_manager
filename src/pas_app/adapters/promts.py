@@ -43,8 +43,8 @@ def cli_register_input() -> LoginRegisterInput:
         clear_console()
         typer.echo("[Регистрация]")
         login = cli_input("Введите логин")
-        if not (4 <= len(login) <= 16):
-            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
+        if not (4 <= len(login) <= 32):
+            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 32")
             time.sleep(2)
             continue
 

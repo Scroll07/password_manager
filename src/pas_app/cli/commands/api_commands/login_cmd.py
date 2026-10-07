@@ -3,26 +3,25 @@ import typer
 import time
 
 from pas_app.adapters.promts import cli_login_input
-from pas_app.config import get_config
 from pas_app.core.api import Api
-from pas_app.core.logger import get_logger
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
-from pas_app.cli.commands.config_commands.default_user import set_default_user
+from pas_app.dependencies import (
+    get_logger,
+    get_keyring_tool
+)
+
+
 
 logger = get_logger()
 
 async def login(
-    change_user: bool
 ):
-    config = get_config()
-
-    if change_user:
-        set_default_user()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
 
     api = Api()
-    config_data = config._refresh()
 
-    user_input_data = cli_login_input(username=config_data.local.DEFAULT_USER)
+    user_input_data = cli_login_input(username=keyring_data.current_user)
     username = user_input_data.username
     password = user_input_data.password
 
@@ -41,12 +40,13 @@ async def login(
         raise typer.Exit(code=1)
         
     if response.status_code == 200:
-        config_data.local.DEFAULT_USER = user_api_data.username
-        config_data.keyring.bearer_token = response.content.bearer_token.token
-        config_data.keyring.refresh_token = response.content.refresh_token.token
-        if config_data.local.DEFAULT_USER != user_api_data.username:
-            config_data.keyring.master_password = ""
-        config.save_config(config_data)
+        if keyring_data.current_user != username:
+            keyring_data.master_password = ''
+        keyring_data.current_user = username
+        keyring_data.bearer_token = response.content.bearer_token.token
+        keyring_data.refresh_token = response.content.refresh_token.token
+        
+        keyring.save(data=keyring_data)
 
         typer.echo(response.content.detail)
         time.sleep(1)
