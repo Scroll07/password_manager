@@ -22,7 +22,7 @@ from pas_app.core.settings import (
 # from pas_app.services.password import check_session
 from pas_app.exceptions import EchoException
 from pas_app.adapters.promts import (
-    select_new_vault_name,
+    select_vault_name,
     select_master_password
 )
 
@@ -91,7 +91,7 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
         f.write(encrypted_vault.model_dump_json())
 
 def create_vault(username: str) -> None:
-    vault_name = select_new_vault_name()
+    vault_name = select_vault_name()
     new_vault_path = create_vault_path(username=username, vault_name=vault_name)
     vaults = get_user_vault_files(username=username)
     if new_vault_path in vaults:

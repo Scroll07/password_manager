@@ -5,7 +5,7 @@ from typing import Union
 
 from pas_app.schemas.passwords import EncryptedUserVault
 from pas_app.schemas.jwt import EncodedToken
-
+from pas_app.schemas.vaults import VaultData
 
 
 
@@ -43,6 +43,8 @@ class BackupData(BaseModel):
     def created_at_formatted(self) -> str:
         return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
     
+ 
+
 class TypeResponses(StrEnum):
     MESSAGE = "message"
     LOGIN = "login"
@@ -80,10 +82,26 @@ class BackupStatsResponse(BaseModel):
     ok: bool
     stats: BackupStats
     type: TypeResponses = TypeResponses.STATS
+    
+class VaultsDataResponse(BaseModel):
+    ok: bool
+    vaults: list[VaultData]
 
+class VaultDataResponse(BaseModel):
+    ok: bool
+    vault: VaultData
+    
 class ApiResponse(BaseModel):
     status_code: int
-    content: Union[MessageResponse, LoginResponse, BackupsResponse, DownloadResponse, BackupStatsResponse]
+    content: Union[
+        MessageResponse, 
+        LoginResponse, 
+        BackupsResponse, 
+        DownloadResponse, 
+        BackupStatsResponse,
+        VaultDataResponse,
+        VaultsDataResponse
+    ]
     
 
 

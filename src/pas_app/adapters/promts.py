@@ -214,18 +214,6 @@ def choose_name_for_backup() -> str:
         return name
     
 
-def select_new_vault_name() -> str:
-    max_length = 16
-    while True:
-        name = typer.prompt("Enter new vault name").strip()
-        if not name:
-            typer.echo("Name cannot be empty")
-            continue
-        if len(name) > max_length:
-            typer.echo(f"Name too long (max {max_length} characters)")
-            continue
-        return name.strip()
-
 
 def select_master_password() -> str:
     min_length = 4
@@ -242,6 +230,22 @@ def select_master_password() -> str:
             typer.echo(f"Password too long (max {max_length} characters)")
             continue
         return password
+
+def select_vault_name() -> str:
+    min_length = 4
+    max_length = 32
+    while True:
+        name = typer.prompt("Enter vault name").strip()
+        if not name:
+            typer.echo("Name cannot be empty")
+            continue
+        if len(name) < min_length:
+            typer.echo(f"Name is too short (min {min_length} characters)")
+            continue
+        if len(name) > max_length:
+            typer.echo(f"Name is too long (max {max_length} characters)")
+            continue
+        return name
 
 def change_password_prompt() -> ChangePasswordSchema:
     while True:

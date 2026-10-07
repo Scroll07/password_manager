@@ -11,10 +11,15 @@ from pas_app.dependencies import (
     get_config,
     get_logger,
 )
+from pas_app.schemas.api import (
+    VaultsDataResponse,
+    VaultDataResponse
+)
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse, BackupStatsResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import EncryptedUserVault, ChangePasswordSchema
 from pas_app.core.crypto import decode_token
+from pas_app.schemas.vaults import CreateVaultData
 
 
 class Api:
@@ -84,62 +89,7 @@ class Api:
             content = MessageResponse.model_validate(response.json())
 
         return ApiResponse(status_code=response.status_code, content=content)
-
-    async def upload(self, file_path: Path, name: str, rows: int) -> ApiResponse:
-        url = "/backups/upload"
-        async with AsyncClient(base_url=self.base_url) as client:
-            with open(file_path, "rb") as f:
-                response = await client.post(
-                    url=url, headers=self.headers, files={"file": f}, data={"name": name, "rows": rows}
-                )
-        if response.status_code == 200:
-            content = MessageResponse.model_validate(response.json())
-        else:
-            content = MessageResponse.model_validate(response.json())
-            
-        return ApiResponse(status_code=response.status_code, content=content)
-    
-    async def get_backups(self) -> ApiResponse:
-        url = '/backups'
-        async with AsyncClient(base_url=self.base_url) as client:
-            response = await client.get(
-                url=url,
-                headers=self.headers                
-            )
-        if response.status_code == 200:
-            content = BackupsResponse.model_validate(response.json())
-        else:
-            content = MessageResponse.model_validate(response.json())        
-
-        return ApiResponse(status_code=response.status_code, content=content)
-        
-    
-    async def download(self, backup_id: int) -> ApiResponse:
-        url = '/backups/download'
-        json = DownloadRequest(backup_id=backup_id).model_dump()
-        async with AsyncClient(base_url=self.base_url) as client:
-            response = await client.post(
-                url=url,
-                json=json,
-                headers=self.headers
-            )
-        if response.status_code == 200:
-            vault_data = EncryptedUserVault.model_validate_json(response.content)
-            content = DownloadResponse(vault_data=vault_data)
-        else:
-            content = MessageResponse.model_validate(response.json())
-        return ApiResponse(status_code=response.status_code, content=content)
-    
-    async def delete(self, backup_id: int) -> ApiResponse:
-        url = f'/backups/{backup_id}'
-        async with AsyncClient(base_url=self.base_url) as client:
-            response = await client.delete(
-                url=url,
-                headers=self.headers
-            )
-        content = MessageResponse.model_validate(response.json())
-        return ApiResponse(status_code=response.status_code, content=content)
-    
+ 
     async def refresh(self) -> ApiResponse:
         url = "/refresh"
         async with AsyncClient(base_url=self.base_url) as client:
@@ -167,44 +117,51 @@ class Api:
         content = MessageResponse(detail=json.get("detail"))
         return ApiResponse(status_code=response.status_code, content=content)              
         
-    async def rename_backup(self, backup_id: int, new_name: str) -> ApiResponse:
-        url = f"/backups/{backup_id}"
+
+    
+    async def create_vault(
+        self,
+        vault_data: CreateVaultData
+    ) -> ApiResponse:
+        url = f'/vaults/create'
         async with AsyncClient(base_url=self.base_url) as client:
-            response = await client.patch(
+            response = await client.post(
                 url=url,
                 headers=self.headers,
-                json=new_name
-            )  
+                json=vault_data.model_dump()
+            )
         data = response.json()
-        content = MessageResponse(detail=data.get("detail"))
+        content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
     
-    async def pin_backup(self, backup_id: int) -> ApiResponse:
-        url = f"/backups/{backup_id}/change-pin"
-        async with AsyncClient(base_url=self.base_url) as client:
-            response = await client.patch(
-                url=url,
-                headers=self.headers,
-            )  
-        data = response.json()
-        content = MessageResponse(detail=data.get("detail"))
-        return ApiResponse(status_code=response.status_code, content=content)
-    
-    async def stats_backup(self) -> ApiResponse:
-        url = f"/backups/stats"
+    async def get_vaults(self) -> ApiResponse:
+        url = '/vaults'
         async with AsyncClient(base_url=self.base_url) as client:
             response = await client.get(
                 url=url,
-                headers=self.headers,
-            )  
+                headers=self.headers
+            )
         data = response.json()
         if response.status_code == 200:
-            content = BackupStatsResponse.model_validate(data)
+            content = VaultsDataResponse.model_validate(data)
         else:
-            content = MessageResponse(detail=data.get("detail"))
+            content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
     
-    
+
+    async def get_vault(self, vault_id: int) -> ApiResponse:
+        url = f'/vaults/{vault_id}'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.get(
+                url=url,
+                headers=self.headers
+            )
+        data = response.json()
+        if response.status_code == 200:
+            content = VaultDataResponse.model_validate(data)
+        else:
+            content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
     
     
     async def check_token(self) -> ApiResponse | None:

@@ -1,10 +1,6 @@
 import typer
 
-
-from pas_app.adapters.promts import print_and_choose_backup, choose_action, choose_name_for_backup
 from pas_app.core.api import Api
-from pas_app.schemas.api import BackupData, BackupsResponse, DownloadResponse, MessageResponse
-from pas_app.config import VAULTS, UserConfig, get_config
 
 
 async def delete(backup: BackupData):
@@ -136,11 +132,3 @@ async def backups():
             await rename(backup=backup)
         elif choice == "delete":
             await delete(backup=backup)
-        
-    
-    
-    
-    
-  
-        
-    

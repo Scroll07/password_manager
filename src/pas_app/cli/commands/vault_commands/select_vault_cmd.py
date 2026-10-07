@@ -7,9 +7,6 @@ from pas_app.dependencies import get_keyring_tool
 # add logging!
 
 def select_current_vault():
-    """
-    add dockstring here
-    """
     keyring = get_keyring_tool()
     keyring_data = keyring.load()
     username = keyring_data.current_vault
