@@ -15,7 +15,7 @@ from pas_app.schemas.api import MessageResponse
 
 logger = get_logger()
 
-async def change_password():
+async def change_user_password():
     api = Api()
     data = change_password_prompt()
 

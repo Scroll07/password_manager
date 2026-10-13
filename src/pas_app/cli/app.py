@@ -13,7 +13,6 @@ from pas_app.cli.commands.pas_commands.export_cmd import export_command
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
 
-from pas_app.cli.commands.api_commands.api_typer import cli_app
 from pas_app.cli.commands.config_commands.config_typer import config_app
 from pas_app.cli.commands.user_commands.user_typer import user_app
 
@@ -53,10 +52,9 @@ app.command("gen")(create_password_command)
 
 
 # APPS
-# app.add_typer(cli_app, name="api")
 # app.add_typer(config_app, name="config")
 # app.add_typer(user_app, name="user")
-
+# vault_app
 
 
 
@@ -79,6 +77,7 @@ app.command("gen")(create_password_command)
     # - create new vault (online | offline)
     # - select current vault
     # - vault actions ( download | change-pin | rename | delete )
+    # - change vault master password
     # - delete vault ( offline )
     # - sync vaults (by version)
     

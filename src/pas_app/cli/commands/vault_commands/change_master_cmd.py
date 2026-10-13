@@ -35,17 +35,6 @@ def _local_attempt_decrypt_vault(username: str, vault_name: str, text: str) -> t
     return encrypted_vault, master_password
 
 def change_master():
-    """
-    Change the master password for local vault.
-
-    The command requires entering the current password and a new password.
-    The operation is irreversible and will re-encrypt all stored passwords
-    with the new master password.
-
-    Examples:
-        pas user change-master <current-password>
-
-    """
     keyring = get_keyring_tool()
     keyring_data = keyring.load()
     
@@ -74,7 +63,7 @@ def change_master():
         return
 
     if not typer.confirm("Change master password? This action is irreversible!"):
-        typer.echo("Master password change was canceled.")
+        typer.echo("Master password changing was canceled.")
         return
 
     current_kek = derive_key(master_password=current_master_password, salt_b64=encrypted_vault.salt)

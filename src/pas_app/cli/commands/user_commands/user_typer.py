@@ -1,42 +1,118 @@
-from functools import wraps
-from typing import Callable
-
+import asyncio
 import typer
-from pas_app.dependencies import get_keyring_tool
+
+
+from pas_app.decorators import (
+    check_current_values_dec,
+    check_token_dec
+)
 
 user_app = typer.Typer(
-    help="User commands for account and backup vault management.",
+    help="User commands for your account.",
     no_args_is_help=True
 )
 
-#imports
+# Imports
 from pas_app.cli.commands.user_commands.set_current_user_cmd import set_current_user
-from pas_app.cli.commands.user_commands.master_cmd import change_master
-from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user
+from pas_app.cli.commands.user_commands.change_password import change_user_password
+from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user # Добавить online
 
-# add decorrator to check current_user and current_vault !!!!!!!!!!!!!!!!!!
-def check_current_values_dec(func: Callable) -> Callable:
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        keyring = get_keyring_tool()
-        keyring_data = keyring.load()
-        if keyring_data.current_user == '':
-            set_current_user()
-            typer.echo("Current user doesnot selected")
-            return
-        # if keyring_data.current_vault == '':
-        #     # add here "set current vault" func
-        #     typer.echo("Current vault doesnot selected")
-        #     return
-        return func(*args, **kwargs)
-    return wrapper
+from pas_app.cli.commands.user_commands.register_cmd import register # Добавить offline
+from pas_app.cli.commands.user_commands.login_cmd import login
 
+# Кароче смотри сюда, человек из будущего. Ты хочешь онлайн и оффлайн разновидность команд создания vault и user
+# Проблема в том что декоратор для проверки токенов и сессии привязан к команде полностью, независимо от того какой флаг выбран
+# Сейчас я вижу 2 пути:
+#   - Проверять флаги внутри декоратора и уже из этого исходить проверять сессию или нет (муторно)
+#   - Сделать 2 отдельные функции offline и online и на online повесить декоратор,
+#     а внутри главной функции сделать выбирать по флагу if offline: ... elif online: ... 
+
+
+
+
+
+# Проверка Bearer token + refresh token
+# Здесь навесь на register_online
+# Здесь навесь на delete_online
+change_user_password = check_token_dec(change_user_password)
+
+# Проверка на Current User is not None
 set_current_user = check_current_values_dec(set_current_user)
-change_master = check_current_values_dec(change_master)
+change_user_password = check_current_values_dec(change_user_password)
 delete_user = check_current_values_dec(delete_user)
 
+
+
+
+
+
+
+
+
+def register_command(
+    offline: bool = typer.Option(False, '--offline', '-o', help='Create user offline (Only from your device)')
+):
+    """
+    Register a new API account.
+
+    Creates a new account for working with remote vault backup storage.
+    You will be prompted to enter a username and password for registration.
+
+    Examples:
+        pas api register
+
+    After successful registration, a local vault will be created.
+    """
+
+    asyncio.run(register())
+
+def login_command():
+    """
+    Log into an existing API account.
+
+    Authenticates with the API and obtains access tokens for subsequent
+    requests. Tokens are securely stored in the local configuration.
+
+    Examples:
+        pas api login
+
+    You will be prompted to enter your username and password.
+    """
+    asyncio.run(login())
+
+
+
+def change_user_password_command():
+    """
+    Change API account password.
+
+    Updates the password for your API account while keeping backups
+    and other account data intact.
+
+    Examples:
+        pas api change-password
+
+    You will be prompted to enter a new password in a secure input window.
+    """
+    asyncio.run(change_user_password())
+
+def change_vault_master_password():
+    """
+    
+    """
+
+
+
+
+
+
+
+
+
+
+
 user_app.command("set")(set_current_user)
-user_app.command("change-master")(change_master)
+user_app.command("change-password")(change_user_password)
 user_app.command("delete")(delete_user)
 
 

@@ -282,36 +282,4 @@ class Api:
                 )
             return response
         return None
-
-        
-
-
-
-def check_token_dec(func: Callable):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        api = Api()
-        keyring = get_keyring_tool()
-        keyring_data = keyring.load()
-        if not keyring_data.bearer_token or not keyring_data.refresh_token:
-            typer.echo("No Tokens\nTry to Login firstly")
-            return 
-        response = await api.check_token()
-        if response is not None:
-            if not isinstance(response.content, RefreshResponse):
-                if isinstance(response.content, MessageResponse):
-                    typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
-                    typer.Exit(code=1)                
-                raise ValueError("Wrong resposne from api")    
-            if response.status_code == 200:
-                typer.echo(response.content.detail + "\n")
-                result = await func(*args, **kwargs)
-                return result
-            else:
-                typer.echo(f"Ошибка при обновлении токенов, \nсообщение: {response.content.detail}\nstatus_code: {response.status_code}")
-                typer.Exit(code=1)
-        else:
-            # typer.echo("Tokens are not expired")
-            return await func(*args, **kwargs)
-                    
-    return wrapper        
+     
