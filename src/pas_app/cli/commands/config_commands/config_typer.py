@@ -29,7 +29,6 @@ For more details, run:
 )
 
 #imports
-from pas_app.cli.commands.config_commands.default_user import set_default_user
 from pas_app.cli.commands.config_commands.bot_token import token_cmd
 from pas_app.cli.commands.config_commands.url import url_cmd
 from pas_app.cli.commands.config_commands.session_cmd import reset_session 
@@ -38,7 +37,6 @@ from pas_app.cli.commands.config_commands.session_cmd import reset_session
 
 
 
-config_app.command("user")(set_default_user)
 config_app.command("url")(url_cmd)
 config_app.command("token")(token_cmd)
 config_app.command("reset")(reset_session)

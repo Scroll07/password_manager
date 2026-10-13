@@ -1,6 +1,6 @@
 import typer
 
-from pas_app.config import get_config, KeyringConfig
+from pas_app.dependencies import get_keyring_tool
 
 
 def reset_session():
@@ -13,12 +13,7 @@ def reset_session():
     Examples:
         pas config reset
     """
-    config = get_config()
-    config_data = config._refresh()
-    keyring = KeyringConfig()
-
-    config_data.keyring = keyring
-    
-    config.save_config(data=config_data)
+    keyring = get_keyring_tool() 
+    keyring.
     
     typer.echo("The config was reset")

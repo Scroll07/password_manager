@@ -1,16 +1,9 @@
-
-
-
-
-
-
 import time
-
 import typer
 
 from pas_app.adapters.console import clear_console
 from pas_app.adapters.promts import exit_message_and_clear_console
-from pas_app.config import ConfigFileData, UserConfig, get_config
+from pas_app.config import ConfigData, UserConfig, get_config
 
 
 def change_base_url(config: UserConfig):
@@ -22,25 +15,25 @@ def change_base_url(config: UserConfig):
             3 - Reset Base URL
             0 - Exit
         """
-        config_data = config._refresh()
+        config_data = config.load_config()
 
         choice = typer.prompt(text + "\nInput").strip()
         if choice == "0":
             exit_message_and_clear_console("Exit")
 
         elif choice == "1":
-            typer.echo(f"BASE_URL = {config_data.local.BASE_URL}")
+            typer.echo(f"BASE_URL = {config_data.BASE_URL}")
             time.sleep(2)
             continue
 
         elif choice == "2":
             user_promt = typer.prompt("Enter Base URL: ").strip()
-            config_data.local.BASE_URL = user_promt
+            config_data.BASE_URL = user_promt
             config.save_config(config_data)
             continue
 
         elif choice == "3":
-            config_data.local.BASE_URL = ConfigFileData.BASE_URL
+            config_data.BASE_URL = ConfigData.BASE_URL
             config.save_config(config_data)
             continue
 
