@@ -14,6 +14,6 @@ def reset_session():
         pas config reset
     """
     keyring = get_keyring_tool() 
-    keyring.
+    keyring.reset_keyring_values()
     
-    typer.echo("The config was reset")
+    typer.echo("The session was reset")

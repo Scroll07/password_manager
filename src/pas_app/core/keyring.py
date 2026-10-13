@@ -71,6 +71,10 @@ class KeyringTool:
             last_action=last_action_datetime,
         )
         return data
+    
+    def reset_keyring_values(self) -> None:
+        new_data = KeyringData()
+        self.save(new_data)
 
 def get_keyring_tool() -> KeyringTool:
     return KeyringTool(service_name=SERVICE_NAME)

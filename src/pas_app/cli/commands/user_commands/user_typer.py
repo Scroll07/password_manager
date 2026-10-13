@@ -10,6 +10,7 @@ user_app = typer.Typer(
 )
 
 #imports
+from pas_app.cli.commands.user_commands.set_current_user_cmd import set_current_user
 from pas_app.cli.commands.user_commands.master_cmd import change_master
 from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user
 
@@ -20,7 +21,7 @@ def check_current_values_dec(func: Callable) -> Callable:
         keyring = get_keyring_tool()
         keyring_data = keyring.load()
         if keyring_data.current_user == '':
-            # add here "set current user" func
+            set_current_user()
             typer.echo("Current user doesnot selected")
             return
         # if keyring_data.current_vault == '':
@@ -30,7 +31,11 @@ def check_current_values_dec(func: Callable) -> Callable:
         return func(*args, **kwargs)
     return wrapper
 
-user_app.command("set")(set_default_user)
+set_current_user = check_current_values_dec(set_current_user)
+change_master = check_current_values_dec(change_master)
+delete_user = check_current_values_dec(delete_user)
+
+user_app.command("set")(set_current_user)
 user_app.command("change-master")(change_master)
 user_app.command("delete")(delete_user)
 
