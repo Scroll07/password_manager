@@ -8,8 +8,8 @@ import typer
 from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
-from pas_app.schemas.api import BackupData
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
+from pas_app.schemas.vaults import VaultData
 
 # DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -156,37 +156,37 @@ def choose_delete_user(usernames: list[str]) -> str:
         return usernames[int(choice)-1]
 
 
-def print_backups(backups: list[BackupData]) -> list[BackupData]:
-    pinned_backups = sorted([b for b in backups if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
-    basic_backups = sorted([b for b in backups if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
+def print_vaults(vaults: list[VaultData]) -> list[VaultData]:
+    pinned_vaults = sorted([b for b in vaults if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
+    basic_vaults = sorted([b for b in vaults if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
     headers = ["Id", "Name", "Rows", "Created_at"]
 
     clear_console()
-    if pinned_backups:
-        pinned_data = [[i, b.name, b.rows , b.created_at_formatted] for i, b in enumerate(pinned_backups, start=1)] 
+    if pinned_vaults:
+        pinned_data = [[i, b.name, b.entries , b.created_at_formatted] for i, b in enumerate(pinned_vaults, start=1)] 
         typer.echo("Pinned Backups:\n")
         typer.echo(tabulate(pinned_data, headers=headers, floatfmt="grid"))
         
         typer.echo("\n")
     
-    if basic_backups:
-        basic_data = [[i, b.name, b.rows , b.created_at_formatted] for i, b in enumerate(basic_backups, start=len(pinned_backups) + 1)]
+    if basic_vaults:
+        basic_data = [[i, b.name, b.entries , b.created_at_formatted] for i, b in enumerate(basic_vaults, start=len(pinned_vaults) + 1)]
         typer.echo("Backups:\n")
         typer.echo(tabulate(basic_data, headers=headers, floatfmt="grid"))
     
     result = []
-    if pinned_backups:
-        for b in pinned_backups:
+    if pinned_vaults:
+        for b in pinned_vaults:
             result.append(b)
-    if basic_backups:
-        for b in basic_backups:
+    if basic_vaults:
+        for b in basic_vaults:
             result.append(b)
     return result
     
     
-def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:    
+def print_and_choose_vault(vaults: list[VaultData], text: str) -> VaultData:    
     while True:
-        sorted_backups = print_backups(backups=backups)
+        sorted_backups = print_vaults(vaults=vaults)
         typer.echo()
         choice = typer.prompt(text=text).strip()
         
@@ -195,7 +195,7 @@ def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:
             time.sleep(2)
             continue
         
-        if not 1 <= int(choice) <= len(backups):
+        if not 1 <= int(choice) <= len(vaults):
             typer.echo("Wrong number input")
             time.sleep(2)
             continue
@@ -203,9 +203,9 @@ def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:
         return sorted_backups[int(choice)-1]
     
 
-def choose_name_for_backup() -> str:
+def choose_name_for_vault() -> str:
     while True:
-        name = typer.prompt("Enter the new backup name").strip()
+        name = typer.prompt("Enter the new vault name").strip()
         if not name:
             continue
         if len(name) > 16:
@@ -274,13 +274,13 @@ def change_password_prompt() -> ChangePasswordSchema:
         )
             
 
-action = Literal["download", "pin", "rename", "delete", "cancel"]
-def choose_action(backup: BackupData) -> action:
+action = Literal["download", "change-pin", "rename", "delete", "cancel"]
+def choose_action(vault: VaultData) -> action:
     while True:
         clear_console()
-        pin_action = "Unpin" if backup.pinned else "Pin"
+        pin_action = "Unpin" if vault.pinned else "Pin"
         text = f"""
-        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at_formatted} 
+        Backup: {vault.name} | entries: {vault.entries} | date: {vault.created_at_formatted} 
         
         1) Download
         2) {pin_action}
@@ -306,7 +306,7 @@ def choose_action(backup: BackupData) -> action:
         elif choice == 1:
             return "download"
         elif choice == 2:
-            return "pin"
+            return "change-pin"
         elif choice == 3:
             return "rename"
         elif choice == 4:

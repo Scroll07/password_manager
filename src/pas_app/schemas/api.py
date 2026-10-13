@@ -76,6 +76,7 @@ class BackupsResponse(MessageResponse):
     
 class DownloadResponse(BaseModel):
     vault_data: EncryptedUserVault
+    filename: str
     type: TypeResponses = TypeResponses.DOWNLOAD
 
 class BackupStatsResponse(BaseModel):
@@ -91,6 +92,13 @@ class VaultDataResponse(BaseModel):
     ok: bool
     vault: VaultData
     
+class UnlockVault(BaseModel):
+    ok: bool
+    vault_token: EncodedToken
+    detail: str
+
+
+
 class ApiResponse(BaseModel):
     status_code: int
     content: Union[
@@ -100,7 +108,8 @@ class ApiResponse(BaseModel):
         DownloadResponse, 
         BackupStatsResponse,
         VaultDataResponse,
-        VaultsDataResponse
+        VaultsDataResponse,
+        UnlockVault
     ]
     
 

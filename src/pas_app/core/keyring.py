@@ -9,6 +9,7 @@ class KeyringData(BaseModel):
     master_password: str = ""
     bearer_token: str = ""                  
     refresh_token: str = ""
+    vault_token: str = ""
     last_action: datetime = datetime.today()
 
 class KeyringValues(StrEnum):
@@ -17,6 +18,7 @@ class KeyringValues(StrEnum):
     MASTER_PASSWORD = "master_password"
     BEARER_TOKEN = "bearer_token"
     REFRESH_TOKEN = "refresh_token"
+    VAULT_TOKEN = "vault_token"
     LAST_ACTION = "last_action"
 
 
@@ -49,6 +51,7 @@ class KeyringTool:
         self.set_keyring_value(KeyringValues.BEARER_TOKEN, data.bearer_token)
         self.set_keyring_value(KeyringValues.MASTER_PASSWORD, data.master_password)
         self.set_keyring_value(KeyringValues.REFRESH_TOKEN, data.refresh_token)
+        self.set_keyring_value(KeyringValues.VAULT_TOKEN, data.vault_token)
         self.set_keyring_value(KeyringValues.LAST_ACTION, last_action_str)
         return None
     
@@ -64,6 +67,7 @@ class KeyringTool:
             master_password=self.get_keyring_value(KeyringValues.MASTER_PASSWORD),
             bearer_token=self.get_keyring_value(KeyringValues.BEARER_TOKEN),
             refresh_token=self.get_keyring_value(KeyringValues.REFRESH_TOKEN),
+            vault_token=self.get_keyring_value(KeyringValues.VAULT_TOKEN),
             last_action=last_action_datetime,
         )
         return data

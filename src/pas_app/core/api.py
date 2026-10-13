@@ -3,7 +3,7 @@ from datetime import timedelta, datetime, timezone
 from typing import Callable
 from httpx import AsyncClient
 from functools import wraps
-
+import re
 import typer
 
 from pas_app.dependencies import (
@@ -12,6 +12,7 @@ from pas_app.dependencies import (
     get_logger,
 )
 from pas_app.schemas.api import (
+    UnlockVault,
     VaultsDataResponse,
     VaultDataResponse
 )
@@ -37,7 +38,13 @@ class Api:
             save_to_config=False
         )
 
-    def _save_token_to_keyring(self, save_to_config: bool = True, bearer_token: str = "", refresh_token: str = "") -> None:
+    def _save_token_to_keyring(
+        self, 
+        save_to_config: bool = True, 
+        bearer_token: str = "", 
+        refresh_token: str = "",
+        vault_token: str = ""
+    ) -> None:
         if not save_to_config:
             return
         self.keyring_data = self.keyring.load()
@@ -45,18 +52,27 @@ class Api:
             self.keyring_data.bearer_token = bearer_token
         if refresh_token:
             self.keyring_data.refresh_token = refresh_token
+        if vault_token:
+            self.keyring_data.vault_token = vault_token
         
-        if bearer_token or refresh_token:
+        if bearer_token or refresh_token or vault_token:
             self.keyring.save(data=self.keyring_data)
         
         
     
-    def update_headers(self, bearer_token: str = "", refresh_token: str = "", save_to_config: bool = True) -> None:
+    def update_headers(
+        self, 
+        save_to_config: bool = True,
+        bearer_token: str = "", 
+        refresh_token: str = "", 
+        vault_token: str = ""
+    ) -> None:
         if bearer_token:
             self.headers["Authorization"] = f"Bearer {bearer_token}"
-        
         if refresh_token:
             self.headers["Refresh"] = refresh_token
+        if vault_token:
+            self.headers["Vault"] = vault_token
             
         self._save_token_to_keyring(bearer_token=bearer_token, refresh_token=refresh_token, save_to_config=save_to_config)
 
@@ -116,8 +132,6 @@ class Api:
         json = response.json()
         content = MessageResponse(detail=json.get("detail"))
         return ApiResponse(status_code=response.status_code, content=content)              
-        
-
     
     async def create_vault(
         self,
@@ -163,6 +177,97 @@ class Api:
             content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
     
+    async def delete_vault(self, vault_id: int) -> ApiResponse:
+        url = f'/vaults/{vault_id}'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.delete(
+                url=url,
+                headers=self.headers
+            )
+        data = response.json()
+        content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+    async def rename_vault(
+        self, 
+        vault_id: int,
+        new_vault_name: str
+    ) -> ApiResponse:
+        url = f'/vaults/{vault_id}/rename'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers,
+                json=new_vault_name
+            )
+        data = response.json()
+        content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+
+    async def change_pin_vault(self, vault_id: int) -> ApiResponse:
+        url = f'/vaults/{vault_id}/change-pin'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers
+            )
+        data = response.json()
+        content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+            
+    async def download_vault(self, vault_id: int):
+        url = f'/vaults/{vault_id}/download'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers
+            )
+        if response.status_code == 200:
+            data = EncryptedUserVault.model_validate_json(response.content)
+            header = response.headers.get('Content-Disposition')
+            match = None
+            if header:
+                match = re.search(r'filename="([^"]+\.json)"', header)
+            if match:
+                filename = match.group(1)
+            else:
+                date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+                filename = f"vault_{date}.json"
+                
+            content = DownloadResponse(vault_data=data, filename=filename)
+        else:
+            content = MessageResponse.model_validate(response.json())
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+    
+    async def get_vault_status(self, vault_id: int) -> ApiResponse:
+        url = f'/vaults/{vault_id}/status'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers
+            )
+        data = response.json()
+        content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+    
+    async def unlock_vault(self, vault_id: int, vault_master_password: str) -> ApiResponse:
+        url = f'/vaults/{vault_id}/unlock'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers,
+                json=vault_master_password
+            )
+        data = response.json()
+        if response.status_code == 200:
+            content = UnlockVault.model_validate(data)
+            self.update_headers(vault_token=content.vault_token.token)
+        else:
+            content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+        
     
     async def check_token(self) -> ApiResponse | None:
         token_data = decode_token(token=self.keyring_data.bearer_token)

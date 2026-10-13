@@ -38,4 +38,3 @@ class LoginRegisterInput(BaseModel):
 
 
 
-    
