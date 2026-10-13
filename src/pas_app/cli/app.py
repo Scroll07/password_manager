@@ -59,6 +59,31 @@ app.command("gen")(create_password_command)
 
 
 
+
+# Expecting apps commands:
+#   User app:
+    # - register new user ( online | offline )
+    # - login
+    # - change password
+    # - set current user
+    # - delete user ( online | offline )
+
+#   Config app:
+    # - edit base url
+    # - edit bot token
+    # - reset session
+    # - reset config
+    # - edit other config variables
+
+#   Vault app:
+    # - create new vault (online | offline)
+    # - select current vault
+    # - vault actions ( download | change-pin | rename | delete )
+    # - delete vault ( offline )
+    # - sync vaults (by version)
+    
+    
+
 @app.callback()
 def main():
     """Initialize session on startup."""
