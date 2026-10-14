@@ -15,9 +15,9 @@ user_app = typer.Typer(
 # Imports
 from pas_app.cli.commands.user_commands.set_current_user_cmd import set_current_user
 from pas_app.cli.commands.user_commands.change_password import change_user_password
-from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user # Добавить online
+from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user_offline, delete_user_online
 
-from pas_app.cli.commands.user_commands.register_cmd import register # Добавить offline
+from pas_app.cli.commands.user_commands.register_cmd import register_online # Добавить offline
 from pas_app.cli.commands.user_commands.login_cmd import login
 
 # Кароче смотри сюда, человек из будущего. Ты хочешь онлайн и оффлайн разновидность команд создания vault и user
@@ -34,12 +34,13 @@ from pas_app.cli.commands.user_commands.login_cmd import login
 # Проверка Bearer token + refresh token
 # Здесь навесь на register_online
 # Здесь навесь на delete_online
+delete_user_online = check_token_dec(delete_user_online)
 change_user_password = check_token_dec(change_user_password)
 
 # Проверка на Current User is not None
 set_current_user = check_current_values_dec(set_current_user)
 change_user_password = check_current_values_dec(change_user_password)
-delete_user = check_current_values_dec(delete_user)
+delete_user = check_current_values_dec(delete_user_offline)
 
 
 
@@ -63,8 +64,10 @@ def register_command(
 
     After successful registration, a local vault will be created.
     """
-
-    asyncio.run(register())
+    if offline:
+        ... # add here offline func 
+    else:
+        asyncio.run(register_online())
 
 def login_command():
     """
@@ -96,12 +99,17 @@ def change_user_password_command():
     """
     asyncio.run(change_user_password())
 
-def change_vault_master_password():
-    """
-    
+
+def delete_user_command(
+    offline: bool = typer.Option(False, '--offline', help="Oflline deleting user"),
+):
     """
 
-
+    """
+    if offline:
+        delete_user_offline()
+    else:
+        asyncio.run(delete_user_online())
 
 
 

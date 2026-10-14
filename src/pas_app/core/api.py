@@ -12,7 +12,8 @@ from pas_app.dependencies import (
     get_logger,
 )
 from pas_app.schemas.api import (
-    UnlockVault,
+    UnlockVaultResponse,
+    UserDataResponse,
     VaultsDataResponse,
     VaultDataResponse
 )
@@ -105,7 +106,42 @@ class Api:
             content = MessageResponse.model_validate(response.json())
 
         return ApiResponse(status_code=response.status_code, content=content)
- 
+
+    async def delete_user(self) -> ApiResponse:
+        url = "/users/me"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.delete(
+                url=url,
+                headers=self.headers
+            )
+        content = MessageResponse.model_validate(response.json())
+        return ApiResponse(status_code=response.status_code, content=content)
+
+    async def deactivate_user(self) -> ApiResponse:
+        url = "/users/me/deactivate"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers
+            )
+        content = MessageResponse.model_validate(response.json())
+        return ApiResponse(status_code=response.status_code, content=content)
+
+    async def user_me(self) -> ApiResponse:
+        url = "/users/me"
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.get(
+                url=url,
+                headers=self.headers
+            )
+        data = response.json()
+        if response.status_code == 200:
+            content = UserDataResponse.model_validate(data)
+        else:
+            content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+
     async def refresh(self) -> ApiResponse:
         url = "/refresh"
         async with AsyncClient(base_url=self.base_url) as client:
@@ -262,7 +298,7 @@ class Api:
             )
         data = response.json()
         if response.status_code == 200:
-            content = UnlockVault.model_validate(data)
+            content = UnlockVaultResponse.model_validate(data)
             self.update_headers(vault_token=content.vault_token.token)
         else:
             content = MessageResponse.model_validate(data)

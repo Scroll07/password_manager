@@ -43,7 +43,13 @@ class BackupData(BaseModel):
     def created_at_formatted(self) -> str:
         return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
     
- 
+class UserData(BaseModel):
+    id: int
+    username: str
+    telegram_id: int | None
+    role: str
+    is_active: bool
+    created_at: datetime
 
 class TypeResponses(StrEnum):
     MESSAGE = "message"
@@ -92,11 +98,14 @@ class VaultDataResponse(BaseModel):
     ok: bool
     vault: VaultData
     
-class UnlockVault(BaseModel):
+class UnlockVaultResponse(BaseModel):
     ok: bool
     vault_token: EncodedToken
     detail: str
 
+class UserDataResponse(BaseModel):
+    ok: bool
+    data: UserData
 
 
 class ApiResponse(BaseModel):
@@ -109,7 +118,8 @@ class ApiResponse(BaseModel):
         BackupStatsResponse,
         VaultDataResponse,
         VaultsDataResponse,
-        UnlockVault
+        UnlockVaultResponse,
+        UserDataResponse
     ]
     
 

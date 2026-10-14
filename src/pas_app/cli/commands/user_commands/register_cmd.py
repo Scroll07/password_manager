@@ -12,7 +12,7 @@ from pas_app.dependencies import (
 
 logger = get_logger()
 
-async def register():
+async def register_online():
     api = Api()
 
     user_input_data = cli_register_input()
