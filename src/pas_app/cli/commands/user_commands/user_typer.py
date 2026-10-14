@@ -34,13 +34,15 @@ from pas_app.cli.commands.user_commands.login_cmd import login
 # Проверка Bearer token + refresh token
 # Здесь навесь на register_online
 # Здесь навесь на delete_online
+register_online = check_token_dec(register_online)
+login = check_token_dec(login)
 delete_user_online = check_token_dec(delete_user_online)
 change_user_password = check_token_dec(change_user_password)
 
 # Проверка на Current User is not None
 set_current_user = check_current_values_dec(set_current_user)
 change_user_password = check_current_values_dec(change_user_password)
-delete_user = check_current_values_dec(delete_user_offline)
+delete_user_offline = check_current_values_dec(delete_user_offline)
 
 
 
@@ -50,9 +52,7 @@ delete_user = check_current_values_dec(delete_user_offline)
 
 
 
-def register_command(
-    offline: bool = typer.Option(False, '--offline', '-o', help='Create user offline (Only from your device)')
-):
+def register_command():
     """
     Register a new API account.
 
@@ -64,10 +64,7 @@ def register_command(
 
     After successful registration, a local vault will be created.
     """
-    if offline:
-        ... # add here offline func 
-    else:
-        asyncio.run(register_online())
+    asyncio.run(register_online())
 
 def login_command():
     """
@@ -118,10 +115,11 @@ def delete_user_command(
 
 
 
-
+user_app.command('register')(register_command)
+user_app.command('login')(login_command)
 user_app.command("set")(set_current_user)
 user_app.command("change-password")(change_user_password)
-user_app.command("delete")(delete_user)
+user_app.command("delete")(delete_user_command)
 
 
 

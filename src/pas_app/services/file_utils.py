@@ -122,7 +122,8 @@ def get_user_vault_files(username: str) -> list[Path]:
 def get_vault_usernames() -> list[str]:
     user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]
     if not user_folders:
-        raise EchoException("No vaults file to get username")
+        return []
+        # raise EchoException("No vaults file to get username")
     usernames = []
     for folder in user_folders:
         folder_name = folder.name

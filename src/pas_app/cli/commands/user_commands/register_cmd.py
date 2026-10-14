@@ -9,7 +9,6 @@ from pas_app.dependencies import (
     get_logger,
     get_keyring_tool
 )
-
 logger = get_logger()
 
 async def register_online():
