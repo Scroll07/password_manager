@@ -68,3 +68,8 @@ def vaults_actions_cmd():
     """
     asyncio.run(vaults())
         
+
+vault_app.command('create')(create_vault_cmd)
+vault_app.command('select')(select_current_vault_cmd)
+vault_app.command('actions')(vaults)
+vault_app.command('change-master')(change_master_cmd)
