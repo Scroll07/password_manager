@@ -3,14 +3,14 @@ import time
 import typer
 from pydantic import ValidationError
 
-from pas_app.adapters.promts import cli_password_promt, clear_console
-from pas_app.schemas.passwords import EncryptedUserVault, Password, Passwords
+from pas_app.adapters.promts import clear_console
+from pas_app.schemas.passwords import EncryptedUserVault, Passwords
 from pas_app.core.settings import IMPORT_DIR
 from pas_app.dependencies import get_password_tool
 from pas_app.services.password import attempt_decrypt_vault
+from pas_app.dependencies import get_logger
 
-
-    
+logger = get_logger()
 
 
 def get_import_files_paths() -> list[Path]:
@@ -87,8 +87,10 @@ def import_data(
         try:
             passwords = Passwords.model_validate_json(data)
         except ValidationError as e:
-            ...
-            # add logging {e}
+            typer.echo("Incorrect file data structure")
+            logger.exception(e)
+            raise typer.Exit(code=1)
+        
     if encrypted_vault is None and passwords is None:
         typer.echo("Import data is not the vault and is not the passwords")
         return
