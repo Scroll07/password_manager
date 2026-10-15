@@ -20,3 +20,5 @@ def select_current_vault():
         keyring_data.master_password = ""
     keyring_data.current_vault = selected
     keyring.save(data=keyring_data)
+    
+    typer.echo(f"Current vault was successfully set as {selected}")
