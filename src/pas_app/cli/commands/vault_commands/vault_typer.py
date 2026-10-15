@@ -26,7 +26,8 @@ vaults = check_token_dec(vaults)
 
 # Проверка на Current User is not None
 change_master = check_current_values_dec(change_master)
-
+create_vault_offline = check_current_values_dec(create_vault_offline)
+create_vault_online = check_current_values_dec(create_vault_online)
 
 
 
@@ -35,7 +36,6 @@ def create_vault_cmd(
     offline: bool = typer.Option(False, '--offline', '-o', help='Delete vault offline (Only from your device)')
 ):
     """
-        offline (bool, optional): _description_. Defaults to typer.Option(False, '--offline', '-o', help='Delete vault offline (Only from your device)').
     """
     if offline:
         create_vault_offline()
@@ -63,4 +63,8 @@ def change_master_cmd():
     change_master()
 
 
+def vaults_actions_cmd():
+    """
+    """
+    asyncio.run(vaults())
         
