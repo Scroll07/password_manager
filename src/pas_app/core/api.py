@@ -168,7 +168,7 @@ class Api:
         json = response.json()
         content = MessageResponse(detail=json.get("detail"))
         return ApiResponse(status_code=response.status_code, content=content)              
-    
+        
     async def create_vault(
         self,
         vault_data: CreateVaultData

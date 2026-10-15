@@ -24,9 +24,10 @@ async def delete_user_online():
     
     assert isinstance(response.content, UserDataResponse)
     user_data = response.content.data
+    username = user_data.username
     keyring = get_keyring_tool()
     keyring_data = keyring.load()
-    choice = typer.confirm(f"Delete user with username: {user_data.username} this action will permanently delete the user and data.\ny/n")
+    choice = typer.confirm(f"Delete user with username: {username} this action will permanently delete the user and data.\ny/n")
     if not choice:
         typer.echo("Canceling...")
         raise typer.Exit(code=0)
@@ -39,10 +40,15 @@ async def delete_user_online():
        
     typer.echo(response.content.detail)
        
-    if keyring_data.current_user == user_data.username:
+    if keyring_data.current_user == username:
         keyring_data.current_user = ""
         typer.echo("Reseting current user...")
        
+       
+    # Удаление vaults локально
+    user_dir = VAULTS / username
+    shutil.rmtree(user_dir)
+    typer.echo(f"Vaults of {username} were deleted")
        
     
        # В начале добавить проверку доступа к vault, если пользователь не знает пароль от него то удалить онлайн нельзя

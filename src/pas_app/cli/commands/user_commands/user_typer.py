@@ -16,7 +16,7 @@ user_app = typer.Typer(
 from pas_app.cli.commands.user_commands.set_current_user_cmd import set_current_user
 from pas_app.cli.commands.user_commands.change_password import change_user_password
 from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user_offline, delete_user_online
-
+from pas_app.cli.commands.user_commands.deactivate_user import deactivate_user_online
 from pas_app.cli.commands.user_commands.register_cmd import register_online # Добавить offline
 from pas_app.cli.commands.user_commands.login_cmd import login
 
@@ -109,8 +109,10 @@ def delete_user_command(
         asyncio.run(delete_user_online())
 
 
-
-
+def deactivate_user_command():
+    """
+    """
+    asyncio.run(deactivate_user_online())
 
 
 
