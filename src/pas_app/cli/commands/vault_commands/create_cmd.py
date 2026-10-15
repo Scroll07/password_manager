@@ -12,20 +12,21 @@ from pas_app.schemas.vaults import CreateVaultData
 
 # add logging!
 
-async def create_vault_command(
-    offline: bool
-):
+
+
+def create_vault_offline():
+    vault_name = select_vault_name()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
+    assert keyring_data.current_user
+    create_vault(username=keyring_data.current_user, vault_name=vault_name)
+    typer.echo("New vault was successfully created")
+    raise typer.Exit(code=0)
+
+async def create_vault_online():
     """
     Dockstring
     """
-    if offline:
-        keyring = get_keyring_tool()
-        keyring_data = keyring.load()
-        assert keyring_data.current_user
-        create_vault(username=keyring_data.current_user)
-        typer.echo("New vault was successfully created")
-        return
-    
     vault_name = select_vault_name()
     master_password = select_master_password()
     data = CreateVaultData(
@@ -40,6 +41,12 @@ async def create_vault_command(
     else:
         assert isinstance(response.content, MessageResponse)
         typer.echo(response.content.detail)
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
+    assert keyring_data.current_user
+    create_vault(username=keyring_data.current_user, vault_name=vault_name)
+    typer.echo("New vault was successfully created")
+    raise typer.Exit(code=0)
     
     
     

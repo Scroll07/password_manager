@@ -90,8 +90,8 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
 
-def create_vault(username: str) -> None:
-    vault_name = select_vault_name()
+def create_vault(username: str, vault_name: str) -> None:
+    # vault_name = select_vault_name()
     new_vault_path = create_vault_path(username=username, vault_name=vault_name)
     vaults = get_user_vault_files(username=username)
     if new_vault_path in vaults:

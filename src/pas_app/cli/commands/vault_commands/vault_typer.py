@@ -15,11 +15,11 @@ vault_app = typer.Typer(
 )
 
 # Imports
-from pas_app.cli.commands.vault_commands.create_cmd import create_vault_command
+from pas_app.cli.commands.vault_commands.create_cmd import create_vault_offline, create_vault_online
 from pas_app.cli.commands.vault_commands.select_vault_cmd import select_current_vault
 from pas_app.cli.commands.vault_commands.vault_multi import vaults
 from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
- 
+
 
 # Проверка Bearer token + refresh token
 vaults = check_token_dec(vaults)
@@ -38,9 +38,9 @@ def create_vault_cmd(
         offline (bool, optional): _description_. Defaults to typer.Option(False, '--offline', '-o', help='Delete vault offline (Only from your device)').
     """
     if offline:
-        ...
+        create_vault_offline()
     else:
-        asyncio.run(create_vault_command(offline=offline))
+        asyncio.run(create_vault_online())
 
 def select_current_vault_cmd():
     """
