@@ -1,3 +1,5 @@
+import typer
+
 from pas_app.dependencies import get_keyring_tool
 from pas_app.adapters.promts import choose_current_user
 from pas_app.services.file_utils import get_vault_username_folders
@@ -12,5 +14,7 @@ def set_current_user():
     
     keyring_data.current_user = selected_user
     keyring.save(data=keyring_data)
+    
+    typer.echo(f"Current user was succussefully set as {selected_user}")
     
     

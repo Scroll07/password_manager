@@ -13,6 +13,8 @@ def delete_user_offline():
     selected = choose_delete_user(usernames=usernames)
     user_dir = VAULTS / selected
     shutil.rmtree(user_dir)
+    
+    typer.echo(f"Vaults of {selected} were deleted")
         
 async def delete_user_online():        
     api = Api()
