@@ -13,8 +13,7 @@ from pas_app.cli.commands.pas_commands.export_cmd import export_command
 from pas_app.cli.commands.pas_commands.copy_cmd import copy
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
 
-from pas_app.cli.commands.config_commands.config_typer import config_app
-from pas_app.cli.commands.user_commands.user_typer import user_app
+
 
 from pas_app.config import get_config
 
@@ -52,9 +51,14 @@ app.command("gen")(create_password_command)
 
 
 # APPS
-# app.add_typer(config_app, name="config")
-# app.add_typer(user_app, name="user")
-# vault_app
+from pas_app.cli.commands.config_commands.config_typer import config_app
+from pas_app.cli.commands.user_commands.user_typer import user_app
+from pas_app.cli.commands.vault_commands.vault_typer import vault_app
+
+app.add_typer(config_app, name="config")
+app.add_typer(user_app, name="user")
+app.add_typer(vault_app, name="vault")
+
 
 
 
