@@ -10,7 +10,6 @@ from tabulate import tabulate
 from pas_app.adapters.console import clear_console
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput, Password
 from pas_app.schemas.vaults import VaultData
-from pas_app.services.password import check_password_strength
 
 # DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -175,6 +174,8 @@ def print_passwords(passwords: list[Password], show: bool = False, check: bool =
                 typer.echo(f"Error: {e}")
                 raise typer.Exit(code=1)
     else:
+        from pas_app.services.password import check_password_strength
+
         headers = ["№", "Service", "Username", "Password", "Strength"]
         for i, pas in enumerate(passwords, start=1):
             try:
