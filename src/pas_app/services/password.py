@@ -96,41 +96,6 @@ def get_key() -> bytes:
 
 
 
-def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> None:
-    if not passwords:
-        typer.echo("Записей нет")
-        return
-    rows = []
-    if not check:
-        headers = ["№", "Метка", "Логин", "Пароль", "Заметка"]
-        for i, pas in enumerate(passwords, start=1):
-            try:
-                match = pas.service
-                username = pas.username
-                password = pas.password if show else "******"
-                note = pas.note
-                rows.append([i, match, username, password, note])
-            except Exception as e:
-                typer.echo(f"Ошибка: {e}")
-                raise typer.Exit(code=1)
-    else:
-        headers = ["№", "Метка", "Логин", "Пароль", "Strength"]
-        for i, pas in enumerate(passwords, start=1):
-            try:
-                match = pas.service
-                username = pas.username
-                password = pas.password if show else "******"
-                strength = check_password_strength(password=pas.password)
-                rows.append([i, match, username, password, strength])
-            except Exception as e:
-                typer.echo(f"Ошибка: {e}")
-                raise typer.Exit(code=1)
-
-    if rows:
-        typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
-        
-        
-
 def attempt_decrypt_vault(username: str, vault_name: str, text: str) -> list[Password] | None:
     encrypted_vault = load_encrypted_vault(username=username, vault_name=vault_name)
     clear_console()

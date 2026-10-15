@@ -1,8 +1,7 @@
 import typer
 
-from pas_app.services.password import print_passwords
 from pas_app.dependencies import get_password_tool
-
+from pas_app.adapters.promts import print_passwords
 
 def get_command(
     service: str = typer.Argument(

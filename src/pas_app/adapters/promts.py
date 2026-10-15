@@ -8,8 +8,9 @@ import typer
 from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
-from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
+from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput, Password
 from pas_app.schemas.vaults import VaultData
+from pas_app.services.password import check_password_strength
 
 # DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -155,6 +156,64 @@ def choose_delete_user(usernames: list[str]) -> str:
             
         return usernames[int(choice)-1]
 
+
+def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> list[Password]:
+    if not passwords:
+        typer.echo("Записей нет")
+        raise typer.Exit(code=1)
+    rows = []
+    if not check:
+        headers = ["№", "Service", "Username", "Password", "Note"]
+        for i, pas in enumerate(passwords, start=1):
+            try:
+                match = pas.service
+                username = pas.username
+                password = pas.password if show else "******"
+                note = pas.note
+                rows.append([i, match, username, password, note])
+            except Exception as e:
+                typer.echo(f"Error: {e}")
+                raise typer.Exit(code=1)
+    else:
+        headers = ["№", "Service", "Username", "Password", "Strength"]
+        for i, pas in enumerate(passwords, start=1):
+            try:
+                match = pas.service
+                username = pas.username
+                password = pas.password if show else "******"
+                strength = check_password_strength(password=pas.password)
+                rows.append([i, match, username, password, strength])
+            except Exception as e:
+                typer.echo(f"Error: {e}")
+                raise typer.Exit(code=1)
+
+    typer.echo(tabulate(rows, headers=headers, tablefmt="grid"))
+    return passwords
+ 
+
+
+    
+
+def print_and_choose_password(passwords: list[Password], text: str) -> Password:    
+    if not passwords:
+        typer.echo("No entries were found")
+        raise typer.Exit(code=1)
+
+    while True:
+        print_passwords(passwords=passwords)
+        choice = typer.prompt(text=text).strip()
+        
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(passwords):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return passwords[int(choice)-1]
 
 def print_vaults(vaults: list[VaultData]) -> list[VaultData]:
     pinned_vaults = sorted([b for b in vaults if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
