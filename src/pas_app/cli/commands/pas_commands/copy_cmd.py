@@ -27,9 +27,9 @@ def copy(
         choosed_password = print_and_choose_password(passwords=passwords, text="Choose service to copy password")
     else:
         labels = [p.service for p in passwords]
-        table = [[label] for label in labels]
+        table = [[i, label] for i, label in enumerate(labels, start=1)]
         while True:
-            typer.echo(tabulate.tabulate(table, headers=["Labels"], tablefmt="simple"))
+            typer.echo(tabulate.tabulate(table, headers=["№", "Labels"], tablefmt="simple"))
             choice = typer.prompt(text="Choose service to copy password").strip()
             
             if not choice.isdigit():
