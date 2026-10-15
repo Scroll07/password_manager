@@ -36,6 +36,16 @@ def create_vault_cmd(
     offline: bool = typer.Option(False, '--offline', '-o', help='Delete vault offline (Only from your device)')
 ):
     """
+    Create a new local vault for storing passwords.
+
+    A vault is a local encrypted storage that holds your passwords.
+    Use --offline to create a vault that exists only on your device
+    without connecting to the remote API.
+
+    Examples:
+        pas vault create           # Create vault with API sync
+
+        pas vault create --offline # Create local-only vault
     """
     if offline:
         create_vault_offline()
@@ -44,7 +54,13 @@ def create_vault_cmd(
 
 def select_current_vault_cmd():
     """
-    Dockstring here
+    Select a vault to work with.
+
+    If you have multiple vaults, this command lets you switch between them.
+    The selected vault will be used for all password operations.
+
+    Examples:
+        pas vault select
     """
     select_current_vault()
 
@@ -65,6 +81,13 @@ def change_master_cmd():
 
 def vaults_actions_cmd():
     """
+    Perform bulk actions on vaults (rename, delete, etc.).
+
+    Opens an interactive menu for managing vault properties
+    such as renaming, deleting, or changing vault settings.
+
+    Examples:
+        pas vault actions
     """
     asyncio.run(vaults())
         

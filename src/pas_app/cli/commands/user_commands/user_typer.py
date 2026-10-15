@@ -98,10 +98,19 @@ def change_user_password_command():
 
 
 def delete_user_command(
-    offline: bool = typer.Option(False, '--offline', help="Oflline deleting user"),
+    offline: bool = typer.Option(False, '--offline', help="Delete user account locally only")
 ):
     """
+    Delete your API account.
 
+    Removes your account from the server or locally.
+    Use --offline to delete only the local reference without touching
+    the server account.
+
+    Examples:
+        pas api delete              # Delete server account
+
+        pas api delete --offline    # Remove local user data only
     """
     if offline:
         delete_user_offline()
@@ -111,6 +120,13 @@ def delete_user_command(
 
 def deactivate_user_command():
     """
+    Deactivate your API account.
+
+    Temporarily disables your account on the server while keeping
+    all your data intact. You can reactivate it later.
+
+    Examples:
+        pas api deactivate
     """
     asyncio.run(deactivate_user_online())
 
