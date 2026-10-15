@@ -21,7 +21,7 @@ from pas_app.schemas.passwords import Password, EncryptedUserVault
 from pas_app.services.file_utils import (
     create_vault_path,
     load_encrypted_vault,
-    get_vault_usernames,
+    get_vault_usernames_with_vault,
     get_user_vault_files,
 )
 from pas_app.exceptions import EchoException
@@ -41,7 +41,7 @@ def check_session() -> None:
     keyring_data = keyring.load()
 
     if not keyring_data.current_user:
-        usernames = get_vault_usernames()
+        usernames = get_vault_usernames_with_vault()
         if not usernames:
             raise EchoException("There are no accounts on this device.\nTry to sync accounts or create new.")
         selected_username = choose_current_user(usernames=usernames, current_username="Not selected")

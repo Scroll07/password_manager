@@ -1,8 +1,11 @@
 
+import asyncio
+
 import typer
 
 
 from pas_app.adapters.promts import cli_register_input
+from pas_app.cli.commands.user_commands.login_cmd import login
 from pas_app.core.api import Api
 from pas_app.schemas.api import Login_RegisterRequest, MessageResponse
 from pas_app.dependencies import (
@@ -38,6 +41,10 @@ async def register_online():
         keyring.save(data=keyring_data)
         
         logger.info(f"Register successful for user: {username}")
+        await asyncio.sleep(1)
+        
+        await login()
+        
         raise typer.Exit(code=0)
     else:
         logger.error(f"Register failed for user {username}: status_code {response.status_code}, message: {response.content.detail}")

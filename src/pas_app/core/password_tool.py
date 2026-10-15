@@ -48,6 +48,7 @@ class PasswordTool:
             logger.exception(f"Exception while initilization Password tool: {e}")
             raise e
     
+
     
     def _load_data(self) -> None:
         self.vault_data: UserVault = load_data(username=self.username, vault_name=self.vault_name)

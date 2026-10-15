@@ -4,6 +4,8 @@ import time
 
 from pas_app.adapters.promts import cli_login_input
 from pas_app.core.api import Api
+from pas_app.core.settings import VAULTS
+from pas_app.schemas import vaults
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
 from pas_app.dependencies import (
     get_logger,
@@ -52,6 +54,10 @@ async def login(
         time.sleep(1)
 
         logger.info(f"Login successful for user: {username}")
+        
+        user_folder = VAULTS / username
+        user_folder.mkdir(exist_ok=True)
+        
         raise typer.Exit(code=0)
     else:
         logger.error(f"Login failed for user {username}: status_code {response.status_code}, message: {response.content.detail}")

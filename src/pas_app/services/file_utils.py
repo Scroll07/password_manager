@@ -28,6 +28,12 @@ from pas_app.adapters.promts import (
 
 
 def create_vault_path(username: str, vault_name: str) -> Path:
+    def _validate_vault_name(vault_name: str) -> str:
+        if vault_name.endswith('.json'):
+            vault_name = vault_name[:-5]
+        return vault_name
+    vault_name = _validate_vault_name(vault_name=vault_name)
+    
     dir = VAULTS / username
     dir.mkdir(exist_ok=True, parents=True)
     return dir / f'{vault_name}.json'
@@ -90,7 +96,7 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
 
-def create_vault(username: str, vault_name: str) -> None:
+def create_vault(username: str, vault_name: str, master_password: str) -> None:
     # vault_name = select_vault_name()
     new_vault_path = create_vault_path(username=username, vault_name=vault_name)
     vaults = get_user_vault_files(username=username)
@@ -119,11 +125,10 @@ def get_user_vault_files(username: str) -> list[Path]:
 
 
 
-def get_vault_usernames() -> list[str]:
+def get_vault_usernames_with_vault() -> list[str]:
     user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]
     if not user_folders:
-        return []
-        # raise EchoException("No vaults file to get username")
+        raise EchoException("No vaults file to get username")
     usernames = []
     for folder in user_folders:
         folder_name = folder.name
@@ -138,4 +143,15 @@ def get_vault_usernames() -> list[str]:
             # else:
                 # добавить логирование
     
+    return list(set(usernames))
+
+
+def get_vault_username_folders() -> list[str]:
+    user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]
+    if not user_folders:
+        return []
+    usernames = []
+    for folder in user_folders:
+        folder_name = folder.name
+        usernames.append(folder_name)
     return usernames

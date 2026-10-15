@@ -32,10 +32,7 @@ from pas_app.cli.commands.user_commands.login_cmd import login
 
 
 # Проверка Bearer token + refresh token
-# Здесь навесь на register_online
 # Здесь навесь на delete_online
-register_online = check_token_dec(register_online)
-login = check_token_dec(login)
 delete_user_online = check_token_dec(delete_user_online)
 change_user_password = check_token_dec(change_user_password)
 

@@ -19,14 +19,12 @@ def create_vault_offline():
     keyring = get_keyring_tool()
     keyring_data = keyring.load()
     assert keyring_data.current_user
-    create_vault(username=keyring_data.current_user, vault_name=vault_name)
+    master_password = select_master_password()
+    create_vault(username=keyring_data.current_user, vault_name=vault_name, master_password=master_password)
     typer.echo("New vault was successfully created")
     raise typer.Exit(code=0)
 
 async def create_vault_online():
-    """
-    Dockstring
-    """
     vault_name = select_vault_name()
     master_password = select_master_password()
     data = CreateVaultData(
@@ -37,16 +35,16 @@ async def create_vault_online():
     api = Api()
     response = await api.create_vault(vault_data=data)
     if response.status_code == 200:
+        keyring = get_keyring_tool()
+        keyring_data = keyring.load()
+        assert keyring_data.current_user
+        create_vault(username=keyring_data.current_user, vault_name=vault_name, master_password=master_password)
         typer.echo("New vault was successfully created")
+        raise typer.Exit(code=0)
     else:
         assert isinstance(response.content, MessageResponse)
         typer.echo(response.content.detail)
-    keyring = get_keyring_tool()
-    keyring_data = keyring.load()
-    assert keyring_data.current_user
-    create_vault(username=keyring_data.current_user, vault_name=vault_name)
-    typer.echo("New vault was successfully created")
-    raise typer.Exit(code=0)
+    
     
     
     

@@ -133,7 +133,7 @@ async def change_pin(vault: VaultData):
 # ==========================
         #FUNC FOR TYPER
 # ==========================
-async def vaults():
+async def vaults_acions():
     api = Api()
     while True:
         response = await api.get_vaults()

@@ -17,12 +17,12 @@ vault_app = typer.Typer(
 # Imports
 from pas_app.cli.commands.vault_commands.create_cmd import create_vault_offline, create_vault_online
 from pas_app.cli.commands.vault_commands.select_vault_cmd import select_current_vault
-from pas_app.cli.commands.vault_commands.vault_multi import vaults
+from pas_app.cli.commands.vault_commands.vault_multi import vaults_acions
 from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
 
 
 # Проверка Bearer token + refresh token
-vaults = check_token_dec(vaults)
+vaults = check_token_dec(vaults_acions)
 
 # Проверка на Current User is not None
 change_master = check_current_values_dec(change_master)
@@ -51,6 +51,7 @@ def create_vault_cmd(
         create_vault_offline()
     else:
         asyncio.run(create_vault_online())
+        
 
 def select_current_vault_cmd():
     """
@@ -89,10 +90,10 @@ def vaults_actions_cmd():
     Examples:
         pas vault actions
     """
-    asyncio.run(vaults())
+    asyncio.run(vaults_acions())
         
 
 vault_app.command('create')(create_vault_cmd)
-vault_app.command('select')(select_current_vault_cmd)
-vault_app.command('actions')(vaults)
+vault_app.command('set')(select_current_vault_cmd)
+vault_app.command('actions')(vaults_actions_cmd)
 vault_app.command('change-master')(change_master_cmd)
