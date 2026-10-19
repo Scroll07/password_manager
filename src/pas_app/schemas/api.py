@@ -3,9 +3,8 @@ from enum import StrEnum
 from pydantic import BaseModel, computed_field
 from typing import Union
 
-from pas_app.schemas.passwords import EncryptedUserVault
 from pas_app.schemas.jwt import EncodedToken
-from pas_app.schemas.vaults import VaultData
+from pas_app.schemas.vaults import EncryptedUserVault, VaultData
 
 
 

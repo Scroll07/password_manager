@@ -19,9 +19,9 @@ from pas_app.schemas.api import (
 )
 from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshResponse, BackupStatsResponse
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
-from pas_app.schemas.passwords import EncryptedUserVault, ChangePasswordSchema
+from pas_app.schemas.passwords import ChangePasswordSchema
 from pas_app.core.crypto import decode_token
-from pas_app.schemas.vaults import CreateVaultData
+from pas_app.schemas.vaults import CreateVaultData, EncryptedUserVault
 
 
 class Api:

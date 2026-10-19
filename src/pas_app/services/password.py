@@ -17,7 +17,7 @@ from pas_app.core.crypto import (
     derive_key,
     decrypt_dek
 )
-from pas_app.schemas.passwords import Password, EncryptedUserVault
+from pas_app.schemas.passwords import Password
 from pas_app.services.file_utils import (
     create_vault_path,
     load_encrypted_vault,

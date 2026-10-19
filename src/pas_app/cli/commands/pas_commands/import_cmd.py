@@ -4,9 +4,10 @@ import typer
 from pydantic import ValidationError
 
 from pas_app.adapters.promts import clear_console, choose_user
-from pas_app.schemas.passwords import EncryptedUserVault, Passwords
+from pas_app.schemas.passwords import Passwords
 from pas_app.core.settings import IMPORT_DIR
 from pas_app.dependencies import get_password_tool
+from pas_app.schemas.vaults import EncryptedUserVault
 from pas_app.services.password import attempt_decrypt_vault
 from pas_app.dependencies import get_logger
 from pas_app.services.file_utils import get_vault_username_folders

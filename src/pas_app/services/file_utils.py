@@ -13,7 +13,7 @@ from pas_app.core.crypto import (
     create_random_salt
 )
 from pas_app.config import UserConfig
-from pas_app.schemas.passwords import Passwords, UserVault, EncryptedUserVault
+from pas_app.schemas.passwords import Passwords
 from pas_app.core.settings import (
     VAULTS,
     LAST_MATCHES
@@ -25,6 +25,7 @@ from pas_app.adapters.promts import (
     select_vault_name,
     select_master_password
 )
+from pas_app.schemas.vaults import EncryptedUserVault, UserVault
 
 
 logger = get_logger()
@@ -72,6 +73,7 @@ def load_data(username: str, vault_name: str) -> UserVault:
         raise typer.Exit(code=1)
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
+        name=vault_name,
         salt=encrypted.salt,
         user_passwords=decoded_passwords.passwords,
         encrypted_dek=encrypted.encrypted_dek
@@ -90,6 +92,7 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
         Passwords(passwords=vault_data.user_passwords), key
     )
     encrypted_vault = EncryptedUserVault(
+        name=vault_data.name,
         salt=vault_data.salt,
         encrypted_passwords=encrypted_passwords,
         encrypted_dek=vault_data.encrypted_dek
@@ -108,6 +111,7 @@ def create_vault(username: str, vault_name: str, master_password: str) -> None:
     kek = derive_key(master_password=master_password, salt_b64=salt)
     encrypted_dek_str = create_dek(kek=kek)
     data = EncryptedUserVault(
+        name=vault_name,
         salt=salt,
         encrypted_dek=encrypted_dek_str,
         encrypted_passwords=''

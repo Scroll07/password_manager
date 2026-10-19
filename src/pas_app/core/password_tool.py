@@ -5,11 +5,12 @@ from pathlib import Path
 from typing import Callable, TypeVar, ParamSpec, cast
 
 
+from pas_app.schemas.vaults import UserVault
 from pas_app.services.file_utils import (
     load_data,
     save_data,
 )
-from pas_app.schemas.passwords import Password, UserVault, Passwords
+from pas_app.schemas.passwords import Password, Passwords
 from pas_app.dependencies import (
     get_keyring_tool,
     get_config,

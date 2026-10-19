@@ -1,6 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel, computed_field
 
+from pas_app.schemas.passwords import Password
+
 
 class CreateVaultData(BaseModel):
     vault_name: str
@@ -17,4 +19,18 @@ class VaultData(BaseModel):
     @property
     def created_at_formatted(self) -> str:
         return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
-       
+
+
+class UserVault(BaseModel):
+    name: str
+    salt: str
+    encrypted_dek: str
+    user_passwords: list[Password]
+
+
+
+class EncryptedUserVault(BaseModel):
+    name: str
+    salt: str
+    encrypted_dek: str
+    encrypted_passwords: str
