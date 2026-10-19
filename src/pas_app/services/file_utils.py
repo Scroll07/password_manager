@@ -1,10 +1,10 @@
-import base64
 import json
-import os
 from pathlib import Path
 import typer
 from cryptography.fernet import InvalidToken
+from pydantic import ValidationError
 
+from pas_app.core.logger import get_logger
 from pas_app.core.crypto import (
     decrypt_vault_passwords, 
     encrypt_vault_passwords,
@@ -25,6 +25,9 @@ from pas_app.adapters.promts import (
     select_vault_name,
     select_master_password
 )
+
+
+logger = get_logger()
 
 
 def create_vault_path(username: str, vault_name: str) -> Path:
@@ -118,33 +121,69 @@ def create_vault(username: str, vault_name: str, master_password: str) -> None:
     
     
 
-def get_user_vault_files(username: str) -> list[Path]:
-    dir = VAULTS / username
-    vaults = [v for v in dir.glob("*.json")]
-    return vaults
 
+def get_user_vault_files(username: str) -> list[Path]:
+    user_dir = VAULTS / username
+
+    if not user_dir.is_dir():
+        logger.warning(f"Vault directory does not exist for user: {username}")
+        return []
+
+    vaults = [v for v in user_dir.glob("*.json") if v.is_file()]
+    result = []
+
+    for v in vaults:
+        try:
+            with open(v, "r", encoding="utf-8") as f:
+                data = f.read()
+            encrypted = EncryptedUserVault.model_validate_json(data)
+        except (OSError, ValidationError) as e:
+            logger.error(f"Failed to read or parse vault file '{v}': {e}")
+            continue
+
+        if username == encrypted.username:
+            result.append(v)
+        else:
+            msg = f"Unknown Vault: {v.name}. Vault is located in {v} but has username={encrypted.username}"
+            logger.warning(msg)
+            typer.echo(msg)
+
+    logger.info(f"Found {len(result)} vault files for user '{username}'")
+    return result
 
 
 def get_vault_usernames_with_vault() -> list[str]:
-    user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]
+    user_folders = [f for f in VAULTS.glob("*") if f.is_dir()]
     if not user_folders:
+        logger.warning(f"No vault folders found in {VAULTS}")
         raise EchoException("No vaults file to get username")
-    usernames = []
-    for folder in user_folders:
-        folder_name = folder.name
-        for v in folder.glob('*.json'):
-            if not v.is_file():
-                continue # добавить логирование
-            with open(v, "r", encoding='utf-8') as f:
-                data = f.read()
-            encrypted = EncryptedUserVault.model_validate_json(data)
-            if folder_name == encrypted.username and folder_name not in user_folders:
-                usernames.append(encrypted.username)
-            # else:
-                # добавить логирование
-    
-    return list(set(usernames))
 
+    usernames = set()
+
+    for folder in user_folders:
+        for v in folder.glob("*.json"):
+            if not v.is_file():
+                logger.warning(f"Skipping non-file object: {v}")
+                continue
+
+            try:
+                with open(v, "r", encoding="utf-8") as f:
+                    data = f.read()
+                encrypted = EncryptedUserVault.model_validate_json(data)
+            except (OSError, ValidationError) as e:
+                logger.error(f"Failed to read or parse vault file '{v}': {e}")
+                continue
+
+            if folder.name == encrypted.username:
+                usernames.add(encrypted.username)
+            else:
+                msg = f"Unknown Vault: {v}. Vault is located in {folder} but has username={encrypted.username}"
+                logger.warning(msg)
+                typer.echo(msg)
+
+    result = list(usernames)
+    logger.info(f"Total unique users with valid vaults found: {len(result)}")
+    return result
 
 def get_vault_username_folders() -> list[str]:
     user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]
