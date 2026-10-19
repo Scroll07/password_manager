@@ -72,7 +72,6 @@ def load_data(username: str, vault_name: str) -> UserVault:
         raise typer.Exit(code=1)
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
-        username=encrypted.username,
         salt=encrypted.salt,
         user_passwords=decoded_passwords.passwords,
         encrypted_dek=encrypted.encrypted_dek
@@ -85,13 +84,12 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
 
     vault_file = create_vault_path(username=username, vault_name=vault_name)
     if not vault_file.exists():
-        raise EchoException(f"File {vault_data.username}.json does not exist")
+        raise EchoException(f"File does not exist")
     key = get_key()
     encrypted_passwords = encrypt_vault_passwords(
         Passwords(passwords=vault_data.user_passwords), key
     )
     encrypted_vault = EncryptedUserVault(
-        username=vault_data.username,
         salt=vault_data.salt,
         encrypted_passwords=encrypted_passwords,
         encrypted_dek=vault_data.encrypted_dek
@@ -100,7 +98,6 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
         f.write(encrypted_vault.model_dump_json())
 
 def create_vault(username: str, vault_name: str, master_password: str) -> None:
-    # vault_name = select_vault_name()
     new_vault_path = create_vault_path(username=username, vault_name=vault_name)
     vaults = get_user_vault_files(username=username)
     if new_vault_path in vaults:
@@ -111,7 +108,6 @@ def create_vault(username: str, vault_name: str, master_password: str) -> None:
     kek = derive_key(master_password=master_password, salt_b64=salt)
     encrypted_dek_str = create_dek(kek=kek)
     data = EncryptedUserVault(
-        username=username,
         salt=salt,
         encrypted_dek=encrypted_dek_str,
         encrypted_passwords=''
@@ -124,33 +120,9 @@ def create_vault(username: str, vault_name: str, master_password: str) -> None:
 
 def get_user_vault_files(username: str) -> list[Path]:
     user_dir = VAULTS / username
-
     if not user_dir.is_dir():
-        logger.warning(f"Vault directory does not exist for user: {username}")
         return []
-
-    vaults = [v for v in user_dir.glob("*.json") if v.is_file()]
-    result = []
-
-    for v in vaults:
-        try:
-            with open(v, "r", encoding="utf-8") as f:
-                data = f.read()
-            encrypted = EncryptedUserVault.model_validate_json(data)
-        except (OSError, ValidationError) as e:
-            logger.error(f"Failed to read or parse vault file '{v}': {e}")
-            continue
-
-        if username == encrypted.username:
-            result.append(v)
-        else:
-            msg = f"Unknown Vault: {v.name}. Vault is located in {v} but has username={encrypted.username}"
-            logger.warning(msg)
-            typer.echo(msg)
-
-    logger.info(f"Found {len(result)} vault files for user '{username}'")
-    return result
-
+    return [v for v in user_dir.glob("*.json") if v.is_file()]
 
 def get_vault_usernames_with_vault() -> list[str]:
     user_folders = [f for f in VAULTS.glob("*") if f.is_dir()]
@@ -158,32 +130,12 @@ def get_vault_usernames_with_vault() -> list[str]:
         logger.warning(f"No vault folders found in {VAULTS}")
         raise EchoException("No vaults file to get username")
 
-    usernames = set()
-
-    for folder in user_folders:
-        for v in folder.glob("*.json"):
-            if not v.is_file():
-                logger.warning(f"Skipping non-file object: {v}")
-                continue
-
-            try:
-                with open(v, "r", encoding="utf-8") as f:
-                    data = f.read()
-                encrypted = EncryptedUserVault.model_validate_json(data)
-            except (OSError, ValidationError) as e:
-                logger.error(f"Failed to read or parse vault file '{v}': {e}")
-                continue
-
-            if folder.name == encrypted.username:
-                usernames.add(encrypted.username)
-            else:
-                msg = f"Unknown Vault: {v}. Vault is located in {folder} but has username={encrypted.username}"
-                logger.warning(msg)
-                typer.echo(msg)
-
-    result = list(usernames)
-    logger.info(f"Total unique users with valid vaults found: {len(result)}")
-    return result
+    # Пользователь считается валидным, если в его папке лежит хотя бы один .json
+    usernames = [
+        f.name for f in user_folders 
+        if any(v.is_file() for v in f.glob("*.json"))
+    ]
+    return usernames
 
 def get_vault_username_folders() -> list[str]:
     user_folders = [f for f in VAULTS.glob('*') if f.is_dir()]

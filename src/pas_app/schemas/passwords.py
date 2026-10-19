@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class UserVault(BaseModel):
-    username: str
+    # username: str
     salt: str
     encrypted_dek: str
     user_passwords: list["Password"]
@@ -12,7 +12,7 @@ class UserVault(BaseModel):
 
 
 class EncryptedUserVault(BaseModel):
-    username: str
+    # username: str
     salt: str
     encrypted_dek: str
     encrypted_passwords: str

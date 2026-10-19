@@ -135,13 +135,13 @@ def choose_current_vault(vault_names: list[str], current_vault: str) -> str:
             
         return vault_names[int(choice)-1]
 
-def choose_delete_user(usernames: list[str]) -> str:
+def choose_user(usernames: list[str], msg: str) -> str:
     while True:
         clear_console()
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choice = typer.prompt("\nChoose username to delete").strip()
+        choice = typer.prompt(f"\n{msg}").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -158,7 +158,7 @@ def choose_delete_user(usernames: list[str]) -> str:
 
 def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> list[Password]:
     if not passwords:
-        typer.echo("Записей нет")
+        typer.echo("No Entries were found")
         raise typer.Exit(code=1)
     rows = []
     if not check:

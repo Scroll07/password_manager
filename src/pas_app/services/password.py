@@ -60,8 +60,8 @@ def check_session() -> None:
         raise FileNotFoundError(f'{vault_file} does not exist')
         
     encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
-    if keyring_data.current_user != encrypted_vault_data.username:
-        raise ValueError()
+    
+    # TRY EXCEPT
     
     keyring.save(data=keyring_data)        
         

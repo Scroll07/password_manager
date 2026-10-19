@@ -1,7 +1,7 @@
 import typer
 import shutil
 
-from pas_app.adapters.promts import choose_delete_user
+from pas_app.adapters.promts import choose_user
 from pas_app.core.api import Api
 from pas_app.core.settings import VAULTS
 from pas_app.schemas.api import MessageResponse, UserDataResponse
@@ -10,7 +10,7 @@ from pas_app.dependencies import get_keyring_tool
 
 def delete_user_offline():
     usernames = get_vault_username_folders()
-    selected = choose_delete_user(usernames=usernames)
+    selected = choose_user(usernames=usernames, msg="Choose username to delete")
     user_dir = VAULTS / selected
     shutil.rmtree(user_dir)
     
