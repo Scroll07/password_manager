@@ -19,16 +19,23 @@ from pas_app.cli.commands.vault_commands.create_cmd import create_vault_offline,
 from pas_app.cli.commands.vault_commands.select_vault_cmd import select_current_vault
 from pas_app.cli.commands.vault_commands.vault_multi import vaults_acions
 from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
+from pas_app.cli.commands.vault_commands.push_cmd import push_vault
+from pas_app.cli.commands.vault_commands.pull_cmd import pull_vault
+
 
 
 # Проверка Bearer token + refresh token
 vaults = check_token_dec(vaults_acions)
+push_vault = check_token_dec(push_vault)
+pull_vault = check_token_dec(pull_vault)
+
 
 # Проверка на Current User is not None
 change_master = check_current_values_dec(change_master)
 create_vault_offline = check_current_values_dec(create_vault_offline)
 create_vault_online = check_current_values_dec(create_vault_online)
-
+push_vault = check_current_values_dec(push_vault)
+pull_vault = check_current_values_dec(pull_vault)
 
 
 
@@ -91,9 +98,57 @@ def vaults_actions_cmd():
         pas vault actions
     """
     asyncio.run(vaults_acions())
-        
+
+def push_vault_cmd(
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force push local changes to the server, overwriting higher or equal remote versions.",
+    ),
+):
+    """
+    Push local encrypted vault changes to the remote server.
+
+    If the remote server contains a newer version, the push operation
+    will fail by default to prevent data loss. Use --force to override.
+    """
+    asyncio.run(push_vault(force=force))
+
+
+def pull_vault_cmd(
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force pull from the server even if local version is newer.",
+    ),
+    new: bool = typer.Option(
+        True,
+        "--new/--overwrite",
+        "-n/-o",
+        help="Save downloaded vault to a new versioned file (default). Use --overwrite (-o) to replace the existing local file.",
+    ),
+):
+    """
+    Pull and download the latest encrypted vault from the server.
+
+    By default, the vault is safely pulled into a new separate versioned
+    file (e.g., <name>_v<version>.json) to prevent accidental loss of local data.
+    Use --overwrite (-o) if you explicitly want to update the existing local file.
+    """
+    asyncio.run(
+        pull_vault(
+            force=force,
+            create_new_file=new,
+        )
+    )
+    
+
 
 vault_app.command('create')(create_vault_cmd)
 vault_app.command('set')(select_current_vault_cmd)
 vault_app.command('actions')(vaults_actions_cmd)
 vault_app.command('change-master')(change_master_cmd)
+vault_app.command('push')(push_vault_cmd)
+vault_app.command('pull')(pull_vault_cmd)
