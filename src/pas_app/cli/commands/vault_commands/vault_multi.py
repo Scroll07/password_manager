@@ -141,8 +141,9 @@ async def vaults_acions():
             if isinstance(response.content, MessageResponse):
                 typer.echo(response.content.detail)
                 raise typer.Exit(code=1)
-            typer.echo("Wrong content from api")
-            raise typer.Exit(code=1)
+            else:
+                typer.echo("Wrong content from api")
+                raise typer.Exit(code=1)
         
         vaults = response.content.vaults
         if not vaults:
