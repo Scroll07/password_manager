@@ -135,6 +135,27 @@ def choose_current_vault(vault_names: list[str], current_vault: str) -> str:
             
         return vault_names[int(choice)-1]
 
+
+def choose_vault(vaults: list[Path], msg: str) -> Path:
+    while True:
+        clear_console()
+        typer.echo("Vault files:\n")
+        for i, vault in enumerate(vaults, start=1):
+            typer.echo(f'[{i}] - {vault.name}')
+        choice = typer.prompt(f"\n{msg}").strip()
+
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(vaults):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return vaults[int(choice)-1]
+
 def choose_user(usernames: list[str], msg: str) -> str:
     while True:
         clear_console()

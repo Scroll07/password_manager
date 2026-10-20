@@ -4,6 +4,7 @@ from typing import Callable
 from httpx import AsyncClient
 from functools import wraps
 import re
+from pydantic import ValidationError
 import typer
 
 from pas_app.dependencies import (
@@ -12,8 +13,12 @@ from pas_app.dependencies import (
     get_logger,
 )
 from pas_app.schemas.api import (
+    PullRequestData,
+    PullResponse,
+    PushResponse,
     UnlockVaultResponse,
     UserDataResponse,
+    VaultPushDataRequest,
     VaultsDataResponse,
     VaultDataResponse
 )
@@ -303,6 +308,38 @@ class Api:
         else:
             content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
+     
+    async def push_vault(self, payload: VaultPushDataRequest) -> ApiResponse:
+        url = f'/vaults/push'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers,
+                json=payload.model_dump()
+            )
+        data = response.json()
+        try:
+            content = PushResponse.model_validate(data)
+        except ValidationError:
+            content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+    
+    async def pull_vault(self, payload: PullRequestData) -> ApiResponse:
+        url = f'/vaults/pull'
+        async with AsyncClient(base_url=self.base_url) as client:
+            response = await client.post(
+                url=url,
+                headers=self.headers,
+                json=payload.model_dump()
+            )
+        data = response.json()
+        try:
+            content = PullResponse.model_validate(data)
+        except ValidationError:
+            content = MessageResponse.model_validate(data)
+        return ApiResponse(status_code=response.status_code, content=content)
+        
+    
         
     
     async def check_token(self) -> ApiResponse | None:
@@ -318,4 +355,4 @@ class Api:
                 )
             return response
         return None
-     
+         

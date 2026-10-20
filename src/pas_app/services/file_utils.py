@@ -73,10 +73,12 @@ def load_data(username: str, vault_name: str) -> UserVault:
         raise typer.Exit(code=1)
     decoded_passwords = decrypt_vault_passwords(encrypted.encrypted_passwords, key)
     vault_data = UserVault(
+        id=encrypted.id,
         name=vault_name,
         salt=encrypted.salt,
         user_passwords=decoded_passwords.passwords,
-        encrypted_dek=encrypted.encrypted_dek
+        encrypted_dek=encrypted.encrypted_dek,
+        version=encrypted.version
     )
     return vault_data
 
@@ -92,10 +94,12 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
         Passwords(passwords=vault_data.user_passwords), key
     )
     encrypted_vault = EncryptedUserVault(
+        id=vault_data.id,
         name=vault_data.name,
         salt=vault_data.salt,
         encrypted_passwords=encrypted_passwords,
-        encrypted_dek=vault_data.encrypted_dek
+        encrypted_dek=vault_data.encrypted_dek,
+        version=vault_data.version
     )
     with open(vault_file, "w") as f:
         f.write(encrypted_vault.model_dump_json())
@@ -111,10 +115,12 @@ def create_vault(username: str, vault_name: str, master_password: str) -> None:
     kek = derive_key(master_password=master_password, salt_b64=salt)
     encrypted_dek_str = create_dek(kek=kek)
     data = EncryptedUserVault(
+        id=None,
         name=vault_name,
         salt=salt,
         encrypted_dek=encrypted_dek_str,
-        encrypted_passwords=''
+        encrypted_passwords='',
+        version=1
     )
     with open(new_vault_path, 'w', encoding='utf-8') as f:
         json.dump(data.model_dump(), f, indent=4)

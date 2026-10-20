@@ -22,6 +22,21 @@ class Login_RegisterRequest(BaseModel):
 class DownloadRequest(BaseModel):
     backup_id: int
 
+class PullRequestData(BaseModel):
+    vault_id: int
+    version: int
+
+class VaultPushDataRequest(BaseModel):
+    id: int | None
+    name: str
+    salt: str
+    entries: int
+    encrypted_dek: str
+    encrypted_passwords: str
+    version: int
+    force: bool
+
+
 #====================================
 class BackupStats(BaseModel):
     backups_count: int
@@ -57,6 +72,19 @@ class TypeResponses(StrEnum):
     DOWNLOAD = "download"
     REFRESH = "refresh"
     STATS = "stats"
+
+class PushStatuses(StrEnum):
+    PUSHED = 'pushed'
+    UP_TO_DATE = 'up_to_date'
+    OUTDATED = 'outdated'
+    OVERWRITTEN = 'overwritten'
+    NOT_FOUND = 'not_found'
+    
+class PullStatuses(StrEnum):
+    PULLED = 'pulled'
+    UP_TO_DATE = 'up_to_date'
+    LOCAL_AHEAD = 'local_ahead'
+    NOT_FOUND = 'not_found'
 
 
 # ===================================
@@ -106,6 +134,13 @@ class UserDataResponse(BaseModel):
     ok: bool
     data: UserData
 
+class PushResponse(MessageResponse):
+    status: PushStatuses
+
+class PullResponse(MessageResponse):
+    vault_data: EncryptedUserVault | None = None
+    status: PullStatuses
+
 
 class ApiResponse(BaseModel):
     status_code: int
@@ -118,7 +153,9 @@ class ApiResponse(BaseModel):
         VaultDataResponse,
         VaultsDataResponse,
         UnlockVaultResponse,
-        UserDataResponse
+        UserDataResponse,
+        PushResponse,
+        PullResponse
     ]
     
 
