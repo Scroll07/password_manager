@@ -1,12 +1,10 @@
 from datetime import datetime
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator
 
 from pas_app.schemas.passwords import Password
 
 
-class CreateVaultData(BaseModel):
-    vault_name: str
-    vault_master_password: str
+
     
 class VaultData(BaseModel):
     id: int

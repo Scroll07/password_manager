@@ -13,6 +13,8 @@ from pas_app.dependencies import (
     get_logger,
 )
 from pas_app.schemas.api import (
+    CreateVaultDataRequest,
+    CreateVaultResponse,
     PullRequestData,
     PullResponse,
     PushResponse,
@@ -26,7 +28,7 @@ from pas_app.schemas.api import DownloadRequest, Login_RegisterRequest, RefreshR
 from pas_app.schemas.api import LoginResponse, MessageResponse, ApiResponse, BackupsResponse, DownloadResponse
 from pas_app.schemas.passwords import ChangePasswordSchema
 from pas_app.core.crypto import decode_token
-from pas_app.schemas.vaults import CreateVaultData, EncryptedUserVault
+from pas_app.schemas.vaults import EncryptedUserVault
 
 
 class Api:
@@ -176,17 +178,20 @@ class Api:
         
     async def create_vault(
         self,
-        vault_data: CreateVaultData
+        payload: CreateVaultDataRequest
     ) -> ApiResponse:
         url = f'/vaults/create'
         async with AsyncClient(base_url=self.base_url) as client:
             response = await client.post(
                 url=url,
                 headers=self.headers,
-                json=vault_data.model_dump()
+                json=payload.model_dump()
             )
         data = response.json()
-        content = MessageResponse.model_validate(data)
+        if response.status_code == 201:
+            content = CreateVaultResponse.model_validate(data)
+        else:
+            content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
     
     async def get_vaults(self) -> ApiResponse:

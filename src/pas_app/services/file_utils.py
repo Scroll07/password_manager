@@ -106,11 +106,9 @@ def save_data(username: str, vault_name: str, vault_data: UserVault) -> None:
 
 def create_vault(username: str, vault_name: str, master_password: str) -> None:
     new_vault_path = create_vault_path(username=username, vault_name=vault_name)
-    vaults = get_user_vault_files(username=username)
-    if new_vault_path in vaults:
+    if new_vault_path.exists():
         raise FileExistsError('Vault with such name already exists')
     
-    master_password = select_master_password()
     salt = create_random_salt()
     kek = derive_key(master_password=master_password, salt_b64=salt)
     encrypted_dek_str = create_dek(kek=kek)

@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator
 from typing import Union
 
 from pas_app.schemas.jwt import EncodedToken
@@ -37,6 +37,17 @@ class VaultPushDataRequest(BaseModel):
     version: int
     force: bool
 
+class CreateVaultDataRequest(BaseModel):
+    name: str
+    salt: str
+    encrypted_dek: str
+    
+    @field_validator('name')
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not (1 < len(value) < 32):
+            raise ValueError("Wrong length of vault name")
+        return value
 
 #====================================
 class BackupStats(BaseModel):
@@ -95,6 +106,9 @@ class MessageResponse(BaseModel):
     # ok: bool
     detail: str
     type: TypeResponses = TypeResponses.MESSAGE
+
+class CreateVaultResponse(MessageResponse):
+    vault_id: int
 
 class LoginResponse(MessageResponse):
     bearer_token: EncodedToken
