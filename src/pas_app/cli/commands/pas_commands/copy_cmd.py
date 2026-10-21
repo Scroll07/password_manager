@@ -43,7 +43,7 @@ def copy(
                 continue
                 
             choosed_password = passwords[int(choice)-1]
-
+            pyperclip.copy(choosed_password.password)
+            typer.echo(f"Password for {choosed_password.service} successfully copied to clipboard.")
+            raise typer.Exit(code=0)
     
-    pyperclip.copy(choosed_password.password)
-    typer.echo(f"Password for {choosed_password.service} successfully copied to clipboard.")
