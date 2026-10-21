@@ -15,6 +15,7 @@ from pas_app.dependencies import (
 from pas_app.schemas.api import (
     CreateVaultDataRequest,
     CreateVaultResponse,
+    DeleteVaultResponse,
     PullRequestData,
     PullResponse,
     PushResponse,
@@ -231,7 +232,10 @@ class Api:
                 headers=self.headers
             )
         data = response.json()
-        content = MessageResponse.model_validate(data)
+        if response.status_code == 200:
+            content = DeleteVaultResponse.model_validate(data)
+        else:
+            content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
     
     async def rename_vault(

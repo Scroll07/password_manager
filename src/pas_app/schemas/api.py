@@ -156,6 +156,9 @@ class PullResponse(MessageResponse):
     vault_data: EncryptedUserVault | None = None
     status: PullStatuses
 
+class DeleteVaultResponse(MessageResponse):
+    vault_id: int
+    vault_name: str
 
 class ApiResponse(BaseModel):
     status_code: int
@@ -170,7 +173,8 @@ class ApiResponse(BaseModel):
         UnlockVaultResponse,
         UserDataResponse,
         PushResponse,
-        PullResponse
+        PullResponse,
+        DeleteVaultResponse
     ]
     
 

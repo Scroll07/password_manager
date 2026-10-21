@@ -17,7 +17,7 @@ vault_app = typer.Typer(
 # Imports
 from pas_app.cli.commands.vault_commands.create_cmd import create_vault_offline, create_vault_online
 from pas_app.cli.commands.vault_commands.select_vault_cmd import select_current_vault
-from pas_app.cli.commands.vault_commands.vault_multi import vaults_acions
+from pas_app.cli.commands.vault_commands.vault_multi import vaults_actions
 from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
 from pas_app.cli.commands.vault_commands.push_cmd import push_vault
 from pas_app.cli.commands.vault_commands.pull_cmd import pull_vault
@@ -25,7 +25,7 @@ from pas_app.cli.commands.vault_commands.pull_cmd import pull_vault
 
 
 # Проверка Bearer token + refresh token
-vaults = check_token_dec(vaults_acions)
+vaults_actions = check_token_dec(vaults_actions)
 push_vault = check_token_dec(push_vault)
 pull_vault = check_token_dec(pull_vault)
 
@@ -97,7 +97,7 @@ def vaults_actions_cmd():
     Examples:
         pas vault actions
     """
-    asyncio.run(vaults_acions())
+    asyncio.run(vaults_actions())
 
 def push_vault_cmd(
     force: bool = typer.Option(
