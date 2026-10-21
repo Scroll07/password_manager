@@ -65,8 +65,6 @@ def check_current_values_dec(func: Callable) -> Callable:
         keyring_data = keyring.load()
         if keyring_data.current_user == '':
             set_current_user()
-            typer.echo("Current user does not selected")
-            return
         # if keyring_data.current_vault == '':
         #     # add here "set current vault" func
         #     typer.echo("Current vault doesnot selected")

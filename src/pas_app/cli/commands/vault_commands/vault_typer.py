@@ -36,7 +36,7 @@ create_vault_offline = check_current_values_dec(create_vault_offline)
 create_vault_online = check_current_values_dec(create_vault_online)
 push_vault = check_current_values_dec(push_vault)
 pull_vault = check_current_values_dec(pull_vault)
-
+select_current_vault = check_current_values_dec(select_current_vault)
 
 
 def create_vault_cmd(

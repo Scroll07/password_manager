@@ -142,7 +142,7 @@ class VaultDataResponse(BaseModel):
     
 class UnlockVaultResponse(BaseModel):
     ok: bool
-    vault_token: EncodedToken
+    vault_token: str
     detail: str
 
 class UserDataResponse(BaseModel):

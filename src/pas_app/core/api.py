@@ -313,7 +313,7 @@ class Api:
         data = response.json()
         if response.status_code == 200:
             content = UnlockVaultResponse.model_validate(data)
-            self.update_headers(vault_token=content.vault_token.token)
+            self.update_headers(vault_token=content.vault_token)
         else:
             content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
