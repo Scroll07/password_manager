@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import time
 import typer
 from cryptography.fernet import InvalidToken
 from pydantic import ValidationError
@@ -25,7 +26,7 @@ from pas_app.adapters.promts import (
     select_vault_name,
     select_master_password
 )
-from pas_app.schemas.vaults import EncryptedUserVault, UserVault
+from pas_app.schemas.vaults import EncryptedUserVault, UserVault, VaultPrintData
 
 
 logger = get_logger()
@@ -154,3 +155,22 @@ def get_vault_username_folders() -> list[str]:
         folder_name = folder.name
         usernames.append(folder_name)
     return usernames
+
+def get_VaultPringData(vaults: list[Path]) -> list[VaultPrintData]:
+    result = []
+    for v in vaults:
+        try:
+            with open(v, 'r', encoding='utf-8') as f:
+                encrypted = EncryptedUserVault.model_validate_json(f.read())
+        except ValidationError as e:
+            logger.error(f"Validation error of file {v}\n{e}")
+            typer.echo(f"Validation error of file {v}\nSkipping...\n")
+            time.sleep(0.5)
+            continue
+        result.append(
+            VaultPrintData(
+                filename=v.name,
+                vault_name=encrypted.name
+            )
+        )
+    return result

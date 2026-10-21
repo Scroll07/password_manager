@@ -20,6 +20,7 @@ from pas_app.core.crypto import (
 from pas_app.schemas.passwords import Password
 from pas_app.services.file_utils import (
     create_vault_path,
+    get_VaultPringData,
     load_encrypted_vault,
     get_vault_usernames_with_vault,
     get_user_vault_files,
@@ -51,8 +52,8 @@ def check_session() -> None:
         vaults = get_user_vault_files(username=keyring_data.current_user)
         if not vaults:
             raise EchoException(f"There are no vaults on this device for {keyring_data.current_user}.\nTry to sync accounts or create new.")
-        vault_names = [v.name for v in vaults]
-        selected_vault = choose_current_vault(vault_names=vault_names, current_vault="Not selected")
+        data = get_VaultPringData(vaults=vaults)
+        selected_vault = choose_current_vault(data=data, current_vault="Not selected")
         keyring_data.current_vault = selected_vault
     
     vault_file = create_vault_path(username=keyring_data.current_user, vault_name=keyring_data.current_vault)

@@ -9,7 +9,7 @@ from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
 from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput, Password
-from pas_app.schemas.vaults import VaultData
+from pas_app.schemas.vaults import VaultData, VaultPrintData
 
 # DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -114,26 +114,26 @@ def choose_current_user(usernames: list[str], current_username: str) -> str:
             
         return usernames[int(choice)-1]
     
-def choose_current_vault(vault_names: list[str], current_vault: str) -> str:
+def choose_current_vault(data: list[VaultPrintData], current_vault: str) -> str:
     while True:
         clear_console()
         typer.echo(f"Current Vault: {current_vault if current_vault else "Not selected"}")
         typer.echo("Vaults:\n")
-        for i, vault_name in enumerate(vault_names, start=1):
-            typer.echo(f'[{i}] - {vault_name}')
-        choice = typer.prompt("\nChoose username to set as default").strip()
+        for i, obj in enumerate(data, start=1):
+            typer.echo(f'[{i}] - {obj.filename} ({obj.vault_name})')
+        choice = typer.prompt("\nChoose vault to set as default").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
             time.sleep(2)
             continue
         
-        if not 1 <= int(choice) <= len(vault_names):
+        if not 1 <= int(choice) <= len(data):
             typer.echo("Wrong number input")
             time.sleep(2)
             continue
             
-        return vault_names[int(choice)-1]
+        return data[int(choice)-1].filename
 
 
 def choose_vault(vaults: list[Path], msg: str) -> Path:

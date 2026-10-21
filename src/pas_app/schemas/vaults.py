@@ -39,3 +39,6 @@ class EncryptedUserVault(BaseModel):
     encrypted_passwords: str
     version: int
     
+class VaultPrintData(BaseModel):
+    filename: str
+    vault_name: str

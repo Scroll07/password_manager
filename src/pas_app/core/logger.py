@@ -28,7 +28,7 @@ class Logger:
         formatter = logging.Formatter(fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
         
         handler.setFormatter(formatter)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(handler)
 
 
