@@ -43,15 +43,6 @@ def create_vault_path(username: str, vault_name: str) -> Path:
     dir.mkdir(exist_ok=True, parents=True)
     return dir / f'{vault_name}.json'
 
-def dump_last_matches(
-    matches: list[str],
-):  # NEED TO REBUILD THIS FUNCTION TO NEW VERSION OF WORKING WITH DATA
-    try:
-        with open(LAST_MATCHES, "w", encoding="utf-8") as f:
-            json.dump(matches, f, indent=2, ensure_ascii=False)
-    except OSError:
-        typer.echo("OSError")
-
 
 def load_encrypted_vault(username: str, vault_name: str) -> EncryptedUserVault:
     vault_file = create_vault_path(username=username, vault_name=vault_name)
