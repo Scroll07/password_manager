@@ -44,6 +44,7 @@ class Api:
         self.update_headers(
             bearer_token=self.keyring_data.bearer_token, 
             refresh_token=self.keyring_data.refresh_token, 
+            vault_token=self.keyring_data.vault_token,
             save_to_config=False
         )
 
@@ -83,7 +84,7 @@ class Api:
         if vault_token:
             self.headers["Vault"] = vault_token
             
-        self._save_token_to_keyring(bearer_token=bearer_token, refresh_token=refresh_token, save_to_config=save_to_config)
+        self._save_token_to_keyring(bearer_token=bearer_token, refresh_token=refresh_token, vault_token=vault_token, save_to_config=save_to_config)
 
     async def register(self, user_data: Login_RegisterRequest) -> ApiResponse:
         url = "/register"
