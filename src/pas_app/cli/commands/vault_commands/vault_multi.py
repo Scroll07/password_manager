@@ -1,11 +1,12 @@
 import asyncio
+from pathlib import Path
 
 from pydantic import ValidationError
 import typer
 
 from pas_app.core.api import Api
 from pas_app.core.settings import VAULTS
-from pas_app.schemas.api import ApiResponse, DeleteVaultResponse, DownloadResponse, MessageResponse, VaultsDataResponse
+from pas_app.schemas.api import ApiResponse, DeleteVaultResponse, DownloadResponse, MessageResponse, RenameVaultResponse, VaultsDataResponse
 from pas_app.schemas.vaults import EncryptedUserVault, VaultData
 from pas_app.adapters.promts import (
     print_and_choose_vault,
@@ -64,11 +65,14 @@ async def delete(vault: VaultData):
 
     response = await api.delete_vault(vault_id=vault.id)
     if response.status_code != 200:
-        assert isinstance(response.content, MessageResponse)
-        logger.error(f"Server deletion failed for vault {vault.id}: {response.status_code} - {response.content.detail}")
-        typer.echo(
-            f"Get vault failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
-        )
+        if isinstance(response.content, MessageResponse):
+            logger.error(f"Server deletion failed for vault {vault.id}: {response.status_code} - {response.content.detail}")
+            typer.echo(
+                f"Get vault failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
+            )
+        else:
+            typer.echo("Wrong server response type")
+            logger.error(f"Unexpected response type on rename: {type(response.content)}")
         raise typer.Exit(code=1)
     
     if not isinstance(response.content, DeleteVaultResponse):
@@ -99,7 +103,7 @@ async def delete(vault: VaultData):
             typer.echo("\nVault was successfully deleted locally")
             raise typer.Exit(code=0)
         elif encrypted.id == response.content.vault_id:
-            logger.warning(f"Found local vault matching id {encrypted.id} but distinct name: {v}")
+            logger.warning(f"Found local vault matching id {encrypted.id} but has distinct name: {v}")
             typer.echo("\nA vault with the same id of what you deleted on server was found, but with a distinct name")
             if typer.confirm("Delete this vault?"):
                 v.unlink()
@@ -109,7 +113,7 @@ async def delete(vault: VaultData):
 
     else:
         logger.warning(f"Local vault file for vault {vault.id} was not found")
-        typer.echo("Vault was not found locally")
+        typer.echo("Vault was not found locally to delete")
         raise typer.Exit(code=1)    
 
 
@@ -146,20 +150,63 @@ async def rename(vault: VaultData):
     new_name = choose_name_for_vault()
     logger.info(f"Renaming vault {vault.id} to '{new_name}'")
     response = await api.rename_vault(vault_id=vault.id, new_vault_name=new_name)
-    if not isinstance(response.content, MessageResponse):
+    if response.status_code != 200:
+        if isinstance(response.content, MessageResponse):
+            logger.error(f"Server rename failed for vault {vault.id}: {response.status_code} - {response.content.detail}")
+            typer.echo(
+                f"Get vault failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
+            )
+        else:
+            typer.echo("Wrong server response type")
+            logger.error(f"Unexpected response type on rename: {type(response.content)}")
+        raise typer.Exit(code=1)
+    
+    if not isinstance(response.content, RenameVaultResponse):
         logger.error(f"Unexpected response type on rename: {type(response.content)}")
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
-    if response.status_code != 200:
-        logger.error(f"Rename failed for vault {vault.id}: {response.status_code} - {response.content.detail}")
-        typer.echo(
-            f"Rename vault failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
-        )
-        raise typer.Exit(code=1)
     
     logger.info(f"Vault {vault.id} renamed successfully")
     typer.echo(response.content.detail)
+    
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
+    vaults = get_user_vault_files(username=keyring_data.current_user)
+    
+    def _rename_vault(path: Path):
+        with open(v, 'w', encoding='utf-8') as f:
+            f.write(encrypted.model_dump_json(indent=4))
+    
+    for v in vaults:
+        try:
+            with open(v, 'r', encoding='utf-8') as f:
+                encrypted = EncryptedUserVault.model_validate_json(f.read())
+        except ValidationError as e:
+            logger.error(f"Validation error of file {v}\n{e}")
+            typer.echo(f"Validation error of file {v}\nSkipping...\n")
+            await asyncio.sleep(0.5)
+            continue
+        
+                
+        if encrypted.id == response.content.vault_id and encrypted.name == response.content.old_vault_name:
+            _rename_vault(path=v)
+            logger.info(f"Renamed local vault file: {v}")
+            typer.echo("\nVault was successfully renamed locally")
+            raise typer.Exit(code=0)
+        elif encrypted.id == response.content.vault_id:
+            logger.warning(f"Found local vault matching id {encrypted.id} but has distinct name: {v}")
+            typer.echo("\nA vault with the same id of what you renamed on server was found, but with a distinct name")
+            if typer.confirm("Rename this vault?"):
+                _rename_vault(path=v)
+                logger.info(f"Renamed renamed local vault file: {v}")
+                typer.echo("\nVault was successfully renamed locally")
+                raise typer.Exit(code=0)
+
+    else:
+        logger.warning(f"Local vault file for vault {vault.id} was not found")
+        typer.echo("Vault was not found locally to rename")
+        raise typer.Exit(code=1)   
 
 
 async def change_pin(vault: VaultData):
