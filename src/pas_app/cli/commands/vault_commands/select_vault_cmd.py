@@ -1,11 +1,8 @@
-from pydantic import ValidationError
 import typer
 
 from pas_app.adapters.promts import choose_current_vault
-from pas_app.schemas.vaults import VaultPrintData
 from pas_app.services.file_utils import get_VaultPringData, get_user_vault_files
 from pas_app.dependencies import get_keyring_tool
-from pas_app.schemas.vaults import EncryptedUserVault
 from pas_app.dependencies import get_logger
 # add logging!
 

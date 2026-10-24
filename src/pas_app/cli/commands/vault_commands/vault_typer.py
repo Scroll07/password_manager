@@ -17,6 +17,7 @@ vault_app = typer.Typer(
 # Imports
 from pas_app.cli.commands.vault_commands.create_cmd import create_vault_offline, create_vault_online
 from pas_app.cli.commands.vault_commands.select_vault_cmd import select_current_vault
+from pas_app.cli.commands.vault_commands.vault_list_cmd import vault_list
 from pas_app.cli.commands.vault_commands.vault_multi import vaults_actions
 from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
 from pas_app.cli.commands.vault_commands.push_cmd import push_vault
@@ -37,6 +38,7 @@ create_vault_online = check_current_values_dec(create_vault_online)
 push_vault = check_current_values_dec(push_vault)
 pull_vault = check_current_values_dec(pull_vault)
 select_current_vault = check_current_values_dec(select_current_vault)
+vault_list = check_current_values_dec(vault_list)
 
 
 def create_vault_cmd(
@@ -71,6 +73,15 @@ def select_current_vault_cmd():
         pas vault select
     """
     select_current_vault()
+    
+def vault_list_cmd():
+    """
+    Show a list of vaults for current user
+    
+    Examples:
+        pas vault list
+    """
+    vault_list()
 
 def change_master_cmd():
     """
@@ -147,6 +158,7 @@ def pull_vault_cmd(
 
 
 vault_app.command('create')(create_vault_cmd)
+vault_app.command('list')(vault_list_cmd)
 vault_app.command('set')(select_current_vault_cmd)
 vault_app.command('actions')(vaults_actions_cmd)
 vault_app.command('change-master')(change_master_cmd)
