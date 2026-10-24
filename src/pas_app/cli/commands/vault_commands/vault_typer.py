@@ -1,6 +1,7 @@
 import typer
 import asyncio
 
+from pas_app.core.keyring import get_keyring_tool
 from pas_app.decorators import (
     check_current_values_dec,
     check_token_dec
@@ -81,7 +82,10 @@ def vault_list_cmd():
     Examples:
         pas vault list
     """
-    vault_list()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
+    username = keyring_data.current_user
+    vault_list(username=username)
 
 def change_master_cmd():
     """
