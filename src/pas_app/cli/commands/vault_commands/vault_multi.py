@@ -158,11 +158,11 @@ async def rename(vault: VaultData):
             )
         else:
             typer.echo("Wrong server response type")
-            logger.error(f"Unexpected response type on rename: {type(response.content)}")
+            logger.error(f"Unexpected response type on rename: {response.content}")
         raise typer.Exit(code=1)
     
     if not isinstance(response.content, RenameVaultResponse):
-        logger.error(f"Unexpected response type on rename: {type(response.content)}")
+        logger.error(f"Unexpected response type on rename: {response.content}")
         typer.echo("Wrong content from api")
         raise typer.Exit(code=1)
     
@@ -190,6 +190,7 @@ async def rename(vault: VaultData):
         
                 
         if encrypted.id == response.content.vault_id and encrypted.name == response.content.old_vault_name:
+            encrypted.name = response.content.new_vault_name
             _rename_vault(path=v)
             logger.info(f"Renamed local vault file: {v}")
             typer.echo("\nVault was successfully renamed locally")
@@ -198,14 +199,17 @@ async def rename(vault: VaultData):
             logger.warning(f"Found local vault matching id {encrypted.id} but has distinct name: {v}")
             typer.echo("\nA vault with the same id of what you renamed on server was found, but with a distinct name")
             if typer.confirm("Rename this vault?"):
+                encrypted.name = response.content.new_vault_name
                 _rename_vault(path=v)
                 logger.info(f"Renamed renamed local vault file: {v}")
                 typer.echo("\nVault was successfully renamed locally")
+                await asyncio.sleep(1)
                 raise typer.Exit(code=0)
 
     else:
         logger.warning(f"Local vault file for vault {vault.id} was not found")
         typer.echo("Vault was not found locally to rename")
+        await asyncio.sleep(1)
         raise typer.Exit(code=1)   
 
 

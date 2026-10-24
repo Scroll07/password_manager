@@ -120,7 +120,7 @@ def choose_current_vault(data: list[VaultPrintData], current_vault: str) -> str:
         typer.echo(f"Current Vault: {current_vault if current_vault else "Not selected"}")
         typer.echo("Vaults:\n")
         for i, obj in enumerate(data, start=1):
-            typer.echo(f'[{i}] - {obj.filename} ({obj.vault_name})')
+            typer.echo(f'[{i}] - {obj.vault_name} ({obj.filename})')
         choice = typer.prompt("\nChoose vault to set as default").strip()
 
         if not choice.isdigit():

@@ -19,6 +19,7 @@ from pas_app.schemas.api import (
     PullRequestData,
     PullResponse,
     PushResponse,
+    RenameVaultResponse,
     UnlockVaultResponse,
     UserDataResponse,
     VaultPushDataRequest,
@@ -252,7 +253,10 @@ class Api:
                 json=new_vault_name
             )
         data = response.json()
-        content = MessageResponse.model_validate(data)
+        if response.status_code == 200:
+            content = RenameVaultResponse.model_validate(data)
+        else:
+            content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
 
     async def change_pin_vault(self, vault_id: int) -> ApiResponse:
