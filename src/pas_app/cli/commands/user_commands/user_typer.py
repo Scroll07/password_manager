@@ -13,6 +13,7 @@ user_app = typer.Typer(
 )
 
 # Imports
+from pas_app.cli.commands.user_commands.user_list_cmd import user_list
 from pas_app.cli.commands.user_commands.set_current_user_cmd import set_current_user
 from pas_app.cli.commands.user_commands.change_password import change_user_password
 from pas_app.cli.commands.user_commands.delete_user_cmd import delete_user_offline, delete_user_online
@@ -127,11 +128,45 @@ def deactivate_user_command():
     """
     asyncio.run(deactivate_user_online())
 
+def user_list_command(
+    with_vaults: bool = typer.Option(
+        False,
+        "--with-vaults",
+        "-w",
+        help="Filter to show only users who have at least one created vault.",
+    ),
+    show_vaults: bool = typer.Option(
+        False,
+        "--show-vaults",
+        "-s",
+        help="Display the list of vault files associated with each user.",
+    ),
+):
+    """
+    List local user profiles on this device.
 
+    Scans the local vault storage and displays all registered user folders.
+    Optionally filter users by vault presence or expand the output to display
+    vault details (names and filenames) for each user.
+
+    Examples:
+        pas user list                     # List all local users
+
+        pas user list --with-vaults       # List only users with created vaults
+
+        pas user list --show-vaults       # List all users along with their vaults
+
+        pas user list -w -s               # List only active users and display their vaults
+    """
+    user_list(
+        users_with_created_vaults=with_vaults,
+        show_user_vaults=show_vaults,
+    )
 
 
 user_app.command('register')(register_command)
 user_app.command('login')(login_command)
+user_app.command('list')(user_list_command)
 user_app.command("set")(set_current_user)
 user_app.command("change-password")(change_user_password)
 user_app.command("delete")(delete_user_command)

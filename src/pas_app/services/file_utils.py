@@ -121,7 +121,7 @@ def create_vault(username: str, vault_name: str, master_password: str) -> None:
 def get_user_vault_files(username: str) -> list[Path]:
     user_dir = VAULTS / username
     if not user_dir.is_dir():
-        return []
+        raise ValueError(f"{user_dir} is not a directory")
     return [v for v in user_dir.glob("*.json") if v.is_file()]
 
 def get_vault_usernames_with_vault() -> list[str]:
