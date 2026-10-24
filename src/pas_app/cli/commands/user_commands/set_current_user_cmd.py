@@ -15,6 +15,6 @@ def set_current_user():
     keyring_data.current_user = selected_user
     keyring.save(data=keyring_data)
     
-    typer.echo(f"Current user was succussefully set as {selected_user}")
+    typer.echo(f"Current user was successfully set as {selected_user}")
     
     

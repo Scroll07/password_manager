@@ -163,12 +163,26 @@ def user_list_command(
         show_user_vaults=show_vaults,
     )
 
+def set_current_user_command():
+    """
+    Select and switch the active local user profile.
+
+    Prompts an interactive selector to choose from available local user
+    directories. Updates the current user context stored in the system keyring,
+    which determines the active vault space for subsequent operations.
+
+    Examples:
+        pas user set      # Interactively choose the active user
+    """
+    set_current_user()
+
+
 
 user_app.command('register')(register_command)
 user_app.command('login')(login_command)
 user_app.command('list')(user_list_command)
-user_app.command("set")(set_current_user)
-user_app.command("change-password")(change_user_password)
+user_app.command("set")(set_current_user_command)
+user_app.command("change-password")(change_user_password_command)
 user_app.command("delete")(delete_user_command)
 
 
