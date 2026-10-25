@@ -23,13 +23,14 @@ from pas_app.cli.commands.vault_commands.vault_multi import vaults_actions
 from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
 from pas_app.cli.commands.vault_commands.push_cmd import push_vault
 from pas_app.cli.commands.vault_commands.pull_cmd import pull_vault
-
+from pas_app.cli.commands.vault_commands.vault_sync_cmd import sync_vaults
 
 
 # Проверка Bearer token + refresh token
 vaults_actions = check_token_dec(vaults_actions)
 push_vault = check_token_dec(push_vault)
 pull_vault = check_token_dec(pull_vault)
+sync_vaults = check_token_dec(sync_vaults)
 
 
 # Проверка на Current User is not None
@@ -40,6 +41,7 @@ push_vault = check_current_values_dec(push_vault)
 pull_vault = check_current_values_dec(pull_vault)
 select_current_vault = check_current_values_dec(select_current_vault)
 vault_list = check_current_values_dec(vault_list)
+sync_vaults = check_current_values_dec(sync_vaults)
 
 
 def create_vault_cmd(
@@ -158,7 +160,19 @@ def pull_vault_cmd(
             create_new_file=new,
         )
     )
-    
+
+def sync_vaults_cmd():
+    """
+    Synchronize vaults between local storage and the remote server.
+
+    Performs bidirectional synchronization: downloads newer or missing vaults
+    from the server (pull) and uploads locally created or modified vaults
+    after verifying credentials (push).
+
+    Examples:
+        pas vault sync
+    """
+    asyncio.run(sync_vaults())
 
 
 vault_app.command('create')(create_vault_cmd)
@@ -168,3 +182,4 @@ vault_app.command('actions')(vaults_actions_cmd)
 vault_app.command('change-master')(change_master_cmd)
 vault_app.command('push')(push_vault_cmd)
 vault_app.command('pull')(pull_vault_cmd)
+vault_app.command('sync')(sync_vaults_cmd)
