@@ -22,7 +22,7 @@ from pas_app.schemas.api import (
     RenameVaultResponse,
     UnlockVaultResponse,
     UserDataResponse,
-    VaultPushDataRequest,
+    PushRequestData,
     VaultsDataResponse,
     VaultDataResponse
 )
@@ -323,7 +323,7 @@ class Api:
             content = MessageResponse.model_validate(data)
         return ApiResponse(status_code=response.status_code, content=content)
      
-    async def push_vault(self, payload: VaultPushDataRequest) -> ApiResponse:
+    async def push_vault(self, payload: PushRequestData) -> ApiResponse:
         url = f'/vaults/push'
         async with AsyncClient(base_url=self.base_url) as client:
             response = await client.post(

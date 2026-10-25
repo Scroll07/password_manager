@@ -27,7 +27,7 @@ class PullRequestData(BaseModel):
     version: int | None
     force: bool
 
-class VaultPushDataRequest(BaseModel):
+class PushRequestData(BaseModel):
     id: int | None
     name: str
     salt: str
@@ -42,13 +42,6 @@ class CreateVaultDataRequest(BaseModel):
     salt: str
     encrypted_dek: str
     
-    @field_validator('name')
-    def validate_name(cls, value: str) -> str:
-        value = value.strip()
-        if not (1 < len(value) < 32):
-            raise ValueError("Wrong length of vault name")
-        return value
-
 #====================================
 class BackupStats(BaseModel):
     backups_count: int
@@ -90,6 +83,7 @@ class PushStatuses(StrEnum):
     UP_TO_DATE = 'up_to_date'
     OUTDATED = 'outdated'
     OVERWRITTEN = 'overwritten'
+    CREATED = 'created'
     NOT_FOUND = 'not_found'
     
 class PullStatuses(StrEnum):
@@ -150,6 +144,7 @@ class UserDataResponse(BaseModel):
     data: UserData
 
 class PushResponse(MessageResponse):
+    vault_id: int
     status: PushStatuses
 
 class PullResponse(MessageResponse):

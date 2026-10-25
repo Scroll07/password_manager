@@ -6,14 +6,17 @@ import typer
 from pas_app.adapters.promts import choose_vault
 from pas_app.core.api import Api
 from pas_app.core.crypto import decrypt_vault_passwords
-from pas_app.schemas.api import MessageResponse, PushResponse, PushStatuses, VaultPushDataRequest
+from pas_app.schemas.api import MessageResponse, PushResponse, PushStatuses, PushRequestData
 from pas_app.schemas.vaults import EncryptedUserVault
 from pas_app.services.file_utils import (
     get_user_vault_files,
     load_encrypted_vault
 )
-from pas_app.dependencies import get_keyring_tool
+from pas_app.dependencies import get_keyring_tool, get_logger
 from pas_app.services.password import get_key
+
+logger = get_logger()
+
 
 async def push_vault(
     force: bool
@@ -50,7 +53,7 @@ async def push_vault(
         )
     
     api = Api()
-    request_data = VaultPushDataRequest(
+    request_data = PushRequestData(
         id=encrypted.id,
         name=encrypted.name,
         salt=encrypted.salt,
@@ -82,9 +85,20 @@ async def push_vault(
         typer.echo("Successful push. Server version was overwrotten")
     elif status == PushStatuses.PUSHED:
         typer.echo("Successful push.")    
-    
-    
-    
+    elif status == PushStatuses.CREATED:
+        encrypted.id = response.content.vault_id
+        try:
+            with open(vault_file, "w", encoding='utf-8') as f:
+                f.write(encrypted.model_dump_json(indent=4))
+        except Exception as e:
+            typer.echo(e)
+            logger.error(e)
+            raise typer.Exit(code=1)
+        
+        typer.echo("Successful push with saving vault on the server.")
+    # СОХРАНИТЬ ИЗМЕНЕНИЯ ПОСЛЕ PUSH ЕСЛИ МЫ СОЗДАЛИ VAULT на СЕРВЕРЕ ТО НАДО СОХРАНИТЬ ID
+    # + ДОБАВЬ НОВЫЙ СТАТУС "CREATED" с помощью коорого мы поймем что нужно сохранить id
+    # + перенеси новосозданную логику в vault_sync!!!!!!!!!!!!!!!!!!!!
     
     
     

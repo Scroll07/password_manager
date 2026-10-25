@@ -1,3 +1,4 @@
+import asyncio
 import json
 from pathlib import Path
 import time
@@ -165,3 +166,14 @@ def get_VaultPringData(vaults: list[Path]) -> list[VaultPrintData]:
             )
         )
     return result
+
+async def load_encrypted_vault_by_path(path: Path) -> EncryptedUserVault | None:
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            encrypted = EncryptedUserVault.model_validate_json(f.read())
+            return encrypted
+    except ValidationError as e:
+        logger.error(f"Validation error of file {path}\n{e}")
+        typer.echo(f"Validation error of file {path}\nSkipping...\n")
+        await asyncio.sleep(0.5)
+        return None
