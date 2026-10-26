@@ -55,7 +55,7 @@ async def change_master():
     for attempt in range(1, 4):
         encrypted_vault, current_master_password = await _local_attempt_decrypt_vault(
             path=choosed_vault,
-            text="Enter current master password for choosed vault "
+            text="Enter current master password for choosed vault: "
         )
         if current_master_password is None or encrypted_vault is None:
             clear_console()
@@ -68,8 +68,7 @@ async def change_master():
         raise typer.Exit(code=1)
         
 
-    typer.echo("Enter new master password.")
-    new_master_password = cli_password_promt()
+    new_master_password = cli_password_promt("Enter new master password: ")
     if not new_master_password:
         typer.echo("[ERROR] Password input was canceled. EXIT")
         raise typer.Exit(code=1)

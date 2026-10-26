@@ -100,8 +100,7 @@ def get_key() -> bytes:
 def attempt_decrypt_vault(username: str, vault_name: str, text: str) -> list[Password] | None:
     encrypted_vault = load_encrypted_vault(username=username, vault_name=vault_name)
     clear_console()
-    typer.echo(text)
-    master_password = cli_password_promt()
+    master_password = cli_password_promt(text=text)
     kek = derive_key(master_password=master_password, salt_b64=encrypted_vault.salt)
     dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
     try:

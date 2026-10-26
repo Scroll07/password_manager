@@ -24,9 +24,9 @@ def gui_password_prompt():
     return password
 
 
-def cli_password_promt():
+def cli_password_promt(text: str = "Enter password: "):
     while True:
-        password = getpass.getpass("Enter password: ").strip()
+        password = getpass.getpass(text).strip()
         if ' ' in password:
             typer.echo("Password must not contain any spaces")
             continue

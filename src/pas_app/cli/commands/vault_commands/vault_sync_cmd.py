@@ -200,8 +200,8 @@ async def sync_vaults():
     
     # делаем push
     def _unlock_vault(encrypted_vault: EncryptedUserVault):
-        typer.echo(f"\nEnter master password to unlock vault: {encrypted_vault.name}")
-        vault_master_password = cli_password_promt()
+        typer.echo(f"\nUnlock vault ({encrypted_vault.name}) to send a [PUSH] request")
+        vault_master_password = cli_password_promt(f"Enter master password to unlock vault {encrypted_vault.name}: ")
         kek = derive_key(vault_master_password, encrypted_vault.salt)
         dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
     

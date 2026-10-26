@@ -117,7 +117,7 @@ def import_data(
             passwords = attempt_decrypt_vault(
                 username=username,
                 vault_name=vault_name, 
-                text="Enter master password of import vault"
+                text="Enter master password of import vault: "
             )
         if passwords is None:
             typer.echo("Too many attempts")

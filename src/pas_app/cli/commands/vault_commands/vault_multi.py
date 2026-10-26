@@ -31,8 +31,7 @@ async def check_status_unlock_vault(vault: VaultData) -> None:
     
         async def unlock_vault() -> ApiResponse:
             clear_console()
-            typer.echo("Enter master password to unlock vault")
-            vault_master_password = cli_password_promt()
+            vault_master_password = cli_password_promt(f"Enter master password to unlock vault ({vault.name}): ")
             response = await api.unlock_vault(
                 vault_id=vault.id,
                 vault_master_password=vault_master_password
@@ -101,7 +100,6 @@ async def delete(vault: VaultData):
             v.unlink()
             logger.info(f"Deleted local vault file: {v}")
             typer.echo("\nVault was successfully deleted locally")
-            raise typer.Exit(code=0)
         elif encrypted.id == response.content.vault_id:
             logger.warning(f"Found local vault matching id {encrypted.id} but has distinct name: {v}")
             typer.echo("\nA vault with the same id of what you deleted on server was found, but with a distinct name")
@@ -109,7 +107,7 @@ async def delete(vault: VaultData):
                 v.unlink()
                 logger.info(f"Deleted renamed local vault file: {v}")
                 typer.echo("\nVault was successfully deleted locally")
-                raise typer.Exit(code=0)
+                await asyncio.sleep(2)
 
     else:
         logger.warning(f"Local vault file for vault {vault.id} was not found")
@@ -194,7 +192,6 @@ async def rename(vault: VaultData):
             _rename_vault(path=v)
             logger.info(f"Renamed local vault file: {v}")
             typer.echo("\nVault was successfully renamed locally")
-            raise typer.Exit(code=0)
         elif encrypted.id == response.content.vault_id:
             logger.warning(f"Found local vault matching id {encrypted.id} but has distinct name: {v}")
             typer.echo("\nA vault with the same id of what you renamed on server was found, but with a distinct name")
@@ -204,7 +201,6 @@ async def rename(vault: VaultData):
                 logger.info(f"Renamed renamed local vault file: {v}")
                 typer.echo("\nVault was successfully renamed locally")
                 await asyncio.sleep(1)
-                raise typer.Exit(code=0)
 
     else:
         logger.warning(f"Local vault file for vault {vault.id} was not found")
@@ -234,6 +230,7 @@ async def change_pin(vault: VaultData):
     
     logger.info(f"PIN changed successfully for vault {vault.id}")
     typer.echo(response.content.detail)
+    await asyncio.sleep(0.5)
 
 
 # ==========================
