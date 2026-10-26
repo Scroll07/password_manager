@@ -31,13 +31,14 @@ async def _pull(
     typer.echo(f"\n[PULL] Checking vault (ID: {payload.vault_id})...")
     response = await api.pull_vault(payload=payload)
     
-    if isinstance(response.content, MessageResponse) and not isinstance(response.content, PullResponse):
+    if not type(response.content) == PullResponse:
+        typer.echo(f"  [ERROR] Vault ID {payload.vault_id}: Wrong server response type")
+        return
+    
+    if isinstance(response.content, MessageResponse):
         typer.echo(f"  [ERROR] Vault ID {payload.vault_id}: {response.content.detail}")
         return
 
-    if not isinstance(response.content, PullResponse):
-        typer.echo(f"  [ERROR] Vault ID {payload.vault_id}: Wrong server response type")
-        return
 
     status = response.content.status
 
@@ -78,13 +79,14 @@ async def _push(payload: PushRequestData, path: Path):
     typer.echo(f"\n[PUSH] Sending {vault_name} ({path.name})...")
     
     response = await api.push_vault(payload=payload)
+    if not type(response.content) == PushResponse:
+        typer.echo(f"  [ERROR] {vault_name}: Wrong server response type")
+        return
+    
     if isinstance(response.content, MessageResponse):
         typer.echo(f"  [ERROR] {vault_name}: {response.content.detail}")
         return
     
-    if not isinstance(response.content, PushResponse):
-        typer.echo(f"  [ERROR] {vault_name}: Wrong server response type")
-        return
     
     status = response.content.status
     if status == PushStatuses.NOT_FOUND:

@@ -64,13 +64,14 @@ async def push_vault(
         force=force
     )
     response = await api.push_vault(payload=request_data)
+    if not type(response.content) == PushResponse:
+        typer.echo("Wrong server response type")
+        raise typer.Exit(code=1)
+    
     if isinstance(response.content, MessageResponse):
         typer.echo(response.content.detail)
         raise typer.Exit(code=1)
     
-    if not isinstance(response.content, PushResponse):
-        typer.echo("Wrong server response type")
-        raise typer.Exit(code=1)
     
     status = response.content.status
     if status == PushStatuses.NOT_FOUND:
