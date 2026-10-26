@@ -24,6 +24,7 @@ from pas_app.cli.commands.vault_commands.change_master_cmd import change_master
 from pas_app.cli.commands.vault_commands.push_cmd import push_vault
 from pas_app.cli.commands.vault_commands.pull_cmd import pull_vault
 from pas_app.cli.commands.vault_commands.vault_sync_cmd import sync_vaults
+from pas_app.cli.commands.vault_commands.vault_fetch_cmd import fetch
 
 
 # Проверка Bearer token + refresh token
@@ -31,6 +32,7 @@ vaults_actions = check_token_dec(vaults_actions)
 push_vault = check_token_dec(push_vault)
 pull_vault = check_token_dec(pull_vault)
 sync_vaults = check_token_dec(sync_vaults)
+fetch = check_token_dec(fetch)
 
 
 # Проверка на Current User is not None
@@ -42,6 +44,7 @@ pull_vault = check_current_values_dec(pull_vault)
 select_current_vault = check_current_values_dec(select_current_vault)
 vault_list = check_current_values_dec(vault_list)
 sync_vaults = check_current_values_dec(sync_vaults)
+fetch = check_current_values_dec(fetch)
 
 
 def create_vault_cmd(
@@ -174,12 +177,26 @@ def sync_vaults_cmd():
     """
     asyncio.run(sync_vaults())
 
+def fetch_vaults_cmd():
+    """
+    Fetch remote vault metadata and inspect synchronization status.
+
+    Compares local vaults against the remote server without applying changes,
+    prompting for passwords, or modifying local files. Displays a summary of
+    vaults requiring pull, push, or already up to date.
+
+    Examples:
+        pas vault fetch
+    """
+    asyncio.run(fetch())
+
 
 vault_app.command('create')(create_vault_cmd)
 vault_app.command('list')(vault_list_cmd)
 vault_app.command('set')(select_current_vault_cmd)
 vault_app.command('actions')(vaults_actions_cmd)
 vault_app.command('change-master')(change_master_cmd)
+vault_app.command('fetch')(fetch_vaults_cmd)
 vault_app.command('push')(push_vault_cmd)
 vault_app.command('pull')(pull_vault_cmd)
 vault_app.command('sync')(sync_vaults_cmd)

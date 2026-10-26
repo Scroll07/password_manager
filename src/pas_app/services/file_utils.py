@@ -27,7 +27,7 @@ from pas_app.adapters.promts import (
     select_vault_name,
     select_master_password
 )
-from pas_app.schemas.vaults import EncryptedUserVault, UserVault, VaultPrintData
+from pas_app.schemas.vaults import EncryptedUserVault, LocalVaultInfo, LocalVaultsData, UserVault, VaultPrintData
 
 
 logger = get_logger()
@@ -177,3 +177,34 @@ async def load_encrypted_vault_by_path(path: Path) -> EncryptedUserVault | None:
         typer.echo(f"Validation error of file {path}\nSkipping...\n")
         await asyncio.sleep(0.5)
         return None
+    
+async def get_local_user_vaults_data(username: str) -> LocalVaultsData | None:
+    vault_paths = get_user_vault_files(username=username)
+    if not vault_paths:
+        return None
+    
+    synced: dict[int, LocalVaultInfo] = {}
+    unpushed: list[LocalVaultInfo] = []
+    
+    for path in vault_paths:
+        encrypted = await load_encrypted_vault_by_path(path=path)
+        if encrypted is None:
+            continue
+        
+        if encrypted.id == None:
+            unpushed.append(
+                LocalVaultInfo(
+                    vault=encrypted,
+                    path=path
+                )
+            )
+        else:
+            synced[encrypted.id] = LocalVaultInfo(
+                vault=encrypted,
+                path=path
+            )
+        
+    return LocalVaultsData(
+        synced=synced,
+        unpushed=unpushed
+    )

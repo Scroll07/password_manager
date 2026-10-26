@@ -1,5 +1,7 @@
 from datetime import datetime
+from pathlib import Path
 from pydantic import BaseModel, computed_field, field_validator
+from dataclasses import dataclass
 
 from pas_app.schemas.passwords import Password
 
@@ -42,3 +44,13 @@ class EncryptedUserVault(BaseModel):
 class VaultPrintData(BaseModel):
     filename: str
     vault_name: str
+    
+@dataclass
+class LocalVaultInfo:
+    vault: EncryptedUserVault
+    path: Path
+    
+@dataclass
+class LocalVaultsData:
+    synced: dict[int, LocalVaultInfo]
+    unpushed: list[LocalVaultInfo]

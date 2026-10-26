@@ -11,12 +11,13 @@ from pas_app.dependencies import (
     get_logger,
     get_keyring_tool
 )
-
+from pas_app.services.file_utils import get_user_vault_files, load_encrypted_vault_by_path
 
 
 logger = get_logger()
 
 async def login(
+    # sync: bool
 ):
     keyring = get_keyring_tool()
     keyring_data = keyring.load()
@@ -58,6 +59,11 @@ async def login(
         user_folder = VAULTS / username
         user_folder.mkdir(exist_ok=True)
         
+        # if sync:
+            # FETCH COMMAND
+            # AND SYNC IF NOT SYNCED
+            
+                
         raise typer.Exit(code=0)
     else:
         logger.error(f"Login failed for user {username}: status_code {response.status_code}, message: {response.content.detail}")
