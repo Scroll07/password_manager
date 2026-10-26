@@ -49,12 +49,11 @@ async def pull_vault(
     )
     response = await api.pull_vault(payload=request_data)
 
-    if not type(response.content) == PullResponse:
-        typer.echo("Wrong server response type")
-        raise typer.Exit(code=1)
-    
-    if isinstance(response.content, MessageResponse):
-        typer.echo(response.content.detail)
+    if not isinstance(response.content, PullResponse):
+        if type(response.content) is MessageResponse:
+            typer.echo(f"  [ERROR]: {response.content.detail}")
+        else:
+            typer.echo(f"  [ERROR]: Wrong server response type")
         raise typer.Exit(code=1)
 
 
