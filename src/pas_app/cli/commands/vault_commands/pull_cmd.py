@@ -81,7 +81,7 @@ async def pull_vault(
         if create_new_file:
             user_dir = VAULTS / keyring_data.current_user
             user_dir.mkdir(exist_ok=True)
-            file = user_dir / f'{vault_data.name}_v{vault_data.version}.json'
+            file = user_dir / f'{vault_data.name}_v1.{vault_data.version}.json'
         else:
             if file.exists():
                 typer.confirm(

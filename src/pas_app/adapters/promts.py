@@ -240,19 +240,19 @@ def print_and_choose_password(passwords: list[Password], text: str) -> Password:
 def print_vaults(vaults: list[VaultData]) -> list[VaultData]:
     pinned_vaults = sorted([b for b in vaults if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
     basic_vaults = sorted([b for b in vaults if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
-    headers = ["Id", "Name", "Rows", "Created_at"]
+    headers = ["Id", "Name", "Entries", "Created_at"]
 
     clear_console()
     if pinned_vaults:
         pinned_data = [[i, b.name, b.entries , b.created_at_formatted] for i, b in enumerate(pinned_vaults, start=1)] 
-        typer.echo("Pinned Backups:\n")
+        typer.echo("Pinned vaults:\n")
         typer.echo(tabulate(pinned_data, headers=headers, floatfmt="grid"))
         
         typer.echo("\n")
     
     if basic_vaults:
         basic_data = [[i, b.name, b.entries , b.created_at_formatted] for i, b in enumerate(basic_vaults, start=len(pinned_vaults) + 1)]
-        typer.echo("Backups:\n")
+        typer.echo("Vaults:\n")
         typer.echo(tabulate(basic_data, headers=headers, floatfmt="grid"))
     
     result = []

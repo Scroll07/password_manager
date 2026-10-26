@@ -44,6 +44,7 @@ class EncryptedUserVault(BaseModel):
 class VaultPrintData(BaseModel):
     filename: str
     vault_name: str
+    version: int
     
 @dataclass
 class LocalVaultInfo:

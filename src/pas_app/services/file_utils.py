@@ -162,7 +162,8 @@ def get_VaultPringData(vaults: list[Path]) -> list[VaultPrintData]:
         result.append(
             VaultPrintData(
                 filename=v.name,
-                vault_name=encrypted.name
+                vault_name=encrypted.name,
+                version=encrypted.version
             )
         )
     return result

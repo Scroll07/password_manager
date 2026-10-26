@@ -48,7 +48,7 @@ fetch = check_current_values_dec(fetch)
 
 
 def create_vault_cmd(
-    offline: bool = typer.Option(False, '--offline', '-o', help='Delete vault offline (Only from your device)')
+    offline: bool = typer.Option(False, '--offline', '-o', help='Creates vault offline (Only from your device)')
 ):
     """
     Create a new local vault for storing passwords.

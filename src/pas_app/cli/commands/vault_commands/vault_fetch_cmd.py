@@ -21,6 +21,7 @@ class FetchData:
     push_queue: list[EncryptedUserVault]
     pull_queue: list[EncryptedUserVault | VaultData]
     up_to_date: list[EncryptedUserVault]
+    server_map: dict[int, VaultData]
 
 async def get_fetch_data() -> FetchData:
     api = Api()
@@ -69,10 +70,12 @@ async def get_fetch_data() -> FetchData:
         for v in server_vaults:
             PULL_QUEUE.append(v)
     
+    
     return FetchData(
         push_queue=PUSH_QUEUE,
         pull_queue=PULL_QUEUE,
-        up_to_date=UP_TO_DATE
+        up_to_date=UP_TO_DATE,
+        server_map={v.id: v for v in server_vaults}
     )
 
 async def print_fetch_data(fetch_data: FetchData) -> None:
@@ -85,7 +88,8 @@ async def print_fetch_data(fetch_data: FetchData) -> None:
         typer.echo("  (none)")
     else:
         for vault in fetch_data.pull_queue:
-            typer.echo(f"- {vault.name} (v 1.{vault.version})")
+            assert type(vault.id) == int 
+            typer.echo(f"< {vault.name} (v 1.{vault.version}) --> (v 1.{fetch_data.server_map[vault.id].version})")
     typer.echo()
 
     # [ PUSH NEEDED ]
@@ -95,7 +99,10 @@ async def print_fetch_data(fetch_data: FetchData) -> None:
         typer.echo("  (none)")
     else:
         for vault in fetch_data.push_queue:
-            typer.echo(f"- {vault.name} (v 1.{vault.version})")
+            if vault.id is not None and fetch_data.server_map[vault.id]:
+                typer.echo(f"> {vault.name} (v 1.{fetch_data.server_map[vault.id].version}) --> (v 1.{vault.version})")
+            else:
+                typer.echo(f"> {vault.name} (v 1.{vault.version}) [NEW]")
     typer.echo()
 
     # [ UP TO DATE ]

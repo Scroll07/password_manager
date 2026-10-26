@@ -260,7 +260,7 @@ async def vaults_actions():
             typer.echo("You have no vaults")
             raise typer.Exit(code=0)
         
-        vault = print_and_choose_vault(vaults=vaults, text="Choose backup for action")
+        vault = print_and_choose_vault(vaults=vaults, text="Choose vault for action")
         choice = choose_action(vault=vault)
         logger.info(f"User selected action '{choice}' for vault {vault.id}")
         

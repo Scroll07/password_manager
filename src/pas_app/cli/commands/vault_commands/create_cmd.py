@@ -19,7 +19,11 @@ def create_vault_offline():
     assert keyring_data.current_user
     vault_name = select_vault_name()
     master_password = select_master_password()
-    create_vault(username=keyring_data.current_user, vault_name=vault_name, master_password=master_password)
+    try:
+        create_vault(username=keyring_data.current_user, vault_name=vault_name, master_password=master_password)
+    except FileExistsError as e:
+        typer.echo(f'\n[ERROR] {e}\n')
+        raise typer.Exit(code=1)
     typer.echo("\nNew vault was successfully created\n")
     raise typer.Exit(code=0)
 
