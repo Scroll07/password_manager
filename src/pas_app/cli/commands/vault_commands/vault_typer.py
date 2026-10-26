@@ -104,7 +104,7 @@ def change_master_cmd():
         pas vault change-master
 
     """
-    change_master()
+    asyncio.run(change_master())
 
 
 def vaults_actions_cmd():
