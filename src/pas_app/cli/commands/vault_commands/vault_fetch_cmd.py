@@ -85,7 +85,7 @@ async def print_fetch_data(fetch_data: FetchData) -> None:
         typer.echo("  (none)")
     else:
         for vault in fetch_data.pull_queue:
-            typer.echo(f"- {vault.name}")
+            typer.echo(f"- {vault.name} (v 1.{vault.version})")
     typer.echo()
 
     # [ PUSH NEEDED ]
@@ -95,7 +95,7 @@ async def print_fetch_data(fetch_data: FetchData) -> None:
         typer.echo("  (none)")
     else:
         for vault in fetch_data.push_queue:
-            typer.echo(f"- {vault.name}")
+            typer.echo(f"- {vault.name} (v 1.{vault.version})")
     typer.echo()
 
     # [ UP TO DATE ]
@@ -113,6 +113,8 @@ async def print_fetch_data(fetch_data: FetchData) -> None:
         else:
             names_preview = ", ".join(names)
         typer.echo(f"  {names_preview}")
+    
+    typer.echo('\n')
         
 async def fetch() -> None:
     fetch_data = await get_fetch_data()

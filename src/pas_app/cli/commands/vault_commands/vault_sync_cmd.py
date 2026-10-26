@@ -28,30 +28,35 @@ async def _pull(
     file_path: Path | None
 ):
     keyring_data = keyring.load()
+    typer.echo(f"\n[PULL] Checking vault (ID: {payload.vault_id})...")
     response = await api.pull_vault(payload=payload)
     
     if isinstance(response.content, MessageResponse) and not isinstance(response.content, PullResponse):
-        typer.echo(response.content.detail)
+        typer.echo(f"  [ERROR] Vault ID {payload.vault_id}: {response.content.detail}")
         return
 
     if not isinstance(response.content, PullResponse):
-        typer.echo("Wrong server response type")
+        typer.echo(f"  [ERROR] Vault ID {payload.vault_id}: Wrong server response type")
         return
 
     status = response.content.status
 
     if status == PullStatuses.NOT_FOUND:
-        typer.echo("Vault not found on server")
+        typer.echo(f"  [NOT FOUND] Vault ID {payload.vault_id} was not found on server")
 
     elif status == PullStatuses.LOCAL_AHEAD:
-        typer.echo("Local version is newer than server version.\nPush first or use '--force' to overwrite local file")
+        typer.echo(
+            f"  [LOCAL AHEAD] Local version of vault ID {payload.vault_id} is newer than server version.\n"
+            f"  Push first or use '--force' to overwrite local file"
+        )
 
     elif status == PullStatuses.UP_TO_DATE:
-        typer.echo("Vault is already up to date with server.")
+        typer.echo(f"  [UP TO DATE] Vault ID {payload.vault_id} is already up to date with server.")
+
     elif status == PullStatuses.PULLED:
         vault_data = response.content.vault_data
         if not vault_data:
-            typer.echo("Server returned PULLED status, but vault data is missing")
+            typer.echo(f"  [ERROR] Server returned PULLED status for vault ID {payload.vault_id}, but vault data is missing")
             return
 
         # Сохраняем обновленные данные в локальный файл
@@ -64,33 +69,41 @@ async def _pull(
             f.write(vault_data.model_dump_json(indent=4))
 
         if payload.force:
-            typer.echo("Forced pull...")
-        typer.echo(f"Successful pull. Pulled to file: {file_path}")
+            typer.echo(f"  [FORCED] Overwriting local file with server version...")
+        typer.echo(f"  [SUCCESS] Successfully pulled '{vault_data.name}' (v{vault_data.version}) -> {file_path.name}")
         
 
-async def _push(payload: PushRequestData, path: Path): # add here path_file!
+async def _push(payload: PushRequestData, path: Path):
+    vault_name = f"'{payload.name}'"
+    typer.echo(f"\n[PUSH] Sending {vault_name} ({path.name})...")
+    
     response = await api.push_vault(payload=payload)
     if isinstance(response.content, MessageResponse):
-        typer.echo(response.content.detail)
+        typer.echo(f"  [ERROR] {vault_name}: {response.content.detail}")
         return
     
     if not isinstance(response.content, PushResponse):
-        typer.echo("Wrong server response type")
+        typer.echo(f"  [ERROR] {vault_name}: Wrong server response type")
         return
     
     status = response.content.status
     if status == PushStatuses.NOT_FOUND:
-        typer.echo("Vault not found")
+        typer.echo(f"  [NOT FOUND] Vault {vault_name} not found on server")
     elif status == PushStatuses.OUTDATED:
-        typer.echo("Server has higher version of vault.\nUse '--force' to force push request")
+        typer.echo(
+            f"  [OUTDATED] Server has higher version of {vault_name}.\n"
+            f"  Use '--force' to force push request"
+        )
     elif status == PushStatuses.UP_TO_DATE:
-        typer.echo("Server has the same version of vault.\nUse '--force' to force push request")
+        typer.echo(
+            f"  [UP TO DATE] Server already has the same version of {vault_name}.\n"
+            f"  Use '--force' to force push request"
+        )
     elif status == PushStatuses.OVERWRITTEN:
-        typer.echo("Successful push. Server version was overwrotten")
+        typer.echo(f"  [SUCCESS] Server version of {vault_name} was overwritten successfully")
     elif status == PushStatuses.PUSHED:
-        typer.echo("Successful push.")
+        typer.echo(f"  [SUCCESS] Successfully pushed {vault_name} (v{payload.version})")
     elif status == PushStatuses.CREATED:
-        
         encrypted = EncryptedUserVault(
             id=response.content.vault_id,
             name=payload.name,
@@ -103,11 +116,11 @@ async def _push(payload: PushRequestData, path: Path): # add here path_file!
             with open(path, "w", encoding='utf-8') as f:
                 f.write(encrypted.model_dump_json(indent=4))
         except Exception as e:
-            typer.echo(f"Saving error of vault: {path}")
+            typer.echo(f"  [ERROR] Failed to save updated vault {vault_name} locally: {path.name}")
             logger.error(e)
             return
                     
-        typer.echo("Successful push with saving vault on the server.")
+        typer.echo(f"  [SUCCESS] Created new remote vault {vault_name} (assigned ID: {response.content.vault_id}) and updated {path.name}")
 
 
 async def sync_vaults():
