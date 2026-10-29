@@ -96,9 +96,7 @@ async def push_vault(
             raise typer.Exit(code=1)
         
         typer.echo("Successful push with saving vault on the server.")
-    # СОХРАНИТЬ ИЗМЕНЕНИЯ ПОСЛЕ PUSH ЕСЛИ МЫ СОЗДАЛИ VAULT на СЕРВЕРЕ ТО НАДО СОХРАНИТЬ ID
-    # + ДОБАВЬ НОВЫЙ СТАТУС "CREATED" с помощью коорого мы поймем что нужно сохранить id
-    # + перенеси новосозданную логику в vault_sync!!!!!!!!!!!!!!!!!!!!
+
     
     
     

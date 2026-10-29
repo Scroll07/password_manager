@@ -1,6 +1,5 @@
 import asyncio
 from pathlib import Path
-
 from pydantic import ValidationError
 import typer
 
@@ -16,7 +15,7 @@ from pas_app.adapters.promts import (
     clear_console
 )
 from pas_app.dependencies import get_keyring_tool, get_logger
-from pas_app.services.file_utils import get_user_vault_files
+from pas_app.services.file_utils import get_user_vault_files, validate_vault_name
 
 logger = get_logger()
 
@@ -172,9 +171,22 @@ async def rename(vault: VaultData):
     keyring_data = keyring.load()
     vaults = get_user_vault_files(username=keyring_data.current_user)
     
-    def _rename_vault(path: Path):
-        with open(v, 'w', encoding='utf-8') as f:
-            f.write(encrypted.model_dump_json(indent=4))
+    def _rename_vault(vault_path: Path) -> Path:
+        # записать в новый файл
+        # сначала получаем безопасное имя для нового файла
+        folder = vault_path.parent
+        validated_vault_name = validate_vault_name(name=encrypted.name)
+        renamed_vault_path = folder / f'{validated_vault_name}.json'
+        try:
+            with open(renamed_vault_path, 'w', encoding='utf-8') as f:
+                f.write(encrypted.model_dump_json(indent=4))
+        except Exception as e:
+            typer.echo(f"Unexcepted error in writing renamed vault: {renamed_vault_path}")
+            logger.error(f"Unexcepted error in writing renamed vault: {renamed_vault_path}\nerror={e}")
+            raise typer.Exit(code=1)
+        # удалить старый файл
+        vault_path.unlink()
+        return renamed_vault_path
     
     for v in vaults:
         try:
@@ -189,16 +201,16 @@ async def rename(vault: VaultData):
                 
         if encrypted.id == response.content.vault_id and encrypted.name == response.content.old_vault_name:
             encrypted.name = response.content.new_vault_name
-            _rename_vault(path=v)
-            logger.info(f"Renamed local vault file: {v}")
+            renamed_vault_path = _rename_vault(vault_path=v)
+            logger.info(f"Renamed local vault file: {renamed_vault_path}")
             typer.echo("\nVault was successfully renamed locally")
         elif encrypted.id == response.content.vault_id:
             logger.warning(f"Found local vault matching id {encrypted.id} but has distinct name: {v}")
             typer.echo("\nA vault with the same id of what you renamed on server was found, but with a distinct name")
             if typer.confirm("Rename this vault?"):
                 encrypted.name = response.content.new_vault_name
-                _rename_vault(path=v)
-                logger.info(f"Renamed renamed local vault file: {v}")
+                renamed_vault_path = _rename_vault(vault_path=v)
+                logger.info(f"Renamed renamed local vault file: {renamed_vault_path}")
                 typer.echo("\nVault was successfully renamed locally")
                 await asyncio.sleep(1)
 

@@ -14,23 +14,29 @@ from pas_app.core.crypto import (
     create_dek,
     create_random_salt
 )
-from pas_app.config import UserConfig
 from pas_app.schemas.passwords import Passwords
 from pas_app.core.settings import (
     VAULTS,
-    LAST_MATCHES
 )
-
-# from pas_app.services.password import check_session
 from pas_app.exceptions import EchoException
-from pas_app.adapters.promts import (
-    select_vault_name,
-    select_master_password
-)
 from pas_app.schemas.vaults import EncryptedUserVault, LocalVaultInfo, LocalVaultsData, UserVault, VaultPrintData
 
 
 logger = get_logger()
+
+
+
+
+
+FORBIDDEN_CHARS = set(r'.\/:*?"<>|')
+
+def validate_vault_name(name: str) -> str:
+    cleaned = "".join('_' if ch in FORBIDDEN_CHARS else ch for ch in name)
+    cleaned = cleaned.strip()
+        
+    return cleaned
+
+
 
 
 def create_vault_path(username: str, vault_name: str) -> Path:
