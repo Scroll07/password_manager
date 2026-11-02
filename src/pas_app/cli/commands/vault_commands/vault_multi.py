@@ -65,11 +65,7 @@ async def delete(vault: VaultData):
     if response.status_code != 200:
         if isinstance(response.content, MessageResponse):
             logger.error(f"Server deletion failed for vault {vault.id}: {response.status_code} - {response.content.detail}")
-            typer.echo(
-                f"Get vault failed\nstatus_code: {response.status_code}, message: {response.content.detail}"
-            )
         else:
-            typer.echo("Wrong server response type")
             logger.error(f"Unexpected response type on rename: {type(response.content)}")
         raise typer.Exit(code=1)
     
