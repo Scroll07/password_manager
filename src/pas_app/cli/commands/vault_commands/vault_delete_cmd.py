@@ -1,5 +1,3 @@
-
-
 import asyncio
 from dataclasses import dataclass
 from pathlib import Path
@@ -66,6 +64,17 @@ def build_unified_vaults(
             )
         )
     
+    for v_id, local_data in synced_map.items():
+        if v_id not in used_ids:
+            unified.append(
+                UnifiedVault(
+                    name=local_data.vault.name,
+                    server=None,
+                    local=local_data
+                )
+            )
+    
+    
     if local_vaults:
         for l_v in local_vaults.unpushed:
             unified.append(
@@ -78,21 +87,23 @@ def build_unified_vaults(
             
     return unified
     
-def print_and_choose_vault_to_delete(vaults: list[UnifiedVault]) -> UnifiedVault | None:
+async def print_and_choose_vault_to_delete(vaults: list[UnifiedVault]) -> UnifiedVault | None:
     table_data = [
         [i, v.name, v.location_label, v.created_at_display]
         for i, v in enumerate(vaults, start=1)
     ]
     
-    headers = ["#", "Name", "Location", "Created At"]
+    headers = ["№", "Name", "Location", "Created At"]
 
     while True:
         clear_console()
-        typer.echo("\nSelect vault to delete:")
+        typer.echo("Select vault to delete:\n")
         typer.echo(tabulate(table_data, headers=headers, tablefmt="simple"))
-        choice = typer.prompt("Choose vault #", default="0").strip()
+        typer.echo("\n  0  Cancel")
+        choice = typer.prompt("\nChoose vault", default="0").strip()
         if not choice.isdigit():
             typer.echo("Please enter a valid number.")
+            await asyncio.sleep(1)
             continue
         idx = int(choice)
         if idx == 0:
@@ -100,6 +111,7 @@ def print_and_choose_vault_to_delete(vaults: list[UnifiedVault]) -> UnifiedVault
         if 1 <= idx <= len(vaults):
             return vaults[idx - 1]
         typer.echo(f"Number must be between 1 and {len(vaults)}.")
+        await asyncio.sleep(1)
 
 
 AVAILABLE_ACTIONS = Literal['remote', 'local', 'both', 'cancel']
@@ -116,8 +128,8 @@ def choose_delete_action(vault: UnifiedVault) -> AVAILABLE_ACTIONS:
 
     while True:
         clear_console()
-        typer.echo(f"\nTarget: '{vault.name}' ({vault.location_label})")
-        typer.echo("Available actions:")
+        typer.echo(f"Target: '{vault.name}' ({vault.location_label})")
+        typer.echo("\nAvailable actions:")
         
         for key in sorted(available_actions.keys()):
             label, _ = available_actions[key]
@@ -172,13 +184,15 @@ async def delete_vault():
                 else:
                     typer.echo("Wrong server response type")
                 raise typer.Exit(code=1)
+        else:
+            typer.echo("Vault was successfully deleted on the server")
 
     def delete_offline(vault_path: Path):
         if not vault_path.exists() or not vault_path.is_file():
             typer.echo("Vault file does not exist")
             raise typer.Exit(code=1)
         vault_path.unlink()
-        typer.echo("Vault file was successfully removed")
+        typer.echo("Vault file was successfully removed locally")
         
         
     while True:
@@ -200,7 +214,7 @@ async def delete_vault():
             typer.echo("You have no vaults to delete.")
             raise typer.Exit(code=0)
 
-        chosen_vault = print_and_choose_vault_to_delete(vaults=vaults)
+        chosen_vault = await print_and_choose_vault_to_delete(vaults=vaults)
         if chosen_vault is None:
             typer.echo("Cancelled.")
             raise typer.Exit(code=0)
@@ -208,7 +222,6 @@ async def delete_vault():
         action = choose_delete_action(vault=chosen_vault)
         if action == "cancel":
             typer.echo("Cancelled.")
-            await asyncio.sleep(1)
             continue
         
         
@@ -232,3 +245,4 @@ async def delete_vault():
                 await delete_online(chosen_vault.server)
             if chosen_vault.local:
                 delete_offline(chosen_vault.local.path)
+        await asyncio.sleep(1.5)

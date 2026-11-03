@@ -25,6 +25,7 @@ from pas_app.cli.commands.vault_commands.push_cmd import push_vault
 from pas_app.cli.commands.vault_commands.pull_cmd import pull_vault
 from pas_app.cli.commands.vault_commands.vault_sync_cmd import sync_vaults
 from pas_app.cli.commands.vault_commands.vault_fetch_cmd import fetch
+from pas_app.cli.commands.vault_commands.vault_delete_cmd import delete_vault
 
 
 # Проверка Bearer token + refresh token
@@ -33,7 +34,7 @@ push_vault = check_token_dec(push_vault)
 pull_vault = check_token_dec(pull_vault)
 sync_vaults = check_token_dec(sync_vaults)
 fetch = check_token_dec(fetch)
-
+delete_vault = check_token_dec(delete_vault)
 
 # Проверка на Current User is not None
 change_master = check_current_values_dec(change_master)
@@ -45,6 +46,7 @@ select_current_vault = check_current_values_dec(select_current_vault)
 vault_list = check_current_values_dec(vault_list)
 sync_vaults = check_current_values_dec(sync_vaults)
 fetch = check_current_values_dec(fetch)
+delete_vault = check_current_values_dec(delete_vault)
 
 
 def create_vault_cmd(
@@ -191,10 +193,30 @@ def fetch_vaults_cmd():
     asyncio.run(fetch())
 
 
+def delete_vault_cmd():
+    """
+    Interactively delete a password vault.
+
+    Launches an interactive wizard listing all available vaults across both
+    local storage and the remote server. Allows selecting a vault and choosing
+    the deletion target:
+      - Local only: Removes the local file while keeping the server copy.
+      - Remote only: Deletes the vault from the server while keeping the local file.
+      - Both: Completely removes the vault from both disk and server.
+
+    Prompts for confirmation before performing any destructive action.
+
+    Examples:
+        pas vault delete
+    """
+    asyncio.run(delete_vault())
+
+
 vault_app.command('create')(create_vault_cmd)
 vault_app.command('list')(vault_list_cmd)
 vault_app.command('set')(select_current_vault_cmd)
 vault_app.command('actions')(vaults_actions_cmd)
+vault_app.command('delete')(delete_vault_cmd)
 vault_app.command('change-master')(change_master_cmd)
 vault_app.command('fetch')(fetch_vaults_cmd)
 vault_app.command('push')(push_vault_cmd)
