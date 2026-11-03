@@ -41,23 +41,23 @@ def cli_input(text: str, is_secret: bool = False) -> str:
 def cli_register_input() -> LoginRegisterInput:
     while True:
         clear_console()
-        typer.echo("[Регистрация]")
-        login = cli_input("Введите логин")
+        typer.echo("[Registration]")
+        login = cli_input("Enter username")
         if not (4 <= len(login) <= 32):
-            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 32")
+            typer.echo("Username length must be between 4 and 32 characters.")
             time.sleep(2)
             continue
 
-        password = cli_input("Введите пароль", True)
-        confirm_password = cli_input("Повторите пароль", True)
+        password = cli_input("Enter password", True)
+        confirm_password = cli_input("Confirm password", True)
 
         if password != confirm_password:
-            typer.echo("Пароли должны совпадать")
+            typer.echo("Passwords must match.")
             time.sleep(2)
             continue
 
         if not (4 <= len(password) <= 32):
-            typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
+            typer.echo("Password length must be between 4 and 32 characters.")
             time.sleep(2)
             continue
 
@@ -67,21 +67,21 @@ def cli_register_input() -> LoginRegisterInput:
 def cli_login_input(username: str | None = None) -> LoginRegisterInput:
     while True:
         clear_console()
-        typer.echo("[Вход]")
+        typer.echo("[Login]")
         if username is None or username == "unauthorized":
-            login = cli_input("Введите логин")
+            login = cli_input("Enter username")
         else:
-            typer.echo(f"Введите логин: {username}")
+            typer.echo(f"Username: {username}")
             login = username
         if not (4 <= len(login) <= 16):
-            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
+            typer.echo("Username length must be between 4 and 16 characters.")
             time.sleep(2)
             continue
 
-        password = cli_input("Введите пароль", True)
+        password = cli_input("Enter password", True)
 
         if not (4 <= len(password) <= 32):
-            typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
+            typer.echo("Password length must be between 4 and 32 characters.")
             time.sleep(2)
             continue
 
