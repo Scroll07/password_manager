@@ -1,13 +1,9 @@
-
-
-
 import time
-
 import typer
 
 from pas_app.adapters.console import clear_console
 from pas_app.adapters.promts import exit_message_and_clear_console
-from pas_app.config import UserConfig, get_config
+from pas_app.config import UserConfig
 
 
 def change_bot_token(config: UserConfig):
@@ -40,15 +36,3 @@ def change_bot_token(config: UserConfig):
             time.sleep(1)
             continue
         
-def token_cmd():
-    """
-    Manage the local bot token.
-
-    This command allows you to view or change the bot token stored in the
-    local CLI configuration.
-
-    Examples:
-        pas config token
-    """
-    config = get_config()
-    change_bot_token(config=config)

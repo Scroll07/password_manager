@@ -3,7 +3,7 @@ import typer
 
 from pas_app.adapters.console import clear_console
 from pas_app.adapters.promts import exit_message_and_clear_console
-from pas_app.config import ConfigData, UserConfig, get_config
+from pas_app.config import ConfigData, UserConfig
 
 
 def change_base_url(config: UserConfig):
@@ -42,15 +42,3 @@ def change_base_url(config: UserConfig):
             time.sleep(1)
             continue
         
-def url_cmd():
-    """
-    Manage the local API base URL.
-
-    This command allows you to view, change, or reset the locally stored
-    Base URL used by the CLI for server requests.
-
-    Examples:
-        pas config url
-    """
-    config = get_config()
-    change_base_url(config=config)
