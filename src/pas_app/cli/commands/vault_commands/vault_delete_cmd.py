@@ -185,7 +185,7 @@ async def delete_vault():
                     typer.echo("Wrong server response type")
                 raise typer.Exit(code=1)
         else:
-            typer.echo("Vault was successfully deleted on the server")
+            typer.echo("Vault file was successfully deleted on the server")
 
     def delete_offline(vault_path: Path):
         if not vault_path.exists() or not vault_path.is_file():

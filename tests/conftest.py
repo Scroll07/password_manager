@@ -1,12 +1,10 @@
-import pytest_asyncio
 import pytest
 import secrets
 from keyring.backend import KeyringBackend
 import keyring
 
 from pas_app.config import UserConfig
-from pas_app.schemas.api import Login_RegisterRequest, LoginResponse
-from pas_app.schemas.passwords import UserVault, Password
+from pas_app.schemas.passwords import Password
 from pas_app.core.api import Api
 from pas_app.services.file_utils import (
     load_data,
@@ -33,10 +31,7 @@ def config(tmp_path) -> UserConfig:
 @pytest.fixture
 def vault_fixture(tmp_path, monkeypatch, test_username, test_vault_name, mock_keyring):
     monkeypatch.setattr('pas_app.services.file_utils.VAULTS', tmp_path)
-    monkeypatch.setattr("pas_app.services.file_utils.select_new_vault_name", lambda: test_vault_name)
-    monkeypatch.setattr("pas_app.services.file_utils.select_master_password", lambda: "admin")
-    monkeypatch.setattr("pas_app.services.password.cli_password_promt", lambda: "admin")
-    create_vault(username=test_username)
+    create_vault(username=test_username, vault_name=test_vault_name, master_password='admin')
     path = create_vault_path(username=test_username, vault_name=test_vault_name)
     assert path.exists()
     keyring = get_keyring_tool()
@@ -47,6 +42,7 @@ def vault_fixture(tmp_path, monkeypatch, test_username, test_vault_name, mock_ke
 @pytest.fixture
 def password_tool(tmp_path, monkeypatch, test_username, test_vault_name, vault_fixture) -> PasswordTool:
     monkeypatch.setattr('pas_app.services.file_utils.VAULTS', tmp_path)
+    monkeypatch.setattr('pas_app.services.password.cli_password_promt', lambda: 'admin')
     
     return PasswordTool()
 

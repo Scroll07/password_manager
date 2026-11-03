@@ -1,9 +1,5 @@
 
 
-from pas_app.core.password_tool import PasswordTool
-from pas_app.schemas.passwords import Password
-
-
 def test__init(password_tool):
     assert password_tool.vault_data is not None
     assert password_tool.username is not None
