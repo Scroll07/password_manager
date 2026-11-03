@@ -1,21 +1,14 @@
 from datetime import datetime
 from enum import StrEnum
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator
 from typing import Union
 
-from pas_app.schemas.passwords import EncryptedUserVault
 from pas_app.schemas.jwt import EncodedToken
+from pas_app.schemas.vaults import EncryptedUserVault, VaultData
 
 
 
 
-class TokenType(StrEnum):
-    BEARER = "bearer"
-    REFRESH = "refresh"
-
-class Token(BaseModel):
-    token: str
-    token_type: TokenType
 
 
 
@@ -29,6 +22,26 @@ class Login_RegisterRequest(BaseModel):
 class DownloadRequest(BaseModel):
     backup_id: int
 
+class PullRequestData(BaseModel):
+    vault_id: int
+    version: int | None
+    force: bool
+
+class PushRequestData(BaseModel):
+    id: int | None
+    name: str
+    salt: str
+    entries: int
+    encrypted_dek: str
+    encrypted_passwords: str
+    version: int
+    force: bool
+
+class CreateVaultDataRequest(BaseModel):
+    name: str
+    salt: str
+    encrypted_dek: str
+    
 #====================================
 class BackupStats(BaseModel):
     backups_count: int
@@ -49,6 +62,14 @@ class BackupData(BaseModel):
     def created_at_formatted(self) -> str:
         return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
     
+class UserData(BaseModel):
+    id: int
+    username: str
+    telegram_id: int | None
+    role: str
+    is_active: bool
+    created_at: datetime
+
 class TypeResponses(StrEnum):
     MESSAGE = "message"
     LOGIN = "login"
@@ -56,6 +77,20 @@ class TypeResponses(StrEnum):
     DOWNLOAD = "download"
     REFRESH = "refresh"
     STATS = "stats"
+
+class PushStatuses(StrEnum):
+    PUSHED = 'pushed'
+    UP_TO_DATE = 'up_to_date'
+    OUTDATED = 'outdated'
+    OVERWRITTEN = 'overwritten'
+    CREATED = 'created'
+    NOT_FOUND = 'not_found'
+    
+class PullStatuses(StrEnum):
+    PULLED = 'pulled'
+    UP_TO_DATE = 'up_to_date'
+    LOCAL_AHEAD = 'local_ahead'
+    NOT_FOUND = 'not_found'
 
 
 # ===================================
@@ -65,6 +100,9 @@ class MessageResponse(BaseModel):
     # ok: bool
     detail: str
     type: TypeResponses = TypeResponses.MESSAGE
+
+class CreateVaultResponse(MessageResponse):
+    vault_id: int
 
 class LoginResponse(MessageResponse):
     bearer_token: EncodedToken
@@ -80,16 +118,65 @@ class BackupsResponse(MessageResponse):
     
 class DownloadResponse(BaseModel):
     vault_data: EncryptedUserVault
+    filename: str
     type: TypeResponses = TypeResponses.DOWNLOAD
 
 class BackupStatsResponse(BaseModel):
     ok: bool
     stats: BackupStats
     type: TypeResponses = TypeResponses.STATS
+    
+class VaultsDataResponse(BaseModel):
+    ok: bool
+    vaults: list[VaultData]
+
+class VaultDataResponse(BaseModel):
+    ok: bool
+    vault: VaultData
+    
+class UnlockVaultResponse(BaseModel):
+    ok: bool
+    vault_token: str
+    detail: str
+
+class UserDataResponse(BaseModel):
+    ok: bool
+    data: UserData
+
+class PushResponse(MessageResponse):
+    vault_id: int
+    status: PushStatuses
+
+class PullResponse(MessageResponse):
+    vault_data: EncryptedUserVault | None = None
+    status: PullStatuses
+
+class DeleteVaultResponse(MessageResponse):
+    vault_id: int
+    vault_name: str
+    
+class RenameVaultResponse(MessageResponse):
+    vault_id: int
+    old_vault_name: str
+    new_vault_name: str
 
 class ApiResponse(BaseModel):
     status_code: int
-    content: Union[MessageResponse, LoginResponse, BackupsResponse, DownloadResponse, BackupStatsResponse]
+    content: Union[
+        MessageResponse, 
+        LoginResponse, 
+        BackupsResponse, 
+        DownloadResponse, 
+        BackupStatsResponse,
+        VaultDataResponse,
+        VaultsDataResponse,
+        UnlockVaultResponse,
+        UserDataResponse,
+        PushResponse,
+        PullResponse,
+        DeleteVaultResponse,
+        RenameVaultResponse
+    ]
     
 
 

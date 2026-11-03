@@ -15,5 +15,5 @@ setup.py
 password_manager.egg-info/
 learn.py
 dist/
-
+.coverage
 

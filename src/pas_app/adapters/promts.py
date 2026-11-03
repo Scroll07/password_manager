@@ -8,9 +8,8 @@ import typer
 from tabulate import tabulate
 
 from pas_app.adapters.console import clear_console
-from pas_app.schemas.api import BackupData
-from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput
-from pas_app.config import IMPORT_DIR
+from pas_app.schemas.passwords import ChangePasswordSchema, LoginRegisterInput, Password
+from pas_app.schemas.vaults import VaultData, VaultPrintData
 
 # DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -25,9 +24,13 @@ def gui_password_prompt():
     return password
 
 
-def cli_password_promt():
-    password = getpass.getpass("Введите пароль: ")
-    return password
+def cli_password_promt(text: str = "Enter password: "):
+    while True:
+        password = getpass.getpass(text).strip()
+        if ' ' in password:
+            typer.echo("Password must not contain any spaces")
+            continue
+        return password
 
 
 def cli_input(text: str, is_secret: bool = False) -> str:
@@ -38,23 +41,23 @@ def cli_input(text: str, is_secret: bool = False) -> str:
 def cli_register_input() -> LoginRegisterInput:
     while True:
         clear_console()
-        typer.echo("[Регистрация]")
-        login = cli_input("Введите логин")
-        if not (4 <= len(login) <= 16):
-            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
+        typer.echo("[Registration]")
+        login = cli_input("Enter username")
+        if not (4 <= len(login) <= 32):
+            typer.echo("Username length must be between 4 and 32 characters.")
             time.sleep(2)
             continue
 
-        password = cli_input("Введите пароль", True)
-        confirm_password = cli_input("Повторите пароль", True)
+        password = cli_input("Enter password", True)
+        confirm_password = cli_input("Confirm password", True)
 
         if password != confirm_password:
-            typer.echo("Пароли должны совпадать")
+            typer.echo("Passwords must match.")
             time.sleep(2)
             continue
 
         if not (4 <= len(password) <= 32):
-            typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
+            typer.echo("Password length must be between 4 and 32 characters.")
             time.sleep(2)
             continue
 
@@ -64,58 +67,33 @@ def cli_register_input() -> LoginRegisterInput:
 def cli_login_input(username: str | None = None) -> LoginRegisterInput:
     while True:
         clear_console()
-        typer.echo("[Вход]")
+        typer.echo("[Login]")
         if username is None or username == "unauthorized":
-            login = cli_input("Введите логин")
+            login = cli_input("Enter username")
         else:
-            typer.echo(f"Введите логин: {username}")
+            typer.echo(f"Username: {username}")
             login = username
         if not (4 <= len(login) <= 16):
-            typer.echo("Длина Логина должна находиться в диапазоне от 4 до 16")
+            typer.echo("Username length must be between 4 and 16 characters.")
             time.sleep(2)
             continue
 
-        password = cli_input("Введите пароль", True)
+        password = cli_input("Enter password", True)
 
         if not (4 <= len(password) <= 32):
-            typer.echo("Длина Пароля должна находиться в диапазоне от 4 до 32")
+            typer.echo("Password length must be between 4 and 32 characters.")
             time.sleep(2)
             continue
 
         return LoginRegisterInput(username=login, password=password)
 
 
-def cli_improt_file_prompt() -> Path:
-    files = []
-    for file in IMPORT_DIR.glob("*.json"):
-        files.append(file)
-    
-    if not files:
-        raise FileExistsError("No files to import")
-        
-    while True:
-        clear_console()
-        typer.echo("Files to import:\n")
-        for i, file in enumerate(files, start=1):
-            typer.echo(f'[{i}] - {file.name}')
-        choice = typer.prompt("\nChoose number of file to import").strip()
 
-        if not choice.isdigit():
-            typer.echo("Input should be digit")
-            time.sleep(2)
-            continue
-        
-        if not 1 <= int(choice) <= len(files):
-            typer.echo("Wrong number input")
-            time.sleep(2)
-            continue
-            
-        return files[int(choice)-1].absolute()
         
             
 
 
-def choose_default_user(usernames: list[str], current_username: str) -> str:
+def choose_current_user(usernames: list[str], current_username: str) -> str:
     while True:
         clear_console()
         typer.echo(f"Current User: {current_username}")
@@ -135,14 +113,56 @@ def choose_default_user(usernames: list[str], current_username: str) -> str:
             continue
             
         return usernames[int(choice)-1]
+    
+def choose_current_vault(data: list[VaultPrintData], current_vault: str) -> str:
+    while True:
+        clear_console()
+        typer.echo(f"Current Vault: {current_vault if current_vault else "Not selected"}")
+        typer.echo("Vaults:\n")
+        for i, obj in enumerate(data, start=1):
+            typer.echo(f'[{i}] - {obj.vault_name} ({obj.filename})')
+        choice = typer.prompt("\nChoose vault to set as default").strip()
 
-def choose_delete_user(usernames: list[str]) -> str:
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(data):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return data[int(choice)-1].filename
+
+
+def choose_vault(vaults: list[Path], msg: str) -> Path:
+    while True:
+        clear_console()
+        typer.echo("Vault files:\n")
+        for i, vault in enumerate(vaults, start=1):
+            typer.echo(f'[{i}] - {vault.name}')
+        choice = typer.prompt(f"\n{msg}").strip()
+
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(vaults):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return vaults[int(choice)-1]
+
+def choose_user(usernames: list[str], msg: str) -> str:
     while True:
         clear_console()
         typer.echo("User profiles:\n")
         for i, username in enumerate(usernames, start=1):
             typer.echo(f'[{i}] - {username}')
-        choice = typer.prompt("\nChoose username to delete").strip()
+        choice = typer.prompt(f"\n{msg}").strip()
 
         if not choice.isdigit():
             typer.echo("Input should be digit")
@@ -157,37 +177,97 @@ def choose_delete_user(usernames: list[str]) -> str:
         return usernames[int(choice)-1]
 
 
-def print_backups(backups: list[BackupData]) -> list[BackupData]:
-    pinned_backups = sorted([b for b in backups if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
-    basic_backups = sorted([b for b in backups if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
-    headers = ["Id", "Name", "Rows", "Created_at"]
+def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> list[Password]:
+    if not passwords:
+        typer.echo("No Entries were found")
+        raise typer.Exit(code=1)
+    rows = []
+    if not check:
+        headers = ["№", "Service", "Username", "Password", "Note"]
+        for i, pas in enumerate(passwords, start=1):
+            try:
+                match = pas.service
+                username = pas.username
+                password = pas.password if show else "******"
+                note = pas.note
+                rows.append([i, match, username, password, note])
+            except Exception as e:
+                typer.echo(f"Error: {e}")
+                raise typer.Exit(code=1)
+    else:
+        from pas_app.services.password import check_password_strength
+
+        headers = ["№", "Service", "Username", "Password", "Strength"]
+        for i, pas in enumerate(passwords, start=1):
+            try:
+                match = pas.service
+                username = pas.username
+                password = pas.password if show else "******"
+                strength = check_password_strength(password=pas.password)
+                rows.append([i, match, username, password, strength])
+            except Exception as e:
+                typer.echo(f"Error: {e}")
+                raise typer.Exit(code=1)
+
+    typer.echo(tabulate(rows, headers=headers, tablefmt="grid"))
+    return passwords
+ 
+
+
+    
+
+def print_and_choose_password(passwords: list[Password], text: str) -> Password:    
+    if not passwords:
+        typer.echo("No entries were found")
+        raise typer.Exit(code=1)
+
+    while True:
+        print_passwords(passwords=passwords)
+        choice = typer.prompt(text=text).strip()
+        
+        if not choice.isdigit():
+            typer.echo("Input should be digit")
+            time.sleep(2)
+            continue
+        
+        if not 1 <= int(choice) <= len(passwords):
+            typer.echo("Wrong number input")
+            time.sleep(2)
+            continue
+            
+        return passwords[int(choice)-1]
+
+def print_vaults(vaults: list[VaultData]) -> list[VaultData]:
+    pinned_vaults = sorted([b for b in vaults if b.pinned], key=lambda b: b.created_at, reverse=True)     #ОПТИМИЗИРОВАТЬ
+    basic_vaults = sorted([b for b in vaults if not b.pinned], key=lambda b: b.created_at, reverse=True)  #ОПТИМИЗИРОВАТЬ
+    headers = ["Id", "Name", "Entries", "Created_at"]
 
     clear_console()
-    if pinned_backups:
-        pinned_data = [[i, b.name, b.rows , b.created_at_formatted] for i, b in enumerate(pinned_backups, start=1)] 
-        typer.echo("Pinned Backups:\n")
+    if pinned_vaults:
+        pinned_data = [[i, b.name, b.entries , b.created_at_formatted] for i, b in enumerate(pinned_vaults, start=1)] 
+        typer.echo("Pinned vaults:\n")
         typer.echo(tabulate(pinned_data, headers=headers, floatfmt="grid"))
         
         typer.echo("\n")
     
-    if basic_backups:
-        basic_data = [[i, b.name, b.rows , b.created_at_formatted] for i, b in enumerate(basic_backups, start=len(pinned_backups) + 1)]
-        typer.echo("Backups:\n")
+    if basic_vaults:
+        basic_data = [[i, b.name, b.entries , b.created_at_formatted] for i, b in enumerate(basic_vaults, start=len(pinned_vaults) + 1)]
+        typer.echo("Vaults:\n")
         typer.echo(tabulate(basic_data, headers=headers, floatfmt="grid"))
     
     result = []
-    if pinned_backups:
-        for b in pinned_backups:
+    if pinned_vaults:
+        for b in pinned_vaults:
             result.append(b)
-    if basic_backups:
-        for b in basic_backups:
+    if basic_vaults:
+        for b in basic_vaults:
             result.append(b)
     return result
     
     
-def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:    
+def print_and_choose_vault(vaults: list[VaultData], text: str) -> VaultData:    
     while True:
-        sorted_backups = print_backups(backups=backups)
+        sorted_backups = print_vaults(vaults=vaults)
         typer.echo()
         choice = typer.prompt(text=text).strip()
         
@@ -196,7 +276,7 @@ def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:
             time.sleep(2)
             continue
         
-        if not 1 <= int(choice) <= len(backups):
+        if not 1 <= int(choice) <= len(vaults):
             typer.echo("Wrong number input")
             time.sleep(2)
             continue
@@ -204,13 +284,47 @@ def print_and_choose_backup(backups: list[BackupData], text: str) -> BackupData:
         return sorted_backups[int(choice)-1]
     
 
-def choose_name_for_backup() -> str:
+def choose_name_for_vault() -> str:
     while True:
-        name = typer.prompt("Input a name for backup").strip()
+        name = typer.prompt("Enter the new vault name").strip()
         if not name:
             continue
         if len(name) > 16:
-            typer.echo("too long name - (16 max)")
+            typer.echo("Name too long (max 16 characters)")
+            continue
+        return name
+    
+
+
+def select_master_password() -> str:
+    min_length = 4
+    max_length = 32
+    while True:
+        password = typer.prompt("Enter master password", hide_input=True).strip()
+        if not password:
+            typer.echo("Password cannot be empty")
+            continue
+        if len(password) < min_length:
+            typer.echo(f"Password too short (min {min_length} characters)")
+            continue
+        if len(password) > max_length:
+            typer.echo(f"Password too long (max {max_length} characters)")
+            continue
+        return password
+
+def select_vault_name() -> str:
+    min_length = 4
+    max_length = 32
+    while True:
+        name = typer.prompt("Enter vault name").strip()
+        if not name:
+            typer.echo("Name cannot be empty")
+            continue
+        if len(name) < min_length:
+            typer.echo(f"Name is too short (min {min_length} characters)")
+            continue
+        if len(name) > max_length:
+            typer.echo(f"Name is too long (max {max_length} characters)")
             continue
         return name
 
@@ -241,13 +355,13 @@ def change_password_prompt() -> ChangePasswordSchema:
         )
             
 
-action = Literal["download", "pin", "rename", "delete", "cancel"]
-def choose_action(backup: BackupData) -> action:
+action = Literal["download", "change-pin", "rename", "delete", "cancel"]
+def choose_action(vault: VaultData) -> action:
     while True:
         clear_console()
-        pin_action = "Unpin" if backup.pinned else "Pin"
+        pin_action = "Unpin" if vault.pinned else "Pin"
         text = f"""
-        Backup: {backup.name} | rows: {backup.rows} | date: {backup.created_at_formatted} 
+        Backup: {vault.name} | entries: {vault.entries} | date: {vault.created_at_formatted} 
         
         1) Download
         2) {pin_action}
@@ -273,7 +387,7 @@ def choose_action(backup: BackupData) -> action:
         elif choice == 1:
             return "download"
         elif choice == 2:
-            return "pin"
+            return "change-pin"
         elif choice == 3:
             return "rename"
         elif choice == 4:

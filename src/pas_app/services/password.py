@@ -1,110 +1,117 @@
 from datetime import datetime
+import time
 import tabulate
 import typer
 from typing import Callable, Literal
+from cryptography.fernet import InvalidToken
 
-from pas_app.adapters.promts import cli_password_promt, choose_default_user
-from pas_app.core.crypto import create_random_salt, decrypt_vault_passwords, derive_key
-from pas_app.config import VAULTS, BASE_DIR
-from pas_app.schemas.passwords import Password, EncryptedUserVault
-from pas_app.services.file_utils import load_encrypted_vault, is_vault_files_exists, get_vault_usernames
+from pas_app.adapters.console import clear_console
+from pas_app.adapters.promts import (
+    cli_password_promt, 
+    choose_current_user,
+    choose_current_vault
+)
+from pas_app.core.crypto import (
+    create_random_salt, 
+    decrypt_vault_passwords, 
+    derive_key,
+    decrypt_dek
+)
+from pas_app.schemas.passwords import Password
+from pas_app.services.file_utils import (
+    create_vault_path,
+    get_VaultPringData,
+    load_encrypted_vault,
+    get_vault_usernames_with_vault,
+    get_user_vault_files,
+)
 from pas_app.exceptions import EchoException
-from pas_app.config import get_config
+from pas_app.dependencies import (
+    get_keyring_tool,
+    get_config,
+    get_logger
+)
+from pas_app.core.settings import BASE_DIR
+
 
 SESSION_TIMEOUT = 300
 
 
 def check_session() -> None:
-    config = get_config()
-    config_data = config._refresh()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
 
-    if not is_vault_files_exists():
-        typer.echo("Try to register firstly")
-        raise typer.Exit(code=1)
-    
-    if config_data.local.default_user == "unauthorized":
-        print(config_data.local.default_user, "- default user")
-        print("default_user == unauthorized")
-        usernames = get_vault_usernames()
-        username = choose_default_user(usernames=usernames, current_username=config_data.local.default_user)
-        config_data.local.default_user = username
+    if not keyring_data.current_user:
+        usernames = get_vault_usernames_with_vault()
+        if not usernames:
+            raise EchoException("There are no accounts on this device.\nTry to sync accounts or create new.")
+        selected_username = choose_current_user(usernames=usernames, current_username="Not selected")
+        keyring_data.current_user = selected_username
         
-    config.save_config(data=config_data)
+    if not keyring_data.current_vault:
+        vaults = get_user_vault_files(username=keyring_data.current_user)
+        if not vaults:
+            raise EchoException(f"There are no vaults on this device for {keyring_data.current_user}.\nTry to sync accounts or create new.")
+        data = get_VaultPringData(vaults=vaults)
+        selected_vault = choose_current_vault(data=data, current_vault="Not selected")
+        keyring_data.current_vault = selected_vault
+    
+    vault_file = create_vault_path(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
+    if not vault_file.exists():
+        raise FileNotFoundError(f'{vault_file} does not exist')
+        
+    encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
+    
+    # TRY EXCEPT
+    
+    keyring.save(data=keyring_data)        
         
         
 def get_key() -> bytes:
-    config = get_config()
-    config_data = config._refresh()
+    keyring = get_keyring_tool()
+    keyring_data = keyring.load()
     expired = (
-        not config_data.keyring.master_password
-        or not config_data.keyring.last_action
-        or (datetime.now() - config_data.keyring.last_action).total_seconds() > SESSION_TIMEOUT
+        not keyring_data.master_password
+        or not keyring_data.last_action
+        or (datetime.now() - keyring_data.last_action).total_seconds() > SESSION_TIMEOUT
     )
 
     if expired:
         master_password = cli_password_promt().strip()
     else:
-        master_password = config_data.keyring.master_password
+        master_password = keyring_data.master_password
 
-    encrypted_vault = load_encrypted_vault(config_data.local.default_user)
+    encrypted_vault_data = load_encrypted_vault(username=keyring_data.current_user, vault_name=keyring_data.current_vault)
 
-    key = derive_key(master_password, encrypted_vault.salt)  # type: ignore
-    decrypt_vault_passwords(encrypted_vault.encrypted_passwords, key)
+    kek = derive_key(master_password, encrypted_vault_data.salt)
+    dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault_data.encrypted_dek)
 
-    config_data.keyring.master_password = master_password
-    config.save_config(data=config_data)
+    # attempt to decrypt (if wrong master password raises InvalidToken)
+    decrypt_vault_passwords(encrypted_passwords=encrypted_vault_data.encrypted_passwords, key=dek)
     
-    return key
+    keyring_data.master_password = master_password
+    keyring.save(data=keyring_data)
+    
+    return dek
 
 
-def create_user_vault(username: str):
-    new_vault = VAULTS / f"{username}.json"
-    if new_vault.exists():
-        raise EchoException(f"File {username}.json already exists")
-
-    salt = create_random_salt()
-    vault_data = EncryptedUserVault(
-        username=username, salt=salt, encrypted_passwords=""
-    )
-
-    data = vault_data.model_dump_json()
-    with open(new_vault, "w") as f:
-        f.write(data)
 
 
-def print_passwords(passwords: list[Password], show: bool = False, check: bool = False) -> None:
-    if not passwords:
-        typer.echo("Записей нет")
-        return
-    rows = []
-    if not check:
-        headers = ["№", "Метка", "Логин", "Пароль", "Заметка"]
-        for i, pas in enumerate(passwords, start=1):
-            try:
-                match = pas.service
-                username = pas.username
-                password = pas.password if show else "******"
-                note = pas.note
-                rows.append([i, match, username, password, note])
-            except Exception as e:
-                typer.echo(f"Ошибка: {e}")
-                raise typer.Exit(code=1)
-    else:
-        headers = ["№", "Метка", "Логин", "Пароль", "Strength"]
-        for i, pas in enumerate(passwords, start=1):
-            try:
-                match = pas.service
-                username = pas.username
-                password = pas.password if show else "******"
-                strength = check_password_strength(password=pas.password)
-                rows.append([i, match, username, password, strength])
-            except Exception as e:
-                typer.echo(f"Ошибка: {e}")
-                raise typer.Exit(code=1)
+def attempt_decrypt_vault(username: str, vault_name: str, text: str) -> list[Password] | None:
+    encrypted_vault = load_encrypted_vault(username=username, vault_name=vault_name)
+    clear_console()
+    master_password = cli_password_promt(text=text)
+    kek = derive_key(master_password=master_password, salt_b64=encrypted_vault.salt)
+    dek = decrypt_dek(kek=kek, encrypted_dek_str=encrypted_vault.encrypted_dek)
+    try:
+        passwords = decrypt_vault_passwords(encrypted_passwords=encrypted_vault.encrypted_passwords, key=dek)
+    except InvalidToken:
+        typer.echo("Wrong master password")
+        time.sleep(2)
+        return None
+    return passwords.passwords
 
-    if rows:
-        typer.echo(tabulate.tabulate(rows, headers=headers, tablefmt="grid"))
-        
+
         
 def find_digits_in_a_row(row: str) -> int:
     result = 0

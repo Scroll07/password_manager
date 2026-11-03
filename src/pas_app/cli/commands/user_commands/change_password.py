@@ -1,12 +1,4 @@
-
-
-
-
-
-
-
 import typer
-
 
 from pas_app.adapters.promts import change_password_prompt
 from pas_app.core.api import Api
@@ -15,7 +7,7 @@ from pas_app.schemas.api import MessageResponse
 
 logger = get_logger()
 
-async def change_password():
+async def change_user_password():
     api = Api()
     data = change_password_prompt()
 

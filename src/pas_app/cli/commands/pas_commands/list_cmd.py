@@ -1,8 +1,7 @@
 import tabulate
 import typer
 
-from pas_app.services.file_utils import load_data
-from pas_app.config import get_config
+from pas_app.dependencies import get_password_tool
 
 
 def list_command(
@@ -16,9 +15,8 @@ def list_command(
     Examples:
         pas list
     """
-    config = get_config()
-    data = load_data(config=config)
-    passwords = data.user_passwords
+    password_tool = get_password_tool()
+    passwords = password_tool.vault_data.user_passwords
 
     labels = [p.service for p in passwords]
     table = [[label] for label in labels]

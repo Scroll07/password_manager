@@ -1,55 +1,47 @@
-import json
+import time
 import pyperclip
+import tabulate
 import typer
 
-from pas_app.services.file_utils import load_data
-from pas_app.config import LAST_MATCHES
-from pas_app.config import get_config
+from pas_app.dependencies import get_password_tool
+from pas_app.adapters.promts import (
+    print_and_choose_password
+)
 
 
-def copy(
-    idx: int = typer.Argument(..., help="Record number from table (from 1 to N)"),
+def copy_command(
+    detailed: bool = typer.Option(False, '-d', '--detailed', help="Detailed table of entries.")
 ):
     """
-    Copy password to clipboard by number from the last get result.
-
-    First run the 'get' command to display a table with numbers,
-    then use 'copy' with the desired number.
-
-    Examples:
-        pas get github    # Show table with numbers
-
-        pas copy 1        # Copy password from row #1
-
-        pas copy 3        # Copy password from row #3
+    Copy password to clipboard. (List by default)
     """
-    if not LAST_MATCHES.exists():
-        typer.echo("File last_matches.json does not exist.")
-        return
-
-    try:
-        last_matches = json.loads(LAST_MATCHES.read_text("utf-8"))
-    except json.JSONDecodeError:
-        typer.echo("Error reading last_matches.json.")
-        return
-
-    if not last_matches:
-        typer.echo("No recent matches found.")
-        return
-
-    if idx < 1 or idx > len(last_matches):
-        typer.echo(f"Invalid index: {idx}. Available from 1 to {len(last_matches)}.")
-        return
-
-    config = get_config()
-    data = load_data(config=config)
-
-    match = last_matches[idx - 1]
-    passwords = data.user_passwords
-    for password in passwords:
-        if password.service == match:
-            pyperclip.copy(password.password)
-            typer.echo(f"Password for {match} successfully copied to clipboard.")
-            break
-        else:
-            typer.echo(f"Password for {match} not found")
+    password_tool = get_password_tool()
+    passwords = password_tool.vault_data.user_passwords
+    if not passwords:
+        typer.echo("There is no entries to copy anything")
+        raise typer.Exit(code=1)
+    
+    if detailed: 
+        choosed_password = print_and_choose_password(passwords=passwords, text="Choose service to copy password")
+    else:
+        labels = [p.service for p in passwords]
+        table = [[i, label] for i, label in enumerate(labels, start=1)]
+        while True:
+            typer.echo(tabulate.tabulate(table, headers=["№", "Labels"], tablefmt="simple"))
+            choice = typer.prompt(text="Choose service to copy password").strip()
+            
+            if not choice.isdigit():
+                typer.echo("Input should be digit")
+                time.sleep(2)
+                continue
+            
+            if not 1 <= int(choice) <= len(passwords):
+                typer.echo("Wrong number input")
+                time.sleep(2)
+                continue
+                
+            choosed_password = passwords[int(choice)-1]
+            pyperclip.copy(choosed_password.password)
+            typer.echo(f"Password for {choosed_password.service} successfully copied to clipboard.")
+            raise typer.Exit(code=0)
+    

@@ -1,24 +1,23 @@
 import typer
 
 from pas_app.services.password import check_session_dec
+from pas_app.config import get_config
 
+
+# Comamnd Imports
 from pas_app.cli.commands.pas_commands.add import add_command
 from pas_app.cli.commands.pas_commands.list_cmd import list_command
 from pas_app.cli.commands.pas_commands.get import get_command
 from pas_app.cli.commands.pas_commands.delete import delete_command
 from pas_app.cli.commands.pas_commands.find import find_command
 from pas_app.cli.commands.pas_commands.edit import edit_command
-from pas_app.cli.commands.pas_commands.import_cmd import import_data
+from pas_app.cli.commands.pas_commands.import_cmd import import_command
 from pas_app.cli.commands.pas_commands.export_cmd import export_command
-from pas_app.cli.commands.pas_commands.copy_cmd import copy
+from pas_app.cli.commands.pas_commands.copy_cmd import copy_command
 from pas_app.cli.commands.pas_commands.create_secret_key import create_password_command
-from pas_app.cli.commands.pas_commands.check_password_strength import check_password_strength_command
 
-from pas_app.cli.commands.api_commands.api_typer import cli_app
-from pas_app.cli.commands.config_commands.config_typer import config_app
-from pas_app.cli.commands.user_commands.user_typer import user_app
 
-from pas_app.config import get_config
+
 
 
 app = typer.Typer(
@@ -31,13 +30,12 @@ app = typer.Typer(
 add_command = check_session_dec(add_command)
 list_command = check_session_dec(list_command)
 get_command = check_session_dec(get_command)
-copy_command = check_session_dec(copy)
+copy_command = check_session_dec(copy_command)
 delete_command = check_session_dec(delete_command)
 find_command = check_session_dec(find_command)
 edit_command = check_session_dec(edit_command)
 export_command = check_session_dec(export_command)
-import_command = check_session_dec(import_data)
-check_strength_command = check_session_dec(check_password_strength_command)
+import_command = check_session_dec(import_command)
 
 
 
@@ -52,23 +50,26 @@ app.command("edit")(edit_command)
 app.command("export")(export_command)
 app.command("import")(import_command)
 app.command("gen")(create_password_command)
-app.command("check")(check_strength_command)
 
 
-# APPS
-app.add_typer(cli_app, name="api")
+# APP (typers) Imports
+from pas_app.cli.commands.config_commands.config_typer import config_app
+from pas_app.cli.commands.user_commands.user_typer import user_app
+from pas_app.cli.commands.vault_commands.vault_typer import vault_app
+
 app.add_typer(config_app, name="config")
 app.add_typer(user_app, name="user")
+app.add_typer(vault_app, name="vault")
 
-
+    
+    
 
 @app.callback()
 def main():
     """Initialize session on startup."""
     try:
         config = get_config()
-        config.create_empty_config(current_user="unauthorized")
-        # check_session()
+        config.create_empty_config()
     except Exception as e:
         typer.echo(e)
         raise typer.Exit(code=1)

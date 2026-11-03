@@ -1,12 +1,10 @@
 import typer
 
-
-from pas_app.services.file_utils import load_data, save_data
-from pas_app.config import get_config
+from pas_app.dependencies import get_password_tool
 
 
 def delete_command(
-    label: str = typer.Argument(
+    service: str = typer.Argument(
         ..., help='Label to delete or "clear-all" to delete all entries'
     ),
 ):
@@ -21,27 +19,19 @@ def delete_command(
 
         pas delete "clear-all"   # Delete all entries (use quotes!)
     """
-    config = get_config()
-    data = load_data(config=config)
+    password_tool = get_password_tool()
+    service = service.strip().lower()
 
-    if label.lower() == "clear-all":
+    if service == "clear-all":
         if not typer.confirm("Delete ALL entries? This action is irreversible!"):
             typer.echo("Deletion was canceled.")
             return
-        data.user_passwords = []
-        save_data(vault_data=data)
+        password_tool.delete(service='', delete_all=True)
         typer.echo("All data was successfully deleted")
         raise typer.Exit(code=0)
 
-    for pas in data.user_passwords:
-        if label.strip() == pas.service.strip():
-            if not typer.confirm("Delete this entry? This action is irreversible!"):
-                typer.echo("Deletion was canceled.")
-                typer.Exit(code=0)
-            data.user_passwords.remove(pas)
-            typer.echo(f"Entry with label {label} was successfully deleted.")
-            save_data(vault_data=data)
-            raise typer.Exit(code=0)
-
-    typer.echo(f'Label "{label}" not found.')
-    raise typer.Exit(code=0)
+    deleted = password_tool.delete(service=service)
+    if deleted:
+        typer.echo("Password was successfully deleted")
+    else:
+        typer.echo(f'Password "{service}" not found.')

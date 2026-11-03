@@ -1,17 +1,19 @@
+import time
 import typer
 import secrets
 
-from pas_app.services.file_utils import load_data, save_data
-from pas_app.schemas.passwords import Password
-from pas_app.config import get_config
+from pas_app.dependencies import get_password_tool, get_logger
+from pas_app.exceptions import EchoException
+from pas_app.adapters.promts import clear_console
 
+logger = get_logger()
 
 def add_command(
-    service: str = typer.Argument(
-        ..., help="Service name (e.g., github, vk, yandex)"
+    service: str | None = typer.Argument(
+        None, help="Service name (e.g., github, vk, yandex)"
     ),
-    username: str = typer.Option(
-        ..., "-u", "--username", help="Username or email"
+    username: str | None = typer.Option(
+        None, "-u", "--username", help="Username or email"
     ),
     password: str | None = typer.Option(
         None, "-p", "--password", help="Password (if not specified, use --gen)"
@@ -37,31 +39,134 @@ def add_command(
 
         pas add work-email -u john@company.com --gen --note "Work email"
     """
-    config = get_config()
+    is_interactive = (
+            service is None
+            and username is None
+            and password is None
+            and note is None
+        )
+    
+    if is_interactive:
+        service, username, password, note = interactive_add_wizard(length=length)
+    else:
+        if not service:
+            typer.echo("Missing argument: 'SERVICE'.")
+            raise typer.Exit(code=1)
 
-    if password is not None:
-        if gen:
+        if not username:
+            typer.echo("Missing option: '-u' / '--username'.")
+            raise typer.Exit(code=1)
+
+        if note is None:
+            note = ""
+
+        if password is not None and gen:
+            logger.warning(
+                "Conflict detected: both --password and --gen were supplied"
+            )
             typer.echo("Cannot use both -p and --gen at the same time. EXIT")
-            return
-    elif password is None:
-        password = secrets.token_urlsafe(length)
-    elif password is None and not gen:
-        typer.echo("You must specify either -p or --gen")
-        return
+            raise typer.Exit(code=1)
 
-    data = load_data(config=config)
+        if password is None:
+            if gen:
+                password = secrets.token_urlsafe(length)
+            else:
+                logger.warning("Missing password or --gen flag")
+                typer.echo("You must specify either -p or --gen")
+                raise typer.Exit(code=1)
 
-    labels = set(b.service for b in data.user_passwords)
-    base = service.lower()
-    candidate = base
-    i = 1
-    while candidate in labels:
-        candidate = base + "-" + str(i)
-        i += 1
+    try:
+        service_clean = service.strip().lower()
 
-    password_to_append = Password(
-        service=candidate, username=username, password=password, note=note
-    )
-    data.user_passwords.append(password_to_append)
+        password_tool = get_password_tool()
+        password_tool.add(
+            service=service_clean,
+            username=username,
+            password=password,
+            note=note,
+        )
 
-    save_data(vault_data=data)
+        typer.echo(f"The new record for '{service_clean}' was successfully created")
+        logger.info(f"Credential successfully created for service='{service_clean}'")
+    except EchoException as e:
+        logger.error(
+            f"Business logic error while adding credential for '{service}': {e}"
+        )
+        typer.echo(e)
+        raise typer.Exit(code=1)
+    except Exception as e:
+        logger.exception(
+            f"Unexpected error while adding credential for '{service}': {e}"
+        )
+        typer.echo("Unexpected error")
+        raise typer.Exit(code=1)
+    
+
+def interactive_add_wizard(length: int = 16) -> tuple[str, str, str, str]:
+    typer.echo("\n--- Interactive Entry ---")
+
+    service_val = ""
+    username_val = ""
+    password_val = ""
+    note_val = ""
+
+    while True:
+        # Отображение текущего прогресса заполнения
+        clear_console()
+        pass_display = "*" * 8 if password_val else "[Will be generated]"
+        typer.echo(
+            f"\nCurrent entry:\n"
+            f"  Service:  {service_val or '[Not set]'}\n"
+            f"  Username: {username_val or '[Not set]'}\n"
+            f"  Password: {pass_display}\n"
+            f"  Note:     {note_val or '[None]'}\n"
+        )
+
+        # 1. Запрос сервиса
+        if not service_val:
+            user_input = typer.prompt("Enter service name").strip()
+            if not user_input:
+                typer.echo("Service cannot be empty.")
+                time.sleep(2)
+                continue
+            service_val = user_input
+            logger.debug(f"Wizard: service set to '{service_val}'")
+            continue
+
+        # 2. Запрос логина / email
+        if not username_val:
+            user_input = typer.prompt("Enter username or email").strip()
+            if not user_input:
+                typer.echo("Username cannot be empty.")
+                time.sleep(2)
+                continue
+            username_val = user_input
+            logger.debug(f"Wizard: username set for '{service_val}'")
+            continue
+
+        # 3. Запрос пароля (пустой ввод -> генерация)
+        if not password_val:
+            user_input = typer.prompt(
+                "Enter password (press Enter to generate securely)",
+                default="",
+                show_default=False,
+                hide_input=True,
+            ).strip()
+
+            if not user_input:
+                password_val = secrets.token_urlsafe(length)
+                typer.echo(f"Generated secure password: {password_val}")
+                time.sleep(1)
+            else:
+                password_val = user_input
+            continue
+
+        # 4. Запрос примечания (опционально)
+        if not note_val:
+            note_val = typer.prompt(
+                "Enter note (optional, press Enter to skip)",
+                default="",
+                show_default=False,
+            ).strip()
+
+        return service_val, username_val, password_val, note_val
