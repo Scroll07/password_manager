@@ -108,21 +108,15 @@ Controls the lifecycle, sync status, and active selection of local and remote va
 
 | Command | Description | Example |
 | --- | --- | --- |
-| `pas vault create` | Create a new vault (synced remotely by default; use `-o`/`--offline` for device-only) | `pas vault create`<br>
-
-<br>`pas vault create --offline` |
+| `pas vault create` | Create a new vault (remote by default; use `-o` / `--offline` for local-only) | `pas vault create --offline` |
 | `pas vault list` | Display all local vaults belonging to the current user | `pas vault list` |
 | `pas vault set` | Interactively select and switch the active working vault | `pas vault set` |
 | `pas vault fetch` | Inspect sync status across local and remote vaults without modifying files | `pas vault fetch` |
-| `pas vault sync` | Perform bidirectional synchronization (download missing/newer, push modified) | `pas vault sync` |
-| `pas vault push` | Push local encrypted changes to the server (use `-f`/`--force` to overwrite) | `pas vault push`<br>
-
-<br>`pas vault push --force` |
-| `pas vault pull` | Download latest vault from server (saves to new versioned file or `--overwrite`) | `pas vault pull`<br>
-
-<br>`pas vault pull -o` |
+| `pas vault sync` | Perform bidirectional synchronization (pull updates, push local changes) | `pas vault sync` |
+| `pas vault push` | Push local encrypted changes to the server (use `-f` / `--force` to overwrite) | `pas vault push --force` |
+| `pas vault pull` | Download latest vault from server (use `-o` / `--overwrite` to replace local file) | `pas vault pull -o` |
 | `pas vault actions` | Open interactive menu for vault maintenance (rename, delete, inspect) | `pas vault actions` |
-| `pas vault delete` | Interactive deletion wizard (choose: delete locally, delete remotely, or both) | `pas vault delete` |
+| `pas vault delete` | Interactive deletion wizard (delete locally, delete remotely, or both) | `pas vault delete` |
 | `pas vault change-master` | Re-encrypt local vault DEK with a new master password | `pas vault change-master` |
 
 ---
