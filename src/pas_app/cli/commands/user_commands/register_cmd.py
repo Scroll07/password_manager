@@ -1,8 +1,5 @@
-
 import asyncio
-
 import typer
-
 
 from pas_app.adapters.promts import cli_register_input
 from pas_app.cli.commands.user_commands.login_cmd import login
@@ -12,6 +9,7 @@ from pas_app.dependencies import (
     get_logger,
     get_keyring_tool
 )
+
 logger = get_logger()
 
 async def register_online():

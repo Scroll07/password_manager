@@ -1,17 +1,14 @@
-
 import typer
 import time
 
 from pas_app.adapters.promts import cli_login_input
 from pas_app.core.api import Api
 from pas_app.core.settings import VAULTS
-from pas_app.schemas import vaults
 from pas_app.schemas.api import Login_RegisterRequest, LoginResponse, MessageResponse
 from pas_app.dependencies import (
     get_logger,
     get_keyring_tool
 )
-from pas_app.services.file_utils import get_user_vault_files, load_encrypted_vault_by_path
 
 
 logger = get_logger()

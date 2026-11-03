@@ -1,12 +1,4 @@
-
-
-
-
-
-
-
 import typer
-
 
 from pas_app.adapters.promts import change_password_prompt
 from pas_app.core.api import Api

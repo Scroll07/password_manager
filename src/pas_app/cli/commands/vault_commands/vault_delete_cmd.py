@@ -19,6 +19,9 @@ from pas_app.services.file_utils import (
     
 )
 
+logger = get_logger()
+
+
 
 @dataclass
 class UnifiedVault:
@@ -146,7 +149,6 @@ def choose_delete_action(vault: UnifiedVault) -> AVAILABLE_ACTIONS:
         typer.echo("Invalid choice for this vault.")
         typer.prompt("Press Enter to continue...", default="", show_default=False)
 
-logger = get_logger()
 
 async def delete_vault():
     keyring = get_keyring_tool()

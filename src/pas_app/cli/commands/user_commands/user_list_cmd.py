@@ -1,4 +1,3 @@
-
 import typer
 
 from pas_app.adapters.console import clear_console

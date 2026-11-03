@@ -8,8 +8,6 @@ from pas_app.decorators import (
 )
 
 
-
-
 vault_app = typer.Typer(
     help="vault commands for vault management.",
     no_args_is_help=True

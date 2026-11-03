@@ -49,7 +49,7 @@ def cli_improt_file_prompt(files: list[Path]) -> Path:
 
 
 
-def import_data(
+def import_command(
     overwrite: bool = typer.Option(
         False, "--overwrite", help="Overwrite existing labels"
     ),

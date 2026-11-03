@@ -1,4 +1,3 @@
-import json
 import typer
 
 from pas_app.dependencies import get_password_tool

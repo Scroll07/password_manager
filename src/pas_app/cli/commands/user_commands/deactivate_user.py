@@ -18,7 +18,7 @@ async def deactivate_user_online():
     username = user_data.username
     keyring = get_keyring_tool()
     keyring_data = keyring.load()
-    choice = typer.confirm(f"Deactivate user with username: {username}\ny/n")
+    choice = typer.confirm(f"Deactivate user with username: {username}")
     if not choice:
         typer.echo("Canceling...")
         raise typer.Exit(code=0)

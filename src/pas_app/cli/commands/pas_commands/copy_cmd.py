@@ -1,5 +1,4 @@
 import time
-
 import pyperclip
 import tabulate
 import typer
@@ -10,9 +9,8 @@ from pas_app.adapters.promts import (
 )
 
 
-def copy(
+def copy_command(
     detailed: bool = typer.Option(False, '-d', '--detailed', help="Detailed table of entries.")
-    # service: str = typer.Argument(..., help="Service name of password to copy"),
 ):
     """
     Copy password to clipboard. (List by default)
